@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the extension */
+@layer base {
+  html {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+}
+
+@layer components {
+  .clip-card {
+    @apply bg-white border border-gray-200 rounded-xl p-5 cursor-pointer transition-all duration-200 ease-out shadow-sm hover:shadow-lg hover:border-blue-500 hover:-translate-y-1;
+  }
+
+  .btn {
+    @apply px-4 py-2 border-none rounded-lg font-medium cursor-pointer transition-all duration-200 ease-out;
+  }
+
+  .btn-primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200;
+  }
+
+  .btn-danger {
+    @apply bg-red-500 text-white hover:bg-red-600;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors;
+  }
+
+  .select-field {
+    @apply px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors;
+  }
+}
+
+@layer utilities {
+  .waterfall-column {
+    @apply flex flex-col gap-4;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title data-i18n="settings_title">ClipIndex - 设置</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1f2937;
+      line-height: 1.5;
+    }
+
+    .settings-page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .settings-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .settings-header h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .settings-header p {
+      margin: 0;
+      font-size: 16px;
+      color: #6b7280;
+    }
+
+    .settings-content {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .settings-section {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .settings-section h2 {
+      margin: 0 0 20px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #111827;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-item.danger {
+      border-color: #fecaca;
+      background: #fef2f2;
+      margin: -16px;
+      padding: 16px;
+      border-radius: 8px;
+    }
+
+    .setting-info {
+      flex: 1;
+      margin-right: 20px;
+    }
+
+    .setting-info h3 {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .setting-info p {
+      margin: 0;
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .setting-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .setting-status {
+      display: flex;
+      align-items: center;
+    }
+
+    .status-indicator {
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .status-local {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .language-select {
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #ffffff;
+      font-size: 14px;
+      color: #374151;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .language-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      padding: 24px 24px 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #6b7280;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+
+    .modal-close:hover {
+      background: #f3f4f6;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      padding: 0 24px 24px 24px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .blocked-sites-list {
+      margin-top: 12px;
+    }
+
+    .blocked-site-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #f9fafb;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .blocked-site-domain {
+      font-size: 14px;
+      color: #374151;
+    }
+
+    .blocked-site-remove {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .blocked-site-remove:hover {
+      background: #fecaca;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #6b7280;
+    }
+
+    .error {
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .settings-page {
+        padding: 16px;
+      }
+
+      .settings-header h1 {
+        font-size: 24px;
+      }
+
+      .setting-item {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .setting-info {
+        margin-right: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="settings-page">
+    <header class="settings-header">
+      <h1>ClipIndex 设置</h1>
+      <p>个性化您的智能摘录体验</p>
+    </header>
+
+    <div class="settings-content">
+      <!-- Language Settings -->
+      <section class="settings-section">
+        <h2>语言设置</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>界面语言</h3>
+            <p>选择您偏好的界面语言</p>
+          </div>
+          <div class="setting-control">
+            <select id="languageSelect" class="language-select">
+              <option value="zh-CN">中文</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Privacy & Data -->
+      <section class="settings-section">
+        <h2>隐私与数据</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>数据存储</h3>
+            <p>所有数据仅存储在您的本地浏览器中，不会上传到任何服务器</p>
+          </div>
+          <div class="setting-status">
+            <span class="status-indicator status-local">本地存储</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>数据导出</h3>
+            <p>将您的所有摘录数据导出为 JSON 文件</p>
+          </div>
+          <div class="setting-control">
+            <button id="exportDataBtn" class="btn btn-secondary">导出数据</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>数据导入</h3>
+            <p>从 JSON 文件导入摘录数据</p>
+          </div>
+          <div class="setting-control">
+            <input type="file" id="importDataInput" accept=".json" style="display: none;">
+            <button id="importDataBtn" class="btn btn-secondary">导入数据</button>
+          </div>
+        </div>
+
+        <div class="setting-item danger">
+          <div class="setting-info">
+            <h3>清除所有数据</h3>
+            <p>删除所有摘录数据和设置。此操作无法撤销</p>
+          </div>
+          <div class="setting-control">
+            <button id="clearDataBtn" class="btn btn-danger">清除数据</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Site Blocking -->
+      <section class="settings-section">
+        <h2>站点禁用</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>禁用当前站点</h3>
+            <p>在当前网站上禁用 ClipIndex，不再自动保存摘录</p>
+          </div>
+          <div class="setting-control">
+            <button id="blockCurrentSiteBtn" class="btn btn-secondary">禁用当前站点</button>
+          </div>
+        </div>
+
+        <div class="blocked-sites">
+          <h3>已禁用站点</h3>
+          <div id="blockedSitesList" class="blocked-sites-list">
+            <div class="loading">加载中...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About -->
+      <section class="settings-section">
+        <h2>关于</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>版本</h3>
+            <p>ClipIndex v2.0.0 - 智能摘录工具</p>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>功能说明</h3>
+            <p>选中网页文本后按 Ctrl+C 自动保存，支持多语言界面和瀑布流展示</p>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>隐私声明</h3>
+            <p>仅在您主动复制内容时读取选中文本，所有数据存储在本地</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Modals -->
+    <div id="confirmModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>确认操作</h3>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="confirmMessage"></p>
+        </div>
+        <div class="modal-footer">
+          <button id="confirmCancel" class="btn btn-secondary">取消</button>
+          <button id="confirmOk" class="btn btn-danger">确认</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

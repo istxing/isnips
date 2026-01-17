@@ -1,0 +1,39 @@
+{
+  "name": "clipindex-extension",
+  "version": "2.0.0",
+  "description": "智能摘录工具 - 选中网页文本自动保存，支持多语言瀑布流展示",
+  "scripts": {
+    "dev": "bun run build:dev && bun run watch",
+    "build": "bun run build:prod",
+    "build:dev": "bun run clean && bun run copy-static && bun run build:ts && bun run bundle && bun run build:css",
+    "build:prod": "bun run clean && bun run copy-static && bun run build:ts && bun run bundle && bun run build:css && bun run minify",
+    "bundle": "bun run bundler.js",
+    "build:css": "bunx tailwindcss -i src/styles/main.css -o dist/library.css --minify",
+    "build:ts": "bunx tsc",
+    "watch": "bun run build:dev && bunx concurrently \"bunx tsc --watch\" \"bunx tailwindcss -i src/styles/main.css -o dist/library.css --watch\"",
+    "copy-static": "bun run copy:manifest && bun run copy:html",
+    "copy:manifest": "cp manifest.json dist/",
+    "copy:html": "cp popup.html dist/ 2>/dev/null || true",
+    "clean": "rm -rf dist && mkdir -p dist",
+    "minify": "bunx terser dist/**/*.js -o dist/bundle.min.js --compress --mangle && mv dist/bundle.min.js dist/background.js",
+    "lint": "bunx eslint src/**/*.ts",
+    "type-check": "bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "autoprefixer": "^10.4.17",
+    "bun-types": "^1.0.30",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
+    "terser": "^5.27.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
