@@ -56,12 +56,29 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const loadLanguage = async () => {
       try {
+        // First try to get from chrome.storage.local (more reliable for cross-page sync)
+        if (chrome && chrome.storage) {
+          const storageResult = await new Promise<{ language?: Language }>((resolve) => {
+            chrome.storage.local.get(['language'], (result: { language?: Language }) => {
+              resolve(result);
+            });
+          });
+          if (storageResult.language) {
+            console.log('Language loaded from chrome.storage.local:', storageResult.language);
+            setCurrentLanguage(storageResult.language);
+            lastPolledLanguage.current = storageResult.language;
+            return;
+          }
+        }
+
+        // Fallback to IndexedDB via runtime message
         if (chrome && chrome.runtime) {
           const result = await chrome.runtime.sendMessage({
             action: 'getSetting',
             key: 'language',
             defaultValue: 'zh-CN'
           });
+          console.log('Language loaded from IndexedDB:', result);
           if (result.success) {
             setCurrentLanguage(result.value);
             lastPolledLanguage.current = result.value;
