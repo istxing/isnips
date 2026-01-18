@@ -3,7 +3,7 @@ node_modules/
 bun.lock
 
 # Build outputs
-dist/
+# dist/
 *.js
 *.d.ts
 

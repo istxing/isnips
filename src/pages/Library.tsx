@@ -6,22 +6,20 @@ import { useChromeMessaging, useI18n } from '../hooks';
 const Library: React.FC = () => {
   const [cards, setCards] = useState<ClipCard[]>([]);
   const [filteredCards, setFilteredCards] = useState<ClipCard[]>([]);
-  const [currentLanguage, setCurrentLanguage] = useState<Language>('zh-CN');
   const [searchQuery, setSearchQuery] = useState('');
 
   const { sendMessage } = useChromeMessaging();
-  const { t, setLanguage } = useI18n();
+  const { t, setLanguage, currentLanguage } = useI18n();
 
   // Load cards on mount
   useEffect(() => {
     loadCards();
-    loadLanguage();
   }, []);
 
-  // Filter cards when search query changes
+  // Filter cards when search query or language changes
   useEffect(() => {
     filterCards();
-  }, [cards, searchQuery]);
+  }, [cards, searchQuery, currentLanguage]);
 
   const loadCards = async () => {
     try {
@@ -42,7 +40,6 @@ const Library: React.FC = () => {
         defaultValue: 'zh-CN'
       });
       if (response.success) {
-        setCurrentLanguage(response.value);
         setLanguage(response.value);
       }
     } catch (error) {
@@ -67,19 +64,10 @@ const Library: React.FC = () => {
     setFilteredCards(filtered);
   };
 
-  const handleLanguageChange = async (lang: Language) => {
-    setCurrentLanguage(lang);
+  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const lang = event.target.value as Language;
+    console.log('Library: Changing language to:', lang);
     setLanguage(lang);
-
-    try {
-      await sendMessage({
-        action: 'setSetting',
-        key: 'language',
-        value: lang
-      });
-    } catch (error) {
-      console.error('Failed to save language:', error);
-    }
   };
 
   const handleCardClick = async (card: ClipCard) => {
@@ -91,6 +79,68 @@ const Library: React.FC = () => {
     } catch (error) {
       console.error('Failed to open tab:', error);
     }
+  };
+
+  const groupCardsByDate = (cards: ClipCard[]) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const groups: { [key: string]: ClipCard[] } = {};
+
+    cards.forEach(card => {
+      const cardDate = new Date(card.createdAt);
+      const cardDay = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate());
+
+      let groupKey: string;
+      if (cardDay.getTime() === today.getTime()) {
+        groupKey = t('today', '今天');
+      } else if (cardDay.getTime() === yesterday.getTime()) {
+        groupKey = t('yesterday', '昨天');
+      } else if (cardDay >= weekAgo) {
+        groupKey = t('this_week', '本周');
+      } else {
+        // Format as YYYY-MM-DD
+        groupKey = cardDate.toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(card);
+    });
+
+    // Sort groups by date (newest first)
+    const sortedGroups = Object.keys(groups).sort((a, b) => {
+      // Check for today, yesterday, this week in all languages
+      const todayLabels = [t('today', '今天'), 'Today', '今日'];
+      const yesterdayLabels = [t('yesterday', '昨天'), 'Yesterday', '昨日'];
+      const thisWeekLabels = [t('this_week', '本周'), 'This Week', '今週'];
+
+      if (todayLabels.includes(a)) return -1;
+      if (todayLabels.includes(b)) return 1;
+      if (yesterdayLabels.includes(a)) return -1;
+      if (yesterdayLabels.includes(b)) return 1;
+      if (thisWeekLabels.includes(a)) return -1;
+      if (thisWeekLabels.includes(b)) return 1;
+
+      // Parse date strings for comparison
+      const dateA = new Date(a.replace(/年|月/g, '-').replace('日', ''));
+      const dateB = new Date(b.replace(/年|月/g, '-').replace('日', ''));
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    return sortedGroups.map(groupKey => ({
+      title: groupKey,
+      cards: groups[groupKey].sort((a, b) => b.createdAt - a.createdAt) // Sort cards within group by time
+    }));
   };
 
   const renderCards = () => {
@@ -105,24 +155,37 @@ const Library: React.FC = () => {
       );
     }
 
-    // Create 3 columns for waterfall layout
-    const columns: ClipCard[][] = [[], [], []];
-
-    filteredCards.forEach((card, index) => {
-      columns[index % 3].push(card);
-    });
+    const cardGroups = groupCardsByDate(filteredCards);
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {columns.map((columnCards, columnIndex) => (
-          <div key={columnIndex} className="waterfall-column">
-            {columnCards.map((card) => (
-              <ClipCardComponent
-                key={card.id}
-                card={card}
-                onClick={() => handleCardClick(card)}
-              />
-            ))}
+      <div className="cards-waterfall">
+        {cardGroups.map(group => (
+          <div key={group.title} className="date-group">
+            <h2 className="date-group-title">
+              {group.title}
+            </h2>
+
+            {/* Create 3 columns for waterfall layout within each date group */}
+            <div className="waterfall-grid">
+              {(() => {
+                const columns: ClipCard[][] = [[], [], []];
+                group.cards.forEach((card, index) => {
+                  columns[index % 3].push(card);
+                });
+
+                return columns.map((columnCards, columnIndex) => (
+                  <div key={columnIndex} className="waterfall-column">
+                    {columnCards.map((card) => (
+                      <ClipCardComponent
+                        key={card.id}
+                        card={card}
+                        onClick={() => handleCardClick(card)}
+                      />
+                    ))}
+                  </div>
+                ));
+              })()}
+            </div>
           </div>
         ))}
       </div>
@@ -130,16 +193,16 @@ const Library: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="app-container">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">ClipIndex</h1>
-          <div className="flex items-center gap-4">
+      <header className="header">
+        <div className="header-content">
+          <h1>{t('library_title', 'ClipIndex')}</h1>
+          <div className="header-controls">
             <select
               value={currentLanguage}
-              onChange={(e) => handleLanguageChange(e.target.value as Language)}
-              className="select-field"
+              onChange={handleLanguageChange}
+              className="language-select"
             >
               <option value="zh-CN">中文</option>
               <option value="en">English</option>
@@ -162,14 +225,14 @@ const Library: React.FC = () => {
       </header>
 
       {/* Main content */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="main-content">
         <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder={t('search_placeholder', '搜索摘录内容、域名...')}
         />
 
-        <div className="mt-8">
+        <div className="cards-container">
           {renderCards()}
         </div>
       </main>
