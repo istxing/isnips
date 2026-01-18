@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useContext, createContext, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useContext, createContext, useEffect, useMemo, useRef } from 'react';
 import { Language, Translations } from '../types';
 
 const translations: Translations = {
@@ -50,6 +50,7 @@ const I18nContext = createContext<I18nContextType | null>(null);
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentLanguage, setCurrentLanguage] = useState<Language>('zh-CN');
+  const lastPolledLanguage = useRef<Language>('zh-CN');
 
   // Load language setting on mount and listen for changes
   useEffect(() => {
@@ -63,6 +64,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
           if (result.success) {
             setCurrentLanguage(result.value);
+            lastPolledLanguage.current = result.value;
           }
         }
       } catch (error) {
@@ -77,6 +79,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (message.action === 'languageChanged') {
         console.log('Language changed via runtime message:', message.language);
         setCurrentLanguage(message.language);
+        lastPolledLanguage.current = message.language;
       }
     };
 
@@ -89,9 +92,10 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
             key: 'language',
             defaultValue: 'zh-CN'
           });
-          if (result.success && result.value !== currentLanguage) {
+          if (result.success && result.value !== lastPolledLanguage.current) {
             console.log('Language changed via polling:', result.value);
             setCurrentLanguage(result.value);
+            lastPolledLanguage.current = result.value;
           }
         }
       } catch (error) {
@@ -110,7 +114,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearInterval(pollInterval);
       };
     }
-  }, [currentLanguage]);
+  }, []); // Remove currentLanguage from dependencies
 
   const t = useCallback((key: string, fallback?: string): string => {
     const langTranslations = translations[currentLanguage] || translations['zh-CN'];
