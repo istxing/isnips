@@ -74,12 +74,13 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     loadLanguage();
 
-    // Listen for runtime messages for real-time language updates
-    const handleRuntimeMessage = (message: any, sender: any, sendResponse: any) => {
-      if (message.action === 'languageChanged') {
-        console.log('Language changed via runtime message:', message.language);
-        setCurrentLanguage(message.language);
-        lastPolledLanguage.current = message.language;
+    // Listen for chrome.storage changes for real-time language updates
+    const handleStorageChange = (changes: any, namespace: string) => {
+      console.log('Storage change detected:', namespace, changes);
+      if (namespace === 'local' && changes.language) {
+        console.log('Language changed via storage:', changes.language.newValue);
+        setCurrentLanguage(changes.language.newValue);
+        lastPolledLanguage.current = changes.language.newValue;
       }
     };
 
@@ -103,14 +104,15 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    if (chrome && chrome.runtime) {
-      chrome.runtime.onMessage.addListener(handleRuntimeMessage);
+    if (chrome && chrome.storage) {
+      chrome.storage.onChanged.addListener(handleStorageChange);
+      console.log('Storage listener added');
 
       // Start polling as fallback
       const pollInterval = setInterval(pollLanguage, 2000);
 
       return () => {
-        chrome.runtime.onMessage.removeListener(handleRuntimeMessage);
+        chrome.storage.onChanged.removeListener(handleStorageChange);
         clearInterval(pollInterval);
       };
     }
