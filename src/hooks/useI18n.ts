@@ -58,8 +58,10 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         // First try to get from chrome.storage.local (more reliable for cross-page sync)
         if (chrome && chrome.storage) {
+          console.log('Attempting to load language from chrome.storage.local');
           const storageResult = await new Promise<{ language?: Language }>((resolve) => {
             chrome.storage.local.get(['language'], (result: { language?: Language }) => {
+              console.log('chrome.storage.local.get result:', result);
               resolve(result);
             });
           });
@@ -68,6 +70,8 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setCurrentLanguage(storageResult.language);
             lastPolledLanguage.current = storageResult.language;
             return;
+          } else {
+            console.log('No language found in chrome.storage.local, trying IndexedDB');
           }
         }
 
