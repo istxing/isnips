@@ -1,12 +1,14 @@
 {
   "manifest_version": 3,
   "name": "ClipIndex - 智能摘录工具",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "选中网页文本自动保存，支持多语言瀑布流展示",
   "permissions": [
     "storage",
     "activeTab",
-    "tabs"
+    "tabs",
+    "sidePanel",
+    "alarms"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -21,8 +23,10 @@
   "background": {
     "service_worker": "background.js"
   },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
   "action": {
-    "default_popup": "popup.html",
     "default_title": "ClipIndex"
   },
   "options_page": "settings.html",

@@ -2,14 +2,676 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <title>ClipIndex - 摘录库</title>
+  <title data-i18n="library_title">ClipIndex - 摘录库</title>
   <link rel="stylesheet" href="library.css">
+  <style>
+    /* Additional styles for the pure JavaScript version */
+    .app-container {
+      min-height: 100vh;
+      background: #f8fafc;
+    }
+
+    .header {
+      background: #ffffff;
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .language-select {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #f8fafc;
+      font-size: 14px;
+      color: #374151;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .language-select:focus {
+      outline: none;
+      background: #ffffff;
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-secondary {
+      background: #f8fafc;
+      color: #475569;
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    .search-bar {
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .search-input {
+      width: 100%;
+      max-width: 400px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      background: #f8fafc;
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: #ffffff;
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+
+    .cards-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .date-group {
+      margin-bottom: 32px;
+    }
+
+    .date-group-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 16px;
+      padding-left: 8px;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .clip-card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      position: relative;
+      border: none;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      flex: 1 1 300px;
+      max-width: 100%;
+      transition: none;
+    }
+
+    .clip-card:hover {
+      background: #fafafa;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transform: none;
+    }
+
+    .clip-card.editing {
+      cursor: default;
+    }
+
+    .clip-card.editing:hover {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .edit-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: #94a3b8;
+      cursor: pointer;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s ease;
+    }
+
+    .clip-card:hover .edit-btn {
+      opacity: 1;
+    }
+
+    .edit-btn:hover {
+      background: transparent;
+      color: #3b82f6;
+    }
+
+    .edit-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #374151;
+      resize: vertical;
+      margin-bottom: 12px;
+      background: #f8fafc;
+    }
+
+    .edit-textarea:focus {
+      outline: none;
+      background: #ffffff;
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+
+    .edit-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-save {
+      background: #10b981;
+      color: #ffffff;
+    }
+
+    .btn-save:hover {
+      background: #059669;
+    }
+
+    .btn-cancel {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn-cancel:hover {
+      background: #e5e7eb;
+    }
+
+    .clip-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #374151;
+      margin-bottom: 12px;
+      word-break: break-word;
+    }
+
+    .clip-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #6b7280;
+      padding-top: 8px;
+    }
+
+    .clip-domain {
+      font-weight: 500;
+      color: #3b82f6;
+    }
+
+    .clip-date {
+      font-size: 11px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: 16px;
+      color: #6b7280;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+      font-size: 16px;
+    }
+
+    /* Sidebar styles */
+    .sidebar {
+      width: 250px;
+      background: #ffffff;
+      padding: 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 5;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar .header {
+      padding: 20px;
+      background: transparent;
+      box-shadow: none;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .sidebar-content {
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .note-section {
+      padding: 20px;
+      border-top: 1px solid #f3f4f6;
+      background: #fcfcfc;
+    }
+
+    .note-section h3 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .note-input {
+      width: 100%;
+      min-height: 100px;
+      padding: 10px;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 10px;
+      resize: vertical;
+      background: #ffffff;
+      font-family: inherit;
+    }
+
+    .note-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    .note-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-section h3 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .category-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .category-btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #f3f4f6;
+      color: #374151;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    .category-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .category-btn.active {
+      background: #3b82f6;
+      color: #ffffff;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: #ffffff;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #ffffff;
+      width: 100%;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .main-wrapper {
+      margin-left: 250px;
+      min-height: 100vh;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 60px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: #94a3b8;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease, color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .clip-card:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      background: transparent;
+      color: #ef4444;
+    }
+
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      color: #374151;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-body textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #374151;
+      resize: vertical;
+    }
+
+    .modal-body textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+      }
+
+      .header-content {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .header h1 {
+        font-size: 20px;
+      }
+
+      .header-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .main-content {
+        padding: 16px;
+      }
+
+      .cards-waterfall {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .modal-content {
+        width: 95%;
+        margin: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script>
-    console.log('library.html loaded, initializing React app');
-  </script>
+  <div class="sidebar">
+    <div class="header">
+      <h1 data-i18n="library_title">ClipIndex</h1>
+      <p data-i18n="library_desc">智能摘录工具</p>
+    </div>
+
+    <div class="sidebar-content">
+      <div class="sidebar-section">
+        <h3 style="margin-bottom: 12px; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">分类</h3>
+        <div class="category-list">
+          <button class="category-btn active" data-category="all" data-i18n="all_categories">全部</button>
+          <button class="category-btn" data-category="收集" data-i18n="collected">收集</button>
+          <button class="category-btn" data-category="随笔" data-i18n="notes">随笔</button>
+          <button class="category-btn" data-category="trash" data-i18n="trash">回收站</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <button id="openSettingsBtn" class="btn btn-secondary" style="width: 100%" data-i18n="settings">设置</button>
+      </div>
+    </div>
+
+    <div class="note-section">
+      <h3>✏️ 写随笔</h3>
+      <textarea id="noteTextarea" class="note-input" placeholder="输入你的随笔内容..." rows="3"></textarea>
+      <div class="note-actions">
+        <button id="saveNoteBtn" class="btn-small btn-save" style="flex: 1;" data-i18n="save">保存</button>
+        <button id="clearNoteBtn" class="btn-small btn-cancel" style="flex: 1;" data-i18n="cancel">清空</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-wrapper">
+    <div class="header">
+      <div class="header-content">
+        <h1 data-i18n="library_title">ClipIndex - 摘录库</h1>
+        <div class="header-controls">
+          <select class="language-select" id="languageSelect">
+            <option value="zh-CN">中文</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="search-bar">
+        <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="搜索摘录内容、域名...">
+      </div>
+
+
+      <div class="trash-controls" style="display: none; margin-bottom: 20px;">
+        <button id="emptyTrashBtn" class="btn btn-danger" data-i18n="empty_trash">清空回收站</button>
+      </div>
+
+      <div id="cardsContainer" class="cards-waterfall">
+        <div id="loadingState" class="loading" data-i18n="loading">加载中...</div>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">📝</div>
+        <h3 data-i18n="no_clips_title">暂无摘录</h3>
+        <p data-i18n="no_clips_desc">选中网页文本后按 Ctrl+C 保存</p>
+      </div>
+
+      <div id="noResults" class="no-results" style="display: none;" data-i18n="no_results">
+        无匹配结果
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="newNoteModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 data-i18n="new_note">新建随笔</h3>
+        <button class="modal-close" id="closeNewNoteModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <textarea id="newNoteTextarea" placeholder="输入你的随笔内容..." rows="8"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelNewNoteBtn" data-i18n="cancel">取消</button>
+        <button class="btn btn-primary" id="saveNewNoteBtn" data-i18n="save">保存</button>
+      </div>
+    </div>
+  </div>
+
   <script src="library.js"></script>
 </body>
 </html>

@@ -331,19 +331,19 @@
 <body>
   <div class="settings-page">
     <header class="settings-header">
-      <h1>ClipIndex 设置</h1>
-      <p>个性化您的智能摘录体验</p>
+      <h1 data-i18n="settings_header_title">ClipIndex 设置</h1>
+      <p data-i18n="settings_header_desc">个性化您的智能摘录体验</p>
     </header>
 
     <div class="settings-content">
       <!-- Language Settings -->
       <section class="settings-section">
-        <h2>语言设置</h2>
+        <h2 data-i18n="language_section">语言设置</h2>
 
         <div class="setting-item">
           <div class="setting-info">
-            <h3>界面语言</h3>
-            <p>选择您偏好的界面语言</p>
+            <h3 data-i18n="language_label">界面语言</h3>
+            <p data-i18n="language_desc">选择您偏好的界面语言</p>
           </div>
           <div class="setting-control">
             <select id="languageSelect" class="language-select">
@@ -357,94 +357,94 @@
 
       <!-- Privacy & Data -->
       <section class="settings-section">
-        <h2>隐私与数据</h2>
+        <h2 data-i18n="privacy_section">隐私与数据</h2>
 
         <div class="setting-item">
           <div class="setting-info">
-            <h3>数据存储</h3>
-            <p>所有数据仅存储在您的本地浏览器中，不会上传到任何服务器</p>
+            <h3 data-i18n="storage_label">数据存储</h3>
+            <p data-i18n="storage_desc">所有数据仅存储在您的本地浏览器中，不会上传到任何服务器</p>
           </div>
           <div class="setting-status">
-            <span class="status-indicator status-local">本地存储</span>
+            <span class="status-indicator status-local" data-i18n="local_storage">本地存储</span>
           </div>
         </div>
 
         <div class="setting-item">
           <div class="setting-info">
-            <h3>数据导出</h3>
-            <p>将您的所有摘录数据导出为 JSON 文件</p>
+            <h3 data-i18n="export_label">数据导出</h3>
+            <p data-i18n="export_desc">将您的所有摘录数据导出为 JSON 文件</p>
           </div>
           <div class="setting-control">
-            <button id="exportDataBtn" class="btn btn-secondary">导出数据</button>
+            <button id="exportDataBtn" class="btn btn-secondary" data-i18n="export_btn">导出数据</button>
           </div>
         </div>
 
         <div class="setting-item">
           <div class="setting-info">
-            <h3>数据导入</h3>
-            <p>从 JSON 文件导入摘录数据</p>
+            <h3 data-i18n="import_label">数据导入</h3>
+            <p data-i18n="import_desc">从 JSON 文件导入摘录数据</p>
           </div>
           <div class="setting-control">
             <input type="file" id="importDataInput" accept=".json" style="display: none;">
-            <button id="importDataBtn" class="btn btn-secondary">导入数据</button>
+            <button id="importDataBtn" class="btn btn-secondary" data-i18n="import_btn">导入数据</button>
           </div>
         </div>
 
         <div class="setting-item danger">
           <div class="setting-info">
-            <h3>清除所有数据</h3>
-            <p>删除所有摘录数据和设置。此操作无法撤销</p>
+            <h3 data-i18n="clear_label">清除所有数据</h3>
+            <p data-i18n="clear_desc">删除所有摘录数据和设置。此操作无法撤销</p>
           </div>
           <div class="setting-control">
-            <button id="clearDataBtn" class="btn btn-danger">清除数据</button>
+            <button id="clearDataBtn" class="btn btn-danger" data-i18n="clear_btn">清除数据</button>
           </div>
         </div>
       </section>
 
       <!-- Site Blocking -->
       <section class="settings-section">
-        <h2>站点禁用</h2>
+        <h2 data-i18n="blocking_section">站点禁用</h2>
 
         <div class="setting-item">
           <div class="setting-info">
-            <h3>禁用当前站点</h3>
-            <p>在当前网站上禁用 ClipIndex，不再自动保存摘录</p>
+            <h3 data-i18n="block_current_label">禁用当前站点</h3>
+            <p data-i18n="block_current_desc">在当前网站上禁用 ClipIndex，不再自动保存摘录</p>
           </div>
           <div class="setting-control">
-            <button id="blockCurrentSiteBtn" class="btn btn-secondary">禁用当前站点</button>
+            <button id="blockCurrentSiteBtn" class="btn btn-secondary" data-i18n="block_current_btn">禁用当前站点</button>
           </div>
         </div>
 
         <div class="blocked-sites">
-          <h3>已禁用站点</h3>
+          <h3 data-i18n="blocked_sites_title">已禁用站点</h3>
           <div id="blockedSitesList" class="blocked-sites-list">
-            <div class="loading">加载中...</div>
+            <div class="loading" data-i18n="load_blocked_error">加载中...</div>
           </div>
         </div>
       </section>
 
       <!-- About -->
       <section class="settings-section">
-        <h2>关于</h2>
+        <h2 data-i18n="about_section">关于</h2>
 
         <div class="setting-item">
           <div class="setting-info">
-            <h3>版本</h3>
-            <p>ClipIndex v2.0.0 - 智能摘录工具</p>
+            <h3 data-i18n="version_label">版本</h3>
+            <p data-i18n="version_desc">ClipIndex v2.0.0 - 智能摘录工具</p>
           </div>
         </div>
 
         <div class="setting-item">
           <div class="setting-info">
-            <h3>功能说明</h3>
-            <p>选中网页文本后按 Ctrl+C 自动保存，支持多语言界面和瀑布流展示</p>
+            <h3 data-i18n="features_label">功能说明</h3>
+            <p data-i18n="features_desc">选中网页文本后按 Ctrl+C 自动保存，支持多语言界面和瀑布流展示</p>
           </div>
         </div>
 
         <div class="setting-item">
           <div class="setting-info">
-            <h3>隐私声明</h3>
-            <p>仅在您主动复制内容时读取选中文本，所有数据存储在本地</p>
+            <h3 data-i18n="privacy_label">隐私声明</h3>
+            <p data-i18n="privacy_desc">仅在您主动复制内容时读取选中文本，所有数据存储在本地</p>
           </div>
         </div>
       </section>
@@ -454,15 +454,15 @@
     <div id="confirmModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>确认操作</h3>
+          <h3 data-i18n="confirm_title">确认操作</h3>
           <button class="modal-close">&times;</button>
         </div>
         <div class="modal-body">
           <p id="confirmMessage"></p>
         </div>
         <div class="modal-footer">
-          <button id="confirmCancel" class="btn btn-secondary">取消</button>
-          <button id="confirmOk" class="btn btn-danger">确认</button>
+          <button id="confirmCancel" class="btn btn-secondary" data-i18n="confirm_cancel">取消</button>
+          <button id="confirmOk" class="btn btn-danger" data-i18n="confirm_ok">确认</button>
         </div>
       </div>
     </div>

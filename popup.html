@@ -2,40 +2,49 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <title>ClipIndex</title>
+  <title>ClipIndex 侧边栏</title>
   <style>
     body {
       width: 320px;
-      min-height: 300px;
+      min-height: 500px;
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #ffffff;
+      background: #f8fafc;
       color: #333;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
 
     .header {
       background: #ffffff;
-      border-bottom: 1px solid #e5e5e5;
-      padding: 16px;
+      padding: 20px 16px 16px;
       text-align: center;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .header h1 {
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #111827;
+      color: #1e293b;
     }
 
     .header p {
       margin: 4px 0 0 0;
       font-size: 13px;
-      color: #6b7280;
+      color: #64748b;
     }
 
     .content {
-      padding: 16px;
+      flex: 1;
+      padding: 20px 16px;
+      overflow-y: auto;
     }
 
     .action-btn {
@@ -49,38 +58,40 @@
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.2s;
       text-decoration: none;
       text-align: center;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .action-btn:hover {
       background: #2563eb;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
     .action-btn.secondary {
-      background: #f3f4f6;
-      color: #374151;
-      border: 1px solid #d1d5db;
+      background: #f8fafc;
+      color: #475569;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .action-btn.secondary:hover {
-      background: #e5e7eb;
+      background: #f1f5f9;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     .stats {
       background: #ffffff;
-      border: 1px solid #e5e5e5;
       border-radius: 8px;
       padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .stat-item {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 8px;
     }
 
@@ -89,44 +100,39 @@
     }
 
     .stat-label {
-      color: #6b7280;
+      color: #64748b;
       font-size: 13px;
     }
 
     .stat-value {
       font-weight: 600;
-      color: #111827;
+      color: #1e293b;
     }
 
     .recent-items {
       background: #ffffff;
-      border: 1px solid #e5e5e5;
       border-radius: 8px;
       padding: 16px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      flex: 1;
     }
 
     .recent-item {
-      padding: 8px 0;
-      border-bottom: 1px solid #f3f4f6;
+      padding: 10px 0;
       cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .recent-item:last-child {
-      border-bottom: none;
+      border-radius: 4px;
+      margin: 0 -4px;
+      padding: 10px 4px;
     }
 
     .recent-item:hover {
-      background: #f9fafb;
-      border-radius: 4px;
-      margin: 0 -8px;
-      padding: 8px;
+      background: #f8fafc;
     }
 
     .recent-text {
       font-size: 14px;
-      color: #111827;
+      color: #1e293b;
       line-height: 1.4;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -136,8 +142,81 @@
 
     .recent-meta {
       font-size: 12px;
-      color: #6b7280;
+      color: #64748b;
       margin-top: 4px;
+    }
+
+    .note-section {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: auto;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      flex-shrink: 0;
+    }
+
+    .note-section h3 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .note-input {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #1e293b;
+      resize: vertical;
+      margin-bottom: 12px;
+      background: #f8fafc;
+    }
+
+    .note-input:focus {
+      outline: none;
+      background: #ffffff;
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+
+    .note-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-small {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+      background: #f8fafc;
+      color: #475569;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     .loading {
@@ -157,21 +236,32 @@
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>ClipIndex</h1>
-    <p>智能摘录工具</p>
-  </div>
-
-  <div class="content">
-    <button id="openLibraryBtn" class="action-btn">打开摘录库</button>
-    <button id="openSettingsBtn" class="action-btn secondary">设置</button>
-
-    <div id="stats" class="stats">
-      <div class="loading">加载中...</div>
+  <div class="sidebar">
+    <div class="header">
+      <h1 data-i18n="popup_title">ClipIndex</h1>
+      <p data-i18n="popup_desc">智能摘录工具</p>
     </div>
 
-    <div id="recentItems" class="recent-items">
-      <div class="loading">加载中...</div>
+    <div class="content">
+      <button id="openLibraryBtn" class="action-btn" data-i18n="open_library">打开摘录库</button>
+      <button id="openSettingsBtn" class="action-btn secondary" data-i18n="settings">设置</button>
+
+      <div id="stats" class="stats">
+        <div class="loading">加载中...</div>
+      </div>
+
+      <div id="recentItems" class="recent-items">
+        <div class="loading">加载中...</div>
+      </div>
+    </div>
+
+    <div class="note-section">
+      <h3>✏️ 写随笔</h3>
+      <textarea id="noteTextarea" class="note-input" placeholder="输入你的随笔内容..." rows="3"></textarea>
+      <div class="note-actions">
+        <button id="saveNoteBtn" class="btn-small btn-primary">保存</button>
+        <button id="clearNoteBtn" class="btn-small btn-secondary">清空</button>
+      </div>
     </div>
   </div>
 
