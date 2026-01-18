@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useContext, createContext, useEffect, useMemo, useRef } from 'react';
+console.log('useI18n.ts loaded successfully');
 import { Language, Translations } from '../types';
 
 const translations: Translations = {
