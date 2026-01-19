@@ -779,9 +779,9 @@ chrome.runtime.onInstalled.addListener(async () => {
         {
           url: '',
           clipText: '这是我的第一条随笔记录，用于测试笔记功能。',
-          domain: '随笔',
+          domain: '记下',
           title: '',
-          category: '随笔',
+          category: '记下',
           createdAt: Date.now() - 7200000, // 2 hours ago
           updatedAt: Date.now() - 7200000
         }

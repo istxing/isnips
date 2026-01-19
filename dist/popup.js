@@ -121,7 +121,7 @@ class ClipIndexPopup {
         total_clips: '总片段数',
         today_saved: '今日保存',
         no_items: '暂无条目',
-        page_index: '页面索引',
+        page_index: '记下',
         load_data_error: '加载数据失败',
         load_stats_error: '加载统计失败',
         load_recent_error: '加载最近条目失败'
@@ -139,7 +139,7 @@ class ClipIndexPopup {
         total_clips: 'Total Snippets',
         today_saved: 'Saved today',
         no_items: 'No items yet',
-        page_index: 'Page index',
+        page_index: 'Jotted',
         load_data_error: 'Failed to load data',
         load_stats_error: 'Failed to load stats',
         load_recent_error: 'Failed to load recent items'
@@ -157,8 +157,8 @@ class ClipIndexPopup {
         total_clips: 'スニペット総数',
         today_saved: '今日保存',
         no_items: 'アイテムがありません',
-        page_index: 'ページインデックス',
-        load_data_error: 'データの読み込みに失敗しました',
+        page_index: '記した',
+        load_data_error: 'データの読み込みに失败しました',
         load_stats_error: '統計の読み込みに失敗しました',
         load_recent_error: '最近のアイテムの読み込みに失敗しました'
       }
@@ -184,15 +184,15 @@ class ClipIndexPopup {
       if (chrome && chrome.commands) {
         const commands = await chrome.commands.getAll();
         const captureCommand = commands.find(c => c.name === 'capture-snippet');
-        
+
         const hintEl = document.getElementById('shortcutHint');
         if (hintEl && captureCommand) {
           const shortcut = captureCommand.shortcut || (this.currentLanguage === 'zh-CN' ? '未设置' : (this.currentLanguage === 'ja' ? '未設定' : 'Not set'));
-          
+
           if (this.currentLanguage === 'zh-CN') {
             hintEl.innerHTML = `在网页选中文字后按 <kbd>${shortcut}</kbd> 即可快速记下片段`;
           } else if (this.currentLanguage === 'ja') {
-             hintEl.innerHTML = `テキストを選択し、<kbd>${shortcut}</kbd> を押すと片段を保存します`;
+            hintEl.innerHTML = `テキストを選択し、<kbd>${shortcut}</kbd> を押すと片段を保存します`;
           } else {
             hintEl.innerHTML = `Select text and press <kbd>${shortcut}</kbd> to save a snippet`;
           }
@@ -263,12 +263,11 @@ class ClipIndexPopup {
         }
 
         const itemsHtml = recentCards.map(card => {
-          const isNote = card.category === '随笔';
+          const isNote = card.category === '记下' || card.category === '随笔';
           const hasUrl = card.url && card.url.length > 0;
-          const sourceLink = hasUrl ? `<span class="source-link" data-url="${card.url}">${this.escapeHtml(card.domain)}</span>` : 
-                                     (isNote ? `<span class="source-link" style="cursor: default; color: inherit;">随笔</span>` : 
-                                              `<span class="source-link" style="cursor: default; color: inherit;">${t.page_index}</span>`);
-          
+          const sourceLink = hasUrl ? `<span class="source-link" data-url="${card.url}">${this.escapeHtml(card.domain)}</span>` :
+            `<span class="source-link" style="cursor: default; color: inherit;">${t.page_index}</span>`;
+
           return `
             <div class="recent-item" data-card-id="${card.id}">
               <button class="delete-item-btn" data-id="${card.id}" title="删除">✕</button>
@@ -309,7 +308,7 @@ class ClipIndexPopup {
             if (e.target.closest('.delete-item-btn') || e.target.closest('.source-link')) {
               return;
             }
-            
+
             const cardId = item.dataset.cardId;
             const card = recentCards.find(c => c.id == cardId);
             if (card && card.clipText) {
@@ -396,19 +395,23 @@ class ClipIndexPopup {
 
     try {
       let url = '';
-      let domain = '随笔';
+      let domain = '记下';
       let title = '';
 
       const includeLink = document.getElementById('includeLinkToggle').checked;
       if (includeLink) {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (tab && tab.url && !tab.url.startsWith('chrome://')) {
+        const isInternalPage = tab.url.startsWith('chrome') ||
+          tab.url.startsWith('edge') ||
+          tab.url.startsWith('brave') ||
+          tab.url.startsWith('about:');
+        if (tab && tab.url && !isInternalPage) {
           url = tab.url;
           title = tab.title || '';
           try {
             domain = new URL(tab.url).hostname;
           } catch (e) {
-            domain = '随笔';
+            domain = '记下';
           }
         }
       }

@@ -739,7 +739,8 @@ class ClipIndexSettings {
       const url = new URL(tab.url);
       const domain = url.hostname;
 
-      if (domain === 'chrome://' || domain === 'chrome-extension://') {
+      const protocol = url.protocol;
+      if (protocol === 'chrome:' || protocol === 'chrome-extension:' || protocol === 'about:') {
         this.showMessage('block_system_error', 'error');
         return;
       }
