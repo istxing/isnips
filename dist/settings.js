@@ -450,61 +450,13 @@ class ClipIndexSettings {
     document.querySelector('.settings-header h1').textContent = t.settings_header_title;
     document.querySelector('.settings-header p').textContent = t.settings_header_desc;
 
-    // Update section headers
-    document.querySelectorAll('.settings-section h2').forEach((el, index) => {
-      const sections = ['shortcuts_section', 'display_section', 'privacy_section', 'blocking_section', 'about_section'];
-      if (t[sections[index]]) {
-        el.textContent = t[sections[index]];
-      }
-    });
-
-    // Update setting items
-    const settingItems = document.querySelectorAll('.setting-item');
-    const labels = [
-      ['capture_shortcut_label', 'capture_shortcut_desc'],
-      ['sidebar_shortcut_label', 'sidebar_shortcut_desc'],
-      [null, 'shortcut_change_tip'],
-      ['language_label', 'language_desc'],
-      ['columns_label', 'columns_desc'],
-      ['storage_label', 'storage_desc'],
-      ['export_label', 'export_desc'],
-      ['import_label', 'import_desc'],
-      ['clear_label', 'clear_desc'],
-      ['block_current_label', 'block_current_desc'],
-      ['version_label', 'version_desc'],
-      ['features_label', 'features_desc'],
-      ['privacy_label', 'privacy_desc']
-    ];
-
-    settingItems.forEach((item, index) => {
-      if (labels[index]) {
-        const [labelKey, descKey] = labels[index];
-        const h3 = item.querySelector('h3');
-        const p = item.querySelector('p');
-        if (h3 && t[labelKey]) h3.textContent = t[labelKey];
-        if (p && t[descKey]) p.textContent = t[descKey];
-      }
-    });
-
-    // Update buttons
-    const buttons = document.querySelectorAll('button, .btn');
-    const buttonLabels = ['export_btn', 'import_btn', 'clear_btn', 'block_current_btn'];
-    buttons.forEach(btn => {
-      const id = btn.id;
-      if (id === 'exportDataBtn' && t.export_btn) btn.textContent = t.export_btn;
-      else if (id === 'importDataBtn' && t.import_btn) btn.textContent = t.import_btn;
-      else if (id === 'clearDataBtn' && t.clear_btn) btn.textContent = t.clear_btn;
-      else if (id === 'blockCurrentSiteBtn' && t.block_current_btn) btn.textContent = t.block_current_btn;
-      else if (id === 'openShortcutsBtn' && t.manage_shortcuts_btn) btn.textContent = t.manage_shortcuts_btn;
-      else if (id === 'confirmCancel' && t.confirm_cancel) btn.textContent = t.confirm_cancel;
-      else if (id === 'confirmOk' && t.confirm_ok) btn.textContent = t.confirm_ok;
-    });
-
     // Update status text
     const statusEl = document.querySelector('.status-indicator');
     if (statusEl && t.local_storage) {
       statusEl.textContent = t.local_storage;
     }
+
+    // No manual button updates needed as they use data-i18n
 
     // Update blocked sites section
     const blockedTitle = document.querySelector('.blocked-sites h3');
