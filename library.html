@@ -84,12 +84,15 @@
     }
 
     .main-content {
+      width: 100%;
       max-width: 1200px;
       margin: 0 auto;
       padding: 24px 20px;
+      display: block;
     }
 
     .search-bar {
+      width: 100%;
       margin-bottom: 32px;
       display: flex;
       justify-content: center;
@@ -111,36 +114,64 @@
       box-shadow: 0 0 0 2px #3b82f6;
     }
 
+    #cardsContainer {
+      display: block;
+      width: 100%;
+    }
+
+    .cards-container-flow {
+      display: block;
+      width: 100%;
+    }
+
     .cards-flow {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
+      display: block;
+      column-count: 3;
+      column-gap: 12px;
+      width: 100%;
+    }
+
+    @media (max-width: 1100px) {
+      .cards-flow {
+        column-count: 2;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .cards-flow {
+        column-count: 1;
+      }
     }
 
     .date-group {
       margin-bottom: 32px;
+      break-inside: avoid;
+      width: 100%;
     }
 
     .date-group-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
       color: #374151;
       margin-bottom: 16px;
       padding-left: 8px;
       border-left: 4px solid #3b82f6;
+      column-span: all;
     }
 
     .clip-card {
       background: #ffffff;
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 6px;
+      padding: 24px 12px 12px;
       cursor: pointer;
       position: relative;
       border: none;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      flex: 1 1 300px;
-      max-width: 100%;
-      transition: none;
+      width: 100%;
+      margin-bottom: 12px;
+      display: block;
+      break-inside: avoid;
+      transition: all 0.2s ease;
     }
 
     .clip-card:hover {
@@ -157,22 +188,23 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
+
     .edit-btn {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 4px;
+      right: 4px;
       background: transparent;
       border: none;
       border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 12px;
+      padding: 2px 6px;
+      font-size: 11px;
       color: #94a3b8;
       cursor: pointer;
       opacity: 0;
       display: flex;
       align-items: center;
       gap: 4px;
-      transition: color 0.2s ease;
+      transition: all 0.2s ease;
     }
 
     .clip-card:hover .edit-btn {
@@ -180,8 +212,59 @@
     }
 
     .edit-btn:hover {
-      background: transparent;
       color: #3b82f6;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 4px;
+      right: 44px;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      color: #94a3b8;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .clip-card:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      color: #ef4444;
+    }
+
+    .restore-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      color: #94a3b8;
+      cursor: pointer;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .clip-card:hover .restore-btn {
+      opacity: 1;
+    }
+
+    .restore-btn:hover {
+      color: #10b981;
     }
 
     .edit-textarea {
@@ -239,10 +322,10 @@
     }
 
     .clip-text {
-      font-size: 14px;
-      line-height: 1.6;
+      font-size: 13px;
+      line-height: 1.5;
       color: #374151;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       word-break: break-word;
     }
 
@@ -250,14 +333,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12px;
-      color: #6b7280;
-      padding-top: 8px;
+      font-size: 11px;
+      color: #94a3b8;
+      padding-top: 4px;
     }
 
     .clip-domain {
       font-weight: 500;
       color: #3b82f6;
+      transition: opacity 0.2s ease;
+      cursor: pointer;
+    }
+
+    .clip-domain:hover {
+      opacity: 0.8;
+      text-decoration: underline;
     }
 
     .clip-date {
@@ -322,44 +412,6 @@
       overflow-y: auto;
     }
 
-    .note-section {
-      padding: 20px;
-      border-top: 1px solid #f3f4f6;
-      background: #fcfcfc;
-    }
-
-    .note-section h3 {
-      margin: 0 0 12px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .note-input {
-      width: 100%;
-      min-height: 100px;
-      padding: 10px;
-      border: 1px solid #e5e5e5;
-      border-radius: 6px;
-      font-size: 14px;
-      margin-bottom: 10px;
-      resize: vertical;
-      background: #ffffff;
-      font-family: inherit;
-    }
-
-    .note-input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-    }
-
-    .note-actions {
-      display: flex;
-      gap: 8px;
-    }
 
     .sidebar-section {
       margin-bottom: 24px;
@@ -424,32 +476,6 @@
       min-height: 100vh;
     }
 
-    .delete-btn {
-      position: absolute;
-      top: 8px;
-      right: 60px;
-      background: transparent;
-      border: none;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 12px;
-      color: #94a3b8;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s ease, color 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .clip-card:hover .delete-btn {
-      opacity: 1;
-    }
-
-    .delete-btn:hover {
-      background: transparent;
-      color: #ef4444;
-    }
 
     /* Modal styles */
     .modal {
@@ -570,11 +596,6 @@
         padding: 16px;
       }
 
-      .cards-waterfall {
-        flex-direction: column;
-        gap: 16px;
-      }
-
       .modal-content {
         width: 95%;
         margin: 20px;
@@ -605,14 +626,6 @@
       </div>
     </div>
 
-    <div class="note-section">
-      <h3>✏️ 写随笔</h3>
-      <textarea id="noteTextarea" class="note-input" placeholder="输入你的随笔内容..." rows="3"></textarea>
-      <div class="note-actions">
-        <button id="saveNoteBtn" class="btn-small btn-save" style="flex: 1;" data-i18n="save">保存</button>
-        <button id="clearNoteBtn" class="btn-small btn-cancel" style="flex: 1;" data-i18n="cancel">清空</button>
-      </div>
-    </div>
   </div>
 
   <div class="main-wrapper">
