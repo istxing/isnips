@@ -184,15 +184,15 @@ class ClipIndexPopup {
       if (chrome && chrome.commands) {
         const commands = await chrome.commands.getAll();
         const captureCommand = commands.find(c => c.name === 'capture-snippet');
-        
+
         const hintEl = document.getElementById('shortcutHint');
         if (hintEl && captureCommand) {
           const shortcut = captureCommand.shortcut || (this.currentLanguage === 'zh-CN' ? '未设置' : (this.currentLanguage === 'ja' ? '未設定' : 'Not set'));
-          
+
           if (this.currentLanguage === 'zh-CN') {
             hintEl.innerHTML = `在网页选中文字后按 <kbd>${shortcut}</kbd> 即可快速记下片段`;
           } else if (this.currentLanguage === 'ja') {
-             hintEl.innerHTML = `テキストを選択し、<kbd>${shortcut}</kbd> を押すと片段を保存します`;
+            hintEl.innerHTML = `テキストを選択し、<kbd>${shortcut}</kbd> を押すと片段を保存します`;
           } else {
             hintEl.innerHTML = `Select text and press <kbd>${shortcut}</kbd> to save a snippet`;
           }
@@ -265,10 +265,10 @@ class ClipIndexPopup {
         const itemsHtml = recentCards.map(card => {
           const isNote = card.category === '随笔';
           const hasUrl = card.url && card.url.length > 0;
-          const sourceLink = hasUrl ? `<span class="source-link" data-url="${card.url}">${this.escapeHtml(card.domain)}</span>` : 
-                                     (isNote ? `<span class="source-link" style="cursor: default; color: inherit;">随笔</span>` : 
-                                              `<span class="source-link" style="cursor: default; color: inherit;">${t.page_index}</span>`);
-          
+          const sourceLink = hasUrl ? `<span class="source-link" data-url="${card.url}">${this.escapeHtml(card.domain)}</span>` :
+            (isNote ? `<span class="source-link" style="cursor: default; color: inherit;">随笔</span>` :
+              `<span class="source-link" style="cursor: default; color: inherit;">${t.page_index}</span>`);
+
           return `
             <div class="recent-item" data-card-id="${card.id}">
               <button class="delete-item-btn" data-id="${card.id}" title="删除">✕</button>
@@ -309,7 +309,7 @@ class ClipIndexPopup {
             if (e.target.closest('.delete-item-btn') || e.target.closest('.source-link')) {
               return;
             }
-            
+
             const cardId = item.dataset.cardId;
             const card = recentCards.find(c => c.id == cardId);
             if (card && card.clipText) {
@@ -402,7 +402,11 @@ class ClipIndexPopup {
       const includeLink = document.getElementById('includeLinkToggle').checked;
       if (includeLink) {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (tab && tab.url && !tab.url.startsWith('chrome://')) {
+        const isInternalPage = tab.url.startsWith('chrome') ||
+          tab.url.startsWith('edge') ||
+          tab.url.startsWith('brave') ||
+          tab.url.startsWith('about:');
+        if (tab && tab.url && !isInternalPage) {
           url = tab.url;
           title = tab.title || '';
           try {
