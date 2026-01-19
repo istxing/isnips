@@ -465,7 +465,7 @@ class ClipIndexSidebar {
         <button class="restore-btn" title="恢复">恢复</button>
         <div class="clip-text">${this.escapeHtml(card.clipText)}</div>
         <div class="clip-meta">
-          <div class="clip-domain">${this.escapeHtml(card.domain)}</div>
+          <div class="clip-domain">${this.escapeHtml(card.domain === '随笔' ? '记下' : card.domain)}</div>
           <div class="clip-date">${this.formatDate(dateToShow)}</div>
         </div>
       `;
@@ -484,7 +484,7 @@ class ClipIndexSidebar {
         <button class="delete-btn" title="删除">删除</button>
         <div class="clip-text">${this.escapeHtml(card.clipText)}</div>
         <div class="clip-meta">
-          <div class="clip-domain">${this.escapeHtml(card.domain)}</div>
+          <div class="clip-domain">${this.escapeHtml(card.domain === '随笔' ? '记下' : card.domain)}</div>
           <div class="clip-date">${this.formatDate(dateToShow)}</div>
         </div>
       `;
@@ -679,10 +679,10 @@ class ClipIndexSidebar {
             btn.classList.remove('active');
             if (btn.dataset.category === category) btn.classList.add('active');
         });
-    const trashControls = document.querySelector('.trash-controls');
-    if (trashControls) trashControls.style.display = (category === 'scrap') ? 'block' : 'none';
-    this.loadData();
-  }
+        const trashControls = document.querySelector('.trash-controls');
+        if (trashControls) trashControls.style.display = (category === 'scrap') ? 'block' : 'none';
+        this.loadData();
+    }
 
     showNewNoteModal() {
         const modal = document.getElementById('newNoteModal');
