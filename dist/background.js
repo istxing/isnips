@@ -84,8 +84,6 @@ class ClipIndexDatabase {
       const request = store.add(card);
 
       request.onsuccess = () => {
-        // Notify other parts of the extension
-        chrome.runtime.sendMessage({ action: 'cardSaved', card });
         resolve({ success: true, card });
       };
 
@@ -144,7 +142,6 @@ class ClipIndexDatabase {
           const putRequest = store.put(updatedCard);
 
           putRequest.onsuccess = () => {
-            chrome.runtime.sendMessage({ action: 'cardSaved' }); // Reuse cardSaved to trigger refresh
             resolve({ success: true, card: updatedCard });
           };
 
@@ -170,7 +167,6 @@ class ClipIndexDatabase {
       const request = store.delete(cardId);
 
       request.onsuccess = () => {
-        chrome.runtime.sendMessage({ action: 'cardSaved' });
         resolve({ success: true });
       };
 
@@ -194,7 +190,6 @@ class ClipIndexDatabase {
           const putRequest = store.put(updatedCard);
 
           putRequest.onsuccess = () => {
-            chrome.runtime.sendMessage({ action: 'cardSaved' });
             resolve({ success: true, card: updatedCard });
           };
 
@@ -248,7 +243,6 @@ class ClipIndexDatabase {
           const putRequest = store.put(updatedCard);
 
           putRequest.onsuccess = () => {
-            chrome.runtime.sendMessage({ action: 'cardSaved' });
             resolve({ success: true, card: updatedCard });
           };
 
@@ -283,7 +277,6 @@ class ClipIndexDatabase {
           deletedCount++;
           cursor.continue();
         } else {
-          chrome.runtime.sendMessage({ action: 'cardSaved' });
           resolve({ success: true, deletedCount });
         }
       };
@@ -600,13 +593,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
+async function broadcastDataChange(action, data = null) {
+  // 1. Send to other extension components (popups, side panels)
+  chrome.runtime.sendMessage({ action, ...data ? { data } : {} }).catch(() => { });
+
+  // 2. Send to all tabs that are extension pages (like library.html)
+  chrome.tabs.query({}, (tabs) => {
+    tabs.forEach(tab => {
+      if (tab.url && tab.url.includes('chrome-extension://')) {
+        chrome.tabs.sendMessage(tab.id, { action, ...data ? { data } : {} }).catch(() => { });
+      }
+    });
+  });
+}
+
 async function handleMessage(db, message) {
   try {
     switch (message.action) {
       case 'saveIndexCard':
         const saveResult = await db.saveIndexCard(message.data);
         if (saveResult.success) {
-          chrome.runtime.sendMessage({ action: 'cardSaved', card: saveResult.card });
+          broadcastDataChange('cardSaved', saveResult.card);
         }
         return saveResult;
 
@@ -615,23 +622,43 @@ async function handleMessage(db, message) {
         return { success: true, cards };
 
       case 'updateIndexCard':
-        return await db.updateIndexCard(message.cardId, message.updates);
+        const updateResult = await db.updateIndexCard(message.cardId, message.updates);
+        if (updateResult.success) {
+          broadcastDataChange('cardSaved');
+        }
+        return updateResult;
 
       case 'deleteIndexCard':
-        return await db.deleteIndexCard(message.cardId);
+        const deleteResult = await db.deleteIndexCard(message.cardId);
+        if (deleteResult.success) {
+          broadcastDataChange('cardSaved');
+        }
+        return deleteResult;
 
       case 'softDeleteIndexCard':
-        return await db.softDeleteIndexCard(message.cardId);
+        const softDeleteResult = await db.softDeleteIndexCard(message.cardId);
+        if (softDeleteResult.success) {
+          broadcastDataChange('cardSaved');
+        }
+        return softDeleteResult;
 
       case 'getDeletedCards':
         const deletedCards = await db.getDeletedCards();
         return { success: true, cards: deletedCards };
 
       case 'restoreCard':
-        return await db.restoreCard(message.cardId);
+        const restoreResult = await db.restoreCard(message.cardId);
+        if (restoreResult.success) {
+          broadcastDataChange('cardSaved');
+        }
+        return restoreResult;
 
       case 'emptyTrash':
-        return await db.emptyTrash();
+        const emptyResult = await db.emptyTrash();
+        if (emptyResult.success) {
+          broadcastDataChange('cardSaved');
+        }
+        return emptyResult;
 
       case 'autoDeleteOldTrash':
         return await db.autoDeleteOldTrash();

@@ -22,7 +22,8 @@
     }
 
     .header-content {
-      max-width: 1200px;
+      width: 98%;
+      max-width: none;
       margin: 0 auto;
       padding: 20px;
       display: flex;
@@ -85,8 +86,8 @@
     }
 
     .main-content {
-      width: 100%;
-      max-width: 1200px;
+      width: 98%;
+      max-width: none;
       margin: 0 auto;
       padding: 24px 20px;
       display: block;
@@ -130,27 +131,27 @@
     }
 
     .cards-flow {
-      display: block;
-      column-count: var(--column-count);
-      column-gap: 12px;
+      display: flex;
+      gap: 12px;
       width: 100%;
+      align-items: start;
     }
 
-    @media (max-width: 1400px) {
-      .cards-flow {
-        column-count: min(var(--column-count), 4);
-      }
+    .cards-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
     }
 
     @media (max-width: 1100px) {
-      .cards-flow {
-        column-count: min(var(--column-count), 2);
-      }
+      /* Responsive behavior inherited from flex */
     }
 
     @media (max-width: 768px) {
       .cards-flow {
-        column-count: 1;
+        flex-direction: column;
       }
     }
 
@@ -663,8 +664,20 @@
       </div>
 
 
-      <div class="trash-controls" style="display: none; margin-bottom: 20px;">
-        <button id="emptyTrashBtn" class="btn btn-danger" data-i18n="empty_trash">清空回收站</button>
+      <div id="trashControls" class="trash-banner" style="display: none;">
+        <div class="trash-banner-content">
+          <div class="trash-info-wrapper">
+            <span class="trash-icon-large">🗑️</span>
+            <div class="trash-text-content">
+              <span class="trash-title" data-i18n="scrap_trash">回收站</span>
+              <span class="trash-hint" data-i18n="trash_info">7天后将自动永久删除</span>
+            </div>
+          </div>
+          <button id="emptyTrashBtn" class="empty-trash-btn-premium">
+            <span>✨</span>
+            <span data-i18n="empty_trash">立即清空回收站</span>
+          </button>
+        </div>
       </div>
 
       <div id="cardsContainer" class="cards-waterfall">

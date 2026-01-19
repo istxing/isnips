@@ -89,6 +89,9 @@ class ClipIndexSidebar {
                     this.currentLanguage = message.language;
                     this.loadTranslations();
                     this.updateUI();
+                } else if (message.action === 'cardSaved') {
+                    console.log('Library: New card saved, refreshing data');
+                    this.loadData();
                 }
                 return false;
             });
@@ -142,7 +145,8 @@ class ClipIndexSidebar {
                 web_clips: '网页',
                 jotted_notes: '记下',
                 scrap_trash: '回收站',
-                empty_trash: '清空回收站',
+                trash_info: '这些片段已进入回收站，7天后将自动永久删除。',
+                empty_trash: '立即清空回收站',
                 new_note: '新建片段',
                 cancel: '取消',
                 save: '保存'
@@ -162,7 +166,8 @@ class ClipIndexSidebar {
                 web_clips: 'Web',
                 jotted_notes: 'Jotted',
                 scrap_trash: 'Trash',
-                empty_trash: 'Empty Trash',
+                trash_info: 'Items in trash will be permanently deleted after 7 days.',
+                empty_trash: 'Empty Trash Now',
                 new_note: 'New Snippet',
                 cancel: 'Cancel',
                 save: 'Save'
@@ -182,7 +187,8 @@ class ClipIndexSidebar {
                 web_clips: 'ウェブ',
                 jotted_notes: '記した',
                 scrap_trash: 'ゴミ箱',
-                empty_trash: 'ゴミ箱を空にする',
+                trash_info: 'ゴミ箱内の項目は7日後に永久に削除されます。',
+                empty_trash: '今すぐゴミ箱を空にする',
                 new_note: '新しいスニペット',
                 cancel: 'キャンセル',
                 save: '保存'
@@ -351,9 +357,21 @@ class ClipIndexSidebar {
             const cardsDiv = document.createElement('div');
             cardsDiv.className = 'cards-flow';
 
-            group.cards.forEach(card => {
+            // Get column count from CSS variable
+            const colCount = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--column-count')) || 3;
+
+            // Create columns
+            const cols = [];
+            for (let i = 0; i < colCount; i++) {
+                const col = document.createElement('div');
+                col.className = 'cards-column';
+                cols.push(col);
+                cardsDiv.appendChild(col);
+            }
+
+            group.cards.forEach((card, index) => {
                 const cardElement = this.createCardElement(card);
-                cardsDiv.appendChild(cardElement);
+                cols[index % colCount].appendChild(cardElement);
             });
 
             groupDiv.appendChild(cardsDiv);
@@ -498,26 +516,24 @@ class ClipIndexSidebar {
             const deleteBtn = cardDiv.querySelector('.delete-btn');
             deleteBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                if (confirm('确定要删除这个摘录吗？它将被移至回收站。')) {
-                    try {
-                        const result = await chrome.runtime.sendMessage({
-                            action: 'softDeleteIndexCard',
-                            cardId: card.id
-                        });
+                try {
+                    const result = await chrome.runtime.sendMessage({
+                        action: 'softDeleteIndexCard',
+                        cardId: card.id
+                    });
 
-                        if (result.success) {
-                            const cardIndex = this.cards.findIndex(c => c.id === card.id);
-                            if (cardIndex !== -1) {
-                                this.cards.splice(cardIndex, 1);
-                            }
-                            this.applyFilters();
-                        } else {
-                            alert('删除失败：' + (result.error || '未知错误'));
+                    if (result.success) {
+                        const cardIndex = this.cards.findIndex(c => c.id === card.id);
+                        if (cardIndex !== -1) {
+                            this.cards.splice(cardIndex, 1);
                         }
-                    } catch (error) {
-                        console.error('Delete error:', error);
-                        alert('删除失败：' + error.message);
+                        this.applyFilters();
+                    } else {
+                        alert('删除失败：' + (result.error || '未知错误'));
                     }
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    alert('删除失败：' + error.message);
                 }
             });
         }
@@ -679,7 +695,7 @@ class ClipIndexSidebar {
             btn.classList.remove('active');
             if (btn.dataset.category === category) btn.classList.add('active');
         });
-        const trashControls = document.querySelector('.trash-controls');
+        const trashControls = document.getElementById('trashControls');
         if (trashControls) trashControls.style.display = (category === 'scrap') ? 'block' : 'none';
         this.loadData();
     }

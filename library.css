@@ -21,7 +21,8 @@ body {
 }
 
 .header-content {
-  max-width: 1200px;
+  width: 98%;
+  max-width: none;
   margin: 0 auto;
   padding: 16px 24px;
   display: flex;
@@ -60,8 +61,8 @@ body {
 
 /* Main content */
 .main-content {
-  width: 100%;
-  max-width: 1200px;
+  width: 98%;
+  max-width: none;
   margin: 0 auto;
   padding: 24px;
   display: block;
@@ -104,15 +105,28 @@ body {
 }
 
 .cards-flow {
-  display: block;
-  column-count: 3;
-  column-gap: 12px;
+  display: flex;
+  gap: 12px;
   width: 100%;
+  align-items: start;
+}
+
+.cards-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  /* Prevents overflow */
 }
 
 @media (max-width: 1100px) {
+  /* Columns are handled by JS count, but we can adjust spacing if needed */
+}
+
+@media (max-width: 768px) {
   .cards-flow {
-    column-count: 2;
+    flex-direction: column;
   }
 }
 
@@ -285,6 +299,106 @@ body {
 .btn-sm {
   padding: 6px 12px;
   font-size: 13px;
+}
+
+/* Trash Controls */
+.trash-banner {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.trash-banner-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.trash-info-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.trash-icon-large {
+  font-size: 20px;
+}
+
+.trash-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trash-title {
+  color: #991b1b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.trash-hint {
+  color: #f87171;
+  font-size: 12px;
+}
+
+.empty-trash-btn-premium {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.1), 0 2px 4px -1px rgba(220, 38, 38, 0.06);
+}
+
+.empty-trash-btn-premium:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.2), 0 4px 6px -2px rgba(220, 38, 38, 0.1);
+}
+
+.empty-trash-btn-premium:active {
+  transform: translateY(0);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .trash-banner-content {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .trash-info-wrapper {
+    flex-direction: column;
+    margin-bottom: 8px;
+  }
+
+  .empty-trash-btn-premium {
+    justify-content: center;
+  }
 }
 
 /* Modals */
