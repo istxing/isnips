@@ -17,6 +17,7 @@ function build() {
     'settings.css',
     'manifest.json',
     'background.js',
+    'sync.js',
     'content.js',
     'popup.html',
     'popup.js'

@@ -13,6 +13,7 @@ class ClipIndexSettings {
     this.loadSettings();
     this.loadBlockedSites();
     this.loadShortcuts();
+    this.loadSyncSettings();
   }
 
   bindEvents() {
@@ -58,6 +59,9 @@ class ClipIndexSettings {
 
     // Modal events
     this.bindModalEvents();
+
+    // Sync events
+    this.bindSyncEvents();
 
     // Listen for language change messages from background
     if (chrome && chrome.runtime) {
@@ -233,7 +237,23 @@ class ClipIndexSettings {
         block_error: '禁用站点失败',
         unblock_success: '已取消禁用站点：{0}',
         unblock_error: '取消禁用失败',
-        no_results: '无匹配结果'
+        no_results: '无匹配结果',
+        sync_section: '数据同步',
+        sync_method_label: '同步方法',
+        sync_method_desc: '选择您偏好的同步服务',
+        sync_method_none: '禁用同步',
+        webdav_url: 'WebDAV 地址',
+        webdav_user: '用户名',
+        webdav_pass: '密码',
+        save_sync_config: '保存配置',
+        gdrive_login: '登录 Google Drive',
+        sync_now_label: '立即同步',
+        last_sync_desc: '上次同步时间：{0}',
+        sync_now_btn: '立即同步',
+        sync_success: '同步成功',
+        sync_error: '同步失败：{0}',
+        config_save_success: '配置已保存',
+        not_synced: '尚未同步'
       },
       'en': {
         settings_title: 'iSnippets - Settings',
@@ -304,7 +324,23 @@ class ClipIndexSettings {
         block_error: 'Failed to block site',
         unblock_success: 'Site unblocked: {0}',
         unblock_error: 'Failed to unblock site',
-        no_results: 'No matching results'
+        no_results: 'No matching results',
+        sync_section: 'Synchronization',
+        sync_method_label: 'Sync Method',
+        sync_method_desc: 'Select your preferred sync service',
+        sync_method_none: 'Disable Sync',
+        webdav_url: 'WebDAV URL',
+        webdav_user: 'Username',
+        webdav_pass: 'Password',
+        save_sync_config: 'Save Config',
+        gdrive_login: 'Login with Google Drive',
+        sync_now_label: 'Sync Now',
+        last_sync_desc: 'Last sync: {0}',
+        sync_now_btn: 'Sync Now',
+        sync_success: 'Sync successful',
+        sync_error: 'Sync failed: {0}',
+        config_save_success: 'Configuration saved',
+        not_synced: 'Never synced'
       },
       'ja': {
         settings_title: 'iSnippets - 設定',
@@ -375,7 +411,23 @@ class ClipIndexSettings {
         block_error: 'サイトのブロックに失敗しました',
         unblock_success: 'サイトのブロックを解除しました：{0}',
         unblock_error: 'サイトのブロック解除に失敗しました',
-        no_results: '一致する結果がありません'
+        no_results: '一致する結果がありません',
+        sync_section: 'データ同期',
+        sync_method_label: '同期方法',
+        sync_method_desc: 'お好みの同期サービスを選択してください',
+        sync_method_none: '同期を無効にする',
+        webdav_url: 'WebDAV アドレス',
+        webdav_user: 'ユーザー名',
+        webdav_pass: 'パスワード',
+        save_sync_config: '設定を保存',
+        gdrive_login: 'Google Drive でログイン',
+        sync_now_label: '今すぐ同期',
+        last_sync_desc: '最終同期：{0}',
+        sync_now_btn: '今すぐ同期',
+        sync_success: '同期に成功しました',
+        sync_error: '同期に失敗しました：{0}',
+        config_save_success: '設定を保存しました',
+        not_synced: '未同期'
       }
     };
   }
@@ -794,6 +846,98 @@ class ClipIndexSettings {
     if (this.pendingAction) {
       await this.pendingAction();
       this.hideConfirmModal();
+    }
+  }
+
+  bindSyncEvents() {
+    const syncMethodSelect = document.getElementById('syncMethodSelect');
+    syncMethodSelect.addEventListener('change', (e) => {
+      this.toggleSyncArea(e.target.value);
+      this.saveSyncConfig({ type: e.target.value });
+    });
+
+    document.getElementById('saveWebdavBtn').addEventListener('click', () => {
+      const config = {
+        type: 'webdav',
+        url: document.getElementById('webdavUrl').value,
+        username: document.getElementById('webdavUser').value,
+        password: document.getElementById('webdavPass').value
+      };
+      this.saveSyncConfig(config);
+    });
+
+    document.getElementById('gdriveLoginBtn').addEventListener('click', () => {
+      this.syncNow('googledrive');
+    });
+
+    document.getElementById('syncNowBtn').addEventListener('click', () => {
+      const type = document.getElementById('syncMethodSelect').value;
+      if (type === 'none') return;
+      this.syncNow(type);
+    });
+  }
+
+  toggleSyncArea(type) {
+    document.querySelectorAll('.sync-config-area').forEach(el => el.style.display = 'none');
+    const targetArea = document.getElementById(type + 'Config');
+    if (targetArea) targetArea.style.display = 'block';
+  }
+
+  async loadSyncSettings() {
+    const config = await this.getSetting('syncConfig', { type: 'none' });
+    document.getElementById('syncMethodSelect').value = config.type;
+    this.toggleSyncArea(config.type);
+
+    if (config.type === 'webdav') {
+      document.getElementById('webdavUrl').value = config.url || '';
+      document.getElementById('webdavUser').value = config.username || '';
+      document.getElementById('webdavPass').value = config.password || '';
+    }
+
+    const lastSyncTime = await this.getSetting('lastSyncTime', null);
+    this.updateLastSyncDisplay(lastSyncTime);
+  }
+
+  async saveSyncConfig(config) {
+    const currentConfig = await this.getSetting('syncConfig', {});
+    const newConfig = { ...currentConfig, ...config };
+    await this.saveSetting('syncConfig', newConfig);
+    this.showMessage('config_save_success', 'success');
+  }
+
+  async syncNow(type) {
+    const btn = document.getElementById('syncNowBtn');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      const action = type === 'webdav' ? 'syncWebDAV' : 'syncGoogleDrive';
+      const result = await chrome.runtime.sendMessage({ action });
+      if (result.success) {
+        const now = Date.now();
+        await this.saveSetting('lastSyncTime', now);
+        this.updateLastSyncDisplay(now);
+        this.showMessage('sync_success', 'success');
+      } else {
+        this.showMessage('sync_error', 'error', result.error);
+      }
+    } catch (error) {
+      this.showMessage('sync_error', 'error', error.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
+  updateLastSyncDisplay(timestamp) {
+    const el = document.getElementById('lastSyncTime');
+    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    if (timestamp) {
+      const dateStr = new Date(timestamp).toLocaleString();
+      el.textContent = t.last_sync_desc.replace('{0}', dateStr);
+    } else {
+      el.textContent = t.not_synced || '尚未同步';
     }
   }
 

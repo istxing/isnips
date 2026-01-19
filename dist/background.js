@@ -1,5 +1,7 @@
 // Background service worker for ClipIndex extension
 // Handles data storage and message routing
+// Import sync service
+importScripts('sync.js');
 
 class ClipIndexDatabase {
   constructor() {
@@ -570,6 +572,7 @@ async function getDatabase() {
   if (!dbInstance) {
     dbInstance = new ClipIndexDatabase();
     await dbInstance.initialize();
+    syncService.setDatabase(dbInstance);
   }
 
   return dbInstance;
@@ -713,6 +716,22 @@ async function handleMessage(db, message) {
         }
 
         return { success: true };
+
+      case 'syncWebDAV':
+        const webdavConfig = await db.getSetting('syncConfig', {});
+        if (webdavConfig.type !== 'webdav') return { success: false, error: 'WebDAV not configured' };
+        const webdavResult = await syncService.syncWebDAV(webdavConfig);
+        if (webdavResult.success) {
+          broadcastDataChange('cardSaved'); // Refresh UI
+        }
+        return webdavResult;
+
+      case 'syncGoogleDrive':
+        const gdResult = await syncService.syncGoogleDrive();
+        if (gdResult.success) {
+          broadcastDataChange('cardSaved'); // Refresh UI
+        }
+        return gdResult;
 
       default:
         return { success: false, error: 'Unknown action' };
