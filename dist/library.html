@@ -22,7 +22,7 @@
     }
 
     .header-content {
-      max-width: 1200px;
+      max-width: 100%;
       margin: 0 auto;
       padding: 20px;
       display: flex;
@@ -86,7 +86,7 @@
 
     .main-content {
       width: 100%;
-      max-width: 1200px;
+      max-width: 100%;
       margin: 0 auto;
       padding: 24px 20px;
       display: block;
@@ -138,7 +138,7 @@
 
     @media (max-width: 1400px) {
       .cards-flow {
-        column-count: min(var(--column-count), 4);
+        column-count: var(--column-count);
       }
     }
 
