@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <title data-i18n="settings_title">ClipIndex - 设置</title>
+  <title data-i18n="settings_title">iSnippets - 设置</title>
   <style>
     * {
       box-sizing: border-box;
@@ -293,6 +293,18 @@
       background: #fecaca;
     }
 
+    .shortcut-display {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+    }
+
     .loading {
       text-align: center;
       padding: 20px;
@@ -331,14 +343,48 @@
 <body>
   <div class="settings-page">
     <header class="settings-header">
-      <h1 data-i18n="settings_header_title">ClipIndex 设置</h1>
-      <p data-i18n="settings_header_desc">个性化您的智能摘录体验</p>
+      <h1 data-i18n="settings_header_title">iSnippets 设置</h1>
+      <p data-i18n="settings_header_desc">记下你真正想记住的内容</p>
     </header>
 
     <div class="settings-content">
-      <!-- Language Settings -->
+      <!-- Shortcuts -->
       <section class="settings-section">
-        <h2 data-i18n="language_section">语言设置</h2>
+        <h2 data-i18n="shortcuts_section">快捷键设置</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="capture_shortcut_label">自动记下片段</h3>
+            <p data-i18n="capture_shortcut_desc">选中网页文本后按下此快捷键自动保存</p>
+          </div>
+          <div class="setting-control">
+            <kbd id="captureShortcutDisplay" class="shortcut-display">-</kbd>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="sidebar_shortcut_label">打开侧边栏</h3>
+            <p data-i18n="sidebar_shortcut_desc">快速呼出插件侧边栏</p>
+          </div>
+          <div class="setting-control">
+            <kbd id="sidebarShortcutDisplay" class="shortcut-display">-</kbd>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <p data-i18n="shortcut_change_tip">提示：您可以在浏览器的“扩展程序 -> 快捷键”设置中修改这些热键</p>
+          </div>
+          <div class="setting-control">
+            <button id="openShortcutsBtn" class="btn btn-secondary" data-i18n="manage_shortcuts_btn">管理快捷键</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Display Settings -->
+      <section class="settings-section">
+        <h2 data-i18n="display_section">显示设置</h2>
 
         <div class="setting-item">
           <div class="setting-info">
@@ -350,6 +396,21 @@
               <option value="zh-CN">中文</option>
               <option value="en">English</option>
               <option value="ja">日本語</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="columns_label">片段库栏数</h3>
+            <p data-i18n="columns_desc">设置片段库在宽屏下的列数展示</p>
+          </div>
+          <div class="setting-control">
+            <select id="columnCountSelect" class="language-select">
+              <option value="3">3 栏</option>
+              <option value="4">4 栏</option>
+              <option value="5">5 栏</option>
+              <option value="6">6 栏</option>
             </select>
           </div>
         </div>
@@ -430,7 +491,7 @@
         <div class="setting-item">
           <div class="setting-info">
             <h3 data-i18n="version_label">版本</h3>
-            <p data-i18n="version_desc">ClipIndex v2.0.0 - 智能摘录工具</p>
+            <p data-i18n="version_desc">iSnippets v2.0.2 - 智能摘录工具</p>
           </div>
         </div>
 

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
-  <title data-i18n="library_title">ClipIndex - 摘录库</title>
+  <title data-i18n="library_title">iSnippets - 片段库</title>
   <link rel="stylesheet" href="library.css">
   <style>
     /* Additional styles for the pure JavaScript version */
@@ -124,16 +125,26 @@
       width: 100%;
     }
 
+    :root {
+      --column-count: 3;
+    }
+
     .cards-flow {
       display: block;
-      column-count: 3;
+      column-count: var(--column-count);
       column-gap: 12px;
       width: 100%;
     }
 
+    @media (max-width: 1400px) {
+      .cards-flow {
+        column-count: min(var(--column-count), 4);
+      }
+    }
+
     @media (max-width: 1100px) {
       .cards-flow {
-        column-count: 2;
+        column-count: min(var(--column-count), 2);
       }
     }
 
@@ -340,8 +351,8 @@
 
     .clip-domain {
       font-weight: 500;
-      color: #3b82f6;
-      transition: opacity 0.2s ease;
+      color: #64748b;
+      transition: all 0.2s ease;
       cursor: pointer;
     }
 
@@ -603,6 +614,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="sidebar">
     <div class="header">
@@ -612,12 +624,14 @@
 
     <div class="sidebar-content">
       <div class="sidebar-section">
-        <h3 style="margin-bottom: 12px; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">分类</h3>
+        <h3
+          style="margin-bottom: 12px; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">
+          分类</h3>
         <div class="category-list">
           <button class="category-btn active" data-category="all" data-i18n="all_categories">全部</button>
-          <button class="category-btn" data-category="收集" data-i18n="collected">收集</button>
-          <button class="category-btn" data-category="随笔" data-i18n="notes">随笔</button>
-          <button class="category-btn" data-category="trash" data-i18n="trash">回收站</button>
+          <button class="category-btn" data-category="web" data-i18n="web_clips">网页</button>
+          <button class="category-btn" data-category="jotted" data-i18n="jotted_notes">记下</button>
+          <button class="category-btn" data-category="scrap" data-i18n="scrap_trash">回收站</button>
         </div>
       </div>
 
@@ -631,7 +645,7 @@
   <div class="main-wrapper">
     <div class="header">
       <div class="header-content">
-        <h1 data-i18n="library_title">ClipIndex - 摘录库</h1>
+        <h1 data-i18n="library_title">iSnippets - 片段库</h1>
         <div class="header-controls">
           <select class="language-select" id="languageSelect">
             <option value="zh-CN">中文</option>
@@ -644,7 +658,8 @@
 
     <div class="main-content">
       <div class="search-bar">
-        <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="搜索摘录内容、域名...">
+        <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="search_placeholder"
+          placeholder="搜索…">
       </div>
 
 
@@ -687,4 +702,5 @@
 
   <script src="library.js"></script>
 </body>
+
 </html>

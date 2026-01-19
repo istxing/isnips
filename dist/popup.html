@@ -195,12 +195,14 @@
     }
 
     .source-link {
-      color: #3b82f6;
+      color: #64748b;
       text-decoration: none;
       cursor: pointer;
+      transition: color 0.2s ease;
     }
 
     .source-link:hover {
+      color: #3b82f6;
       text-decoration: underline;
     }
 
@@ -384,6 +386,24 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
+    .shortcut-hint {
+      padding: 8px 20px;
+      background: #eff6ff;
+      color: #3b82f6;
+      font-size: 11px;
+      line-height: 1.4;
+      border-bottom: 1px solid #dbeafe;
+    }
+
+    .shortcut-hint kbd {
+      background: #ffffff;
+      border: 1px solid #3b82f6;
+      border-radius: 3px;
+      padding: 1px 4px;
+      font-weight: 600;
+      font-family: monospace;
+    }
+
     .loading {
       text-align: center;
       padding: 20px;
@@ -404,7 +424,7 @@
   <div class="sidebar">
     <div class="header">
       <div class="header-info">
-        <h1 data-i18n="popup_title">ClipIndex</h1>
+        <h1 data-i18n="popup_title">iSnippets</h1>
       </div>
       <div class="header-controls">
         <button id="openSettingsBtn" class="icon-btn settings-btn" title="设置">
@@ -414,11 +434,15 @@
       </div>
     </div>
 
+    <div id="shortcutHint" class="shortcut-hint">
+      <!-- Will be populated by JS -->
+    </div>
+
     <div class="content">
       <div class="recent-container">
         <div class="section-header">
-          <span class="section-title">最近摘录</span>
-          <button id="openLibraryBtn" class="btn-link" data-i18n="open_library">全部</button>
+          <span class="section-title" data-i18n="recent_snippets">最近片段</span>
+          <button id="openLibraryBtn" class="btn-link" data-i18n="all_snippets">全部</button>
         </div>
         <div class="recent-items-scroll">
           <div id="recentItems" class="recent-items">
@@ -430,9 +454,9 @@
 
     <div class="note-section">
       <div class="note-section-header">
-        <h3>写随笔</h3>
+        <h3 data-i18n="take_note">记下</h3>
         <label class="toggle-container">
-          <span data-i18n="include_link">包含链接</span>
+          <span data-i18n="link_page">关联网页</span>
           <span class="switch">
             <input type="checkbox" id="includeLinkToggle" checked>
             <span class="slider"></span>
@@ -440,7 +464,7 @@
         </label>
       </div>
       <div class="note-input-container">
-        <textarea id="noteTextarea" class="note-input" placeholder="输入你的随笔内容..." rows="3" maxlength="144"></textarea>
+        <textarea id="noteTextarea" class="note-input" placeholder="记下你的片段内容..." data-i18n-placeholder="take_note_placeholder" rows="3" maxlength="144"></textarea>
         <span class="char-counter"><span id="charCount">0</span>/144</span>
       </div>
       <div class="note-actions">

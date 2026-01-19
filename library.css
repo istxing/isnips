@@ -179,18 +179,19 @@ body {
 
 .clip-domain {
   font-weight: 500;
-  color: #374151;
-  transition: opacity 0.2s ease;
+  color: #64748b;
+  transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .clip-domain:hover {
-  opacity: 0.8;
+  color: #3b82f6;
   text-decoration: underline;
 }
 
 .clip-date {
   white-space: nowrap;
+  color: #94a3b8;
   opacity: 0.8;
 }
 
