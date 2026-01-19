@@ -119,6 +119,11 @@ class ClipIndexSidebar {
                 defaultValue: 3
             });
             const count = result.success ? result.value : 3;
+            const container = document.getElementById('cardsContainer');
+            if (container) {
+                container.style.setProperty('--column-count', count);
+            }
+            // fallback to document element just in case
             document.documentElement.style.setProperty('--column-count', count);
         } catch (error) {
             console.error('Failed to load settings:', error);
