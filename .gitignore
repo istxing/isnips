@@ -4,8 +4,6 @@ bun.lock
 
 # Build outputs
 # dist/
-*.js
-*.d.ts
 
 # IDE
 .vscode/
