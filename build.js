@@ -18,6 +18,7 @@ function build() {
     'manifest.json',
     'background.js',
     'sync.js',
+    'merge.js',
     'content.js',
     'popup.html',
     'popup.js'
