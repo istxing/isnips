@@ -4,6 +4,7 @@ class ClipIndexSettings {
   constructor() {
     this.currentLanguage = 'zh-CN';
     this.translations = {};
+    this.loadTranslations(); // Load translations immediately
     this.init();
   }
 
@@ -467,7 +468,7 @@ class ClipIndexSettings {
 
   renderBlockedSites(blockedSites) {
     const container = document.getElementById('blockedSitesList');
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || {};
 
     if (blockedSites.length === 0) {
       container.innerHTML = `<div style="color: #6b7280; font-size: 14px;">${t.no_blocked_sites || '暂无禁用站点'}</div>`;
@@ -884,10 +885,12 @@ class ClipIndexSettings {
 
   updateLastSyncDisplay(timestamp) {
     const el = document.getElementById('lastSyncTime');
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    if (!el) return;
+
+    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || {};
     if (timestamp) {
       const dateStr = new Date(timestamp).toLocaleString();
-      el.textContent = t.last_sync_desc.replace('{0}', dateStr);
+      el.textContent = (t.last_sync_desc || '上次同步时间：{0}').replace('{0}', dateStr);
     } else {
       el.textContent = t.not_synced || '尚未同步';
     }
