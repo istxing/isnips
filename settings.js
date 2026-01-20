@@ -131,14 +131,15 @@ class ClipIndexSettings {
         if (captureCommand) {
           const display = document.getElementById('captureShortcutDisplay');
           if (display) {
-            display.textContent = captureCommand.shortcut || (this.translations[this.currentLanguage]?.not_set || '未设置');
+            const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || {};
+            display.textContent = captureCommand.shortcut || (t.not_set || '未设置');
           }
         }
-
         if (sidebarCommand) {
           const display = document.getElementById('sidebarShortcutDisplay');
           if (display) {
-            display.textContent = sidebarCommand.shortcut || (this.translations[this.currentLanguage]?.not_set || '未设置');
+            const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || {};
+            display.textContent = sidebarCommand.shortcut || (t.not_set || '未设置');
           }
         }
       }
@@ -421,7 +422,7 @@ class ClipIndexSettings {
         sync_section: 'データ同期',
         sync_method_label: '同期方法',
         sync_method_desc: 'お好みの同期サービスを選択してください',
-        sync_method_none: '同期を无効にする',
+        sync_method_none: '同期を無効にする',
         sync_method_webdav: 'WebDAV',
         sync_method_googledrive: 'Google Drive',
         webdav_url: 'WebDAV アドレス',
@@ -444,7 +445,10 @@ class ClipIndexSettings {
   }
 
   updateUI() {
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    // Get primary language code (e.g., 'en-US' -> 'en')
+    const lang = this.currentLanguage;
+    const baseLang = lang.split('-')[0];
+    const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'];
 
     // Update document title
     document.title = t.settings_title;
@@ -990,10 +994,15 @@ class ClipIndexSettings {
   }
 
   showMessage(message, type = 'info', ...args) {
+    // Get primary language code (e.g., 'en-US' -> 'en')
+    const lang = this.currentLanguage;
+    const baseLang = lang.split('-')[0];
+    const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'] || {};
+
     // Use translated message if key is provided
     let displayMessage = message;
-    if (this.translations[this.currentLanguage] && this.translations[this.currentLanguage][message]) {
-      displayMessage = this.translations[this.currentLanguage][message];
+    if (t[message]) {
+      displayMessage = t[message];
     }
 
     // Replace placeholders with arguments
