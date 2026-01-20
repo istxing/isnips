@@ -688,6 +688,9 @@ async function handleMessage(db, message) {
         const cards = await db.getSnippets(message.filters);
         return { success: true, cards };
 
+      case 'getAllSnippets':
+        return { success: true, cards: await db.getAllSnippetsIncludingDeleted() };
+
       case 'updateSnippet':
       case 'updateIndexCard':
         const updateResult = await db.updateSnippet(message.cardId, message.updates);
