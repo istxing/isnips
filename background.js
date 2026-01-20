@@ -111,6 +111,7 @@ class ClipIndexDatabase {
           text: text.slice(0, 144),
           url,
           domain: card.domain || null,
+          spaceId: card.spaceId || null,
           created_at: card.createdAt || Date.now(),
           updated_at: card.updatedAt || card.createdAt || Date.now(),
           deleted_at: card.deletedAt || null,
@@ -475,43 +476,41 @@ class ClipIndexDatabase {
 
     const db = await this.initialize();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(['spaces', 'indexCards'], 'readwrite');
-      const spacesStore = transaction.objectStore('spaces');
-      const cardsStore = transaction.objectStore('indexCards');
+    const transaction = db.transaction(['spaces', 'snippets'], 'readwrite');
+    const spacesStore = transaction.objectStore('spaces');
+    const snippetsStore = transaction.objectStore('snippets');
+    const cardsRequest = snippetsStore.getAll();
 
-      // Move cards to inbox first
-      const cardsIndex = cardsStore.index('spaceId');
-      const cardsRequest = cardsIndex.getAll(spaceId);
-
-      cardsRequest.onsuccess = () => {
-        const cards = cardsRequest.result;
-        const updatePromises = cards.map(card => {
+    cardsRequest.onsuccess = () => {
+      const cards = cardsRequest.result || [];
+      const updatePromises = cards
+        .filter(card => card.spaceId === spaceId)
+        .map(card => {
           return new Promise((res, rej) => {
-            const updateRequest = cardsStore.put({ ...card, spaceId: 'inbox', updatedAt: Date.now() });
+            const updateRequest = snippetsStore.put({ ...card, spaceId: 'inbox', updated_at: Date.now() });
             updateRequest.onsuccess = () => res();
             updateRequest.onerror = () => rej(updateRequest.error);
           });
         });
 
-        Promise.all(updatePromises).then(() => {
-          // Now delete the space
-          const deleteRequest = spacesStore.delete(spaceId);
-          deleteRequest.onsuccess = () => {
-            resolve({ success: true, movedCards: cards.length });
-          };
-          deleteRequest.onerror = () => {
-            reject({ success: false, error: deleteRequest.error });
-          };
-        }).catch(error => {
-          reject({ success: false, error });
-        });
-      };
+      Promise.all(updatePromises).then(() => {
+        const deleteRequest = spacesStore.delete(spaceId);
+        deleteRequest.onsuccess = () => {
+          resolve({ success: true, movedCards: updatePromises.length });
+        };
+        deleteRequest.onerror = () => {
+          reject({ success: false, error: deleteRequest.error });
+        };
+      }).catch(error => {
+        reject({ success: false, error });
+      });
+    };
 
-      cardsRequest.onerror = () => {
-        reject({ success: false, error: cardsRequest.error });
-      };
-    });
-  }
+    cardsRequest.onerror = () => {
+      reject({ success: false, error: cardsRequest.error });
+    };
+  });
+}
 
   // Highlights operations
   async storeHighlight(highlight) {
@@ -676,48 +675,62 @@ async function broadcastDataChange(action, data = null) {
 async function handleMessage(db, message) {
   try {
     switch (message.action) {
+      case 'saveSnippet':
       case 'saveIndexCard':
-        const saveResult = await db.saveIndexCard(message.data);
+        const saveResult = await db.saveSnippet(message.data);
         if (saveResult.success) {
-          broadcastDataChange('cardSaved', saveResult.card);
+          broadcastDataChange('cardSaved', saveResult.snippet);
         }
         return saveResult;
 
+      case 'getSnippets':
       case 'getIndexCards':
-        const cards = await db.getIndexCards(message.filters);
+        const cards = await db.getSnippets(message.filters);
         return { success: true, cards };
 
+      case 'updateSnippet':
       case 'updateIndexCard':
-        const updateResult = await db.updateIndexCard(message.cardId, message.updates);
+        const updateResult = await db.updateSnippet(message.cardId, message.updates);
         if (updateResult.success) {
           broadcastDataChange('cardSaved');
         }
         return updateResult;
 
+      case 'deleteSnippet':
       case 'deleteIndexCard':
-        const deleteResult = await db.deleteIndexCard(message.cardId);
+        const deleteResult = await db.deleteSnippet(message.cardId);
         if (deleteResult.success) {
           broadcastDataChange('cardSaved');
         }
         return deleteResult;
 
+      case 'softDeleteSnippet':
       case 'softDeleteIndexCard':
-        const softDeleteResult = await db.softDeleteIndexCard(message.cardId);
+        const softDeleteResult = await db.softDeleteSnippet(message.cardId);
         if (softDeleteResult.success) {
           broadcastDataChange('cardSaved');
         }
         return softDeleteResult;
 
+      case 'getDeletedSnippets':
       case 'getDeletedCards':
-        const deletedCards = await db.getDeletedCards();
+        const deletedCards = await db.getDeletedSnippets();
         return { success: true, cards: deletedCards };
 
+      case 'restoreSnippet':
       case 'restoreCard':
-        const restoreResult = await db.restoreCard(message.cardId);
+        const restoreResult = await db.restoreSnippet(message.cardId);
         if (restoreResult.success) {
           broadcastDataChange('cardSaved');
         }
         return restoreResult;
+
+      case 'purgeSnippet':
+        const purgeResult = await db.purgeSnippet(message.cardId);
+        if (purgeResult.success) {
+          broadcastDataChange('cardSaved');
+        }
+        return purgeResult;
 
       case 'emptyTrash':
         const emptyResult = await db.emptyTrash();
@@ -862,42 +875,45 @@ chrome.runtime.onInstalled.addListener(async () => {
     const db = await getDatabase();
 
     // Check if we already have data
-    const existingCards = await db.getIndexCards();
+    const existingCards = await db.getAllSnippetsIncludingDeleted();
     if (existingCards.length === 0) {
       console.log('Adding sample data...');
 
       const sampleCards = [
         {
           url: 'https://example.com/article1',
-          clipText: '这是一个示例摘录内容，用于测试 ClipIndex 功能。',
+          type: 'web',
+          text: '这是一个示例摘录内容，用于测试 ClipIndex 功能。',
           domain: 'example.com',
-          title: '示例文章标题',
-          category: '收集',
-          createdAt: Date.now() - 86400000, // 1 day ago
-          updatedAt: Date.now() - 86400000
+          created_at: Date.now() - 86400000,
+          updated_at: Date.now() - 86400000,
+          deleted_at: null,
+          purged_at: null
         },
         {
           url: 'https://example.com/article2',
-          clipText: '另一个测试摘录，展示瀑布流布局的效果。',
+          type: 'web',
+          text: '另一个测试摘录，展示瀑布流布局的效果。',
           domain: 'example.com',
-          title: '第二个示例',
-          category: '收集',
-          createdAt: Date.now() - 3600000, // 1 hour ago
-          updatedAt: Date.now() - 3600000
+          created_at: Date.now() - 3600000,
+          updated_at: Date.now() - 3600000,
+          deleted_at: null,
+          purged_at: null
         },
         {
-          url: '',
-          clipText: '这是我的第一条随笔记录，用于测试笔记功能。',
-          domain: '记下',
-          title: '',
-          category: '记下',
-          createdAt: Date.now() - 7200000, // 2 hours ago
-          updatedAt: Date.now() - 7200000
+          url: null,
+          type: 'note',
+          text: '这是我的第一条随笔记录，用于测试笔记功能。',
+          domain: null,
+          created_at: Date.now() - 7200000,
+          updated_at: Date.now() - 7200000,
+          deleted_at: null,
+          purged_at: null
         }
       ];
 
       for (const card of sampleCards) {
-        await db.saveIndexCard(card);
+        await db.saveSnippet(card);
       }
 
       console.log('Sample data added successfully');
