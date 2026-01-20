@@ -7,7 +7,7 @@ class ClipIndexDatabase {
   constructor() {
     this.db = null;
     this.dbName = 'ClipIndexDB';
-    this.dbVersion = 2;
+    this.dbVersion = 3;
     this.initialized = false;
   }
 
@@ -62,6 +62,16 @@ class ClipIndexDatabase {
           highlightsStore.createIndex('timestamp', 'timestamp', { unique: false });
         }
 
+        // Snippets store
+        if (!db.objectStoreNames.contains('snippets')) {
+          const snippetsStore = db.createObjectStore('snippets', { keyPath: 'id' });
+          snippetsStore.createIndex('created_at', 'created_at', { unique: false });
+          snippetsStore.createIndex('updated_at', 'updated_at', { unique: false });
+          snippetsStore.createIndex('deleted_at', 'deleted_at', { unique: false });
+          snippetsStore.createIndex('purged_at', 'purged_at', { unique: false });
+          snippetsStore.createIndex('domain', 'domain', { unique: false });
+        }
+
         // Settings store
         if (!db.objectStoreNames.contains('settings')) {
           db.createObjectStore('settings', { keyPath: 'key' });
@@ -70,6 +80,49 @@ class ClipIndexDatabase {
         console.log('IndexedDB schema updated');
       };
     });
+  }
+
+  async migrateIndexCardsToSnippets() {
+    const migrated = await this.getSetting('snippets_migrated', false);
+    if (migrated) return;
+
+    const db = await this.initialize();
+    const cards = await new Promise((resolve, reject) => {
+      const transaction = db.transaction(['indexCards'], 'readonly');
+      const request = transaction.objectStore('indexCards').getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+
+    if (cards.length === 0) {
+      await this.setSetting('snippets_migrated', true);
+      return;
+    }
+
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction(['snippets'], 'readwrite');
+      const store = transaction.objectStore('snippets');
+      for (const card of cards) {
+        const text = (card.clipText || card.title || '').trim();
+        const url = card.url || null;
+        const snippet = {
+          id: card.id,
+          type: url ? 'web' : 'note',
+          text: text.slice(0, 144),
+          url,
+          domain: card.domain || null,
+          created_at: card.createdAt || Date.now(),
+          updated_at: card.updatedAt || card.createdAt || Date.now(),
+          deleted_at: card.deletedAt || null,
+          purged_at: null
+        };
+        store.put(snippet);
+      }
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+
+    await this.setSetting('snippets_migrated', true);
   }
 
   // Index Cards operations
@@ -572,6 +625,7 @@ async function getDatabase() {
   if (!dbInstance) {
     dbInstance = new ClipIndexDatabase();
     await dbInstance.initialize();
+    await dbInstance.migrateIndexCardsToSnippets();
     syncService.setDatabase(dbInstance);
   }
 
