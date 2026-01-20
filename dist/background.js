@@ -1,9 +1,9 @@
-// Background service worker for ClipIndex extension
+// Background service worker for iSnippets extension
 // Handles data storage and message routing
 // Import sync service
 importScripts('sync.js');
 
-class ClipIndexDatabase {
+class iSnippetsDatabase {
   constructor() {
     this.db = null;
     this.dbName = 'ClipIndexDB';
@@ -476,41 +476,41 @@ class ClipIndexDatabase {
 
     const db = await this.initialize();
     return new Promise((resolve, reject) => {
-    const transaction = db.transaction(['spaces', 'snippets'], 'readwrite');
-    const spacesStore = transaction.objectStore('spaces');
-    const snippetsStore = transaction.objectStore('snippets');
-    const cardsRequest = snippetsStore.getAll();
+      const transaction = db.transaction(['spaces', 'snippets'], 'readwrite');
+      const spacesStore = transaction.objectStore('spaces');
+      const snippetsStore = transaction.objectStore('snippets');
+      const cardsRequest = snippetsStore.getAll();
 
-    cardsRequest.onsuccess = () => {
-      const cards = cardsRequest.result || [];
-      const updatePromises = cards
-        .filter(card => card.spaceId === spaceId)
-        .map(card => {
-          return new Promise((res, rej) => {
-            const updateRequest = snippetsStore.put({ ...card, spaceId: 'inbox', updated_at: Date.now() });
-            updateRequest.onsuccess = () => res();
-            updateRequest.onerror = () => rej(updateRequest.error);
+      cardsRequest.onsuccess = () => {
+        const cards = cardsRequest.result || [];
+        const updatePromises = cards
+          .filter(card => card.spaceId === spaceId)
+          .map(card => {
+            return new Promise((res, rej) => {
+              const updateRequest = snippetsStore.put({ ...card, spaceId: 'inbox', updated_at: Date.now() });
+              updateRequest.onsuccess = () => res();
+              updateRequest.onerror = () => rej(updateRequest.error);
+            });
           });
+
+        Promise.all(updatePromises).then(() => {
+          const deleteRequest = spacesStore.delete(spaceId);
+          deleteRequest.onsuccess = () => {
+            resolve({ success: true, movedCards: updatePromises.length });
+          };
+          deleteRequest.onerror = () => {
+            reject({ success: false, error: deleteRequest.error });
+          };
+        }).catch(error => {
+          reject({ success: false, error });
         });
+      };
 
-      Promise.all(updatePromises).then(() => {
-        const deleteRequest = spacesStore.delete(spaceId);
-        deleteRequest.onsuccess = () => {
-          resolve({ success: true, movedCards: updatePromises.length });
-        };
-        deleteRequest.onerror = () => {
-          reject({ success: false, error: deleteRequest.error });
-        };
-      }).catch(error => {
-        reject({ success: false, error });
-      });
-    };
-
-    cardsRequest.onerror = () => {
-      reject({ success: false, error: cardsRequest.error });
-    };
-  });
-}
+      cardsRequest.onerror = () => {
+        reject({ success: false, error: cardsRequest.error });
+      };
+    });
+  }
 
   // Highlights operations
   async storeHighlight(highlight) {
@@ -631,7 +631,7 @@ let dbInstance = null;
 
 async function getDatabase() {
   if (!dbInstance) {
-    dbInstance = new ClipIndexDatabase();
+    dbInstance = new iSnippetsDatabase();
     await dbInstance.initialize();
     await dbInstance.migrateIndexCardsToSnippets();
     syncService.setDatabase(dbInstance);

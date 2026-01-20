@@ -61,7 +61,7 @@ function bundleReactComponents() {
       // Create a simple text representation for debugging
       const debugDiv = document.createElement('div');
       debugDiv.style.cssText = 'padding: 20px; font-family: monospace; background: #f5f5f5; border: 1px solid #ccc;';
-      debugDiv.innerHTML = '<h2>ClipIndex Library</h2>' +
+      debugDiv.innerHTML = '<h2>iSnippets Library</h2>' +
         '<p>React rendering is working! The extension is loaded successfully.</p>' +
         '<p>Current status: <strong id="status">Initializing...</strong></p>' +
         '<div id="cards-list" style="margin-top: 20px;"></div>' +

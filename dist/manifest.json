@@ -38,7 +38,7 @@
     "default_path": "popup.html"
   },
   "action": {
-    "default_title": "ClipIndex"
+    "default_title": "iSnippets"
   },
   "commands": {
     "capture-snippet": {

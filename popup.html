@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
-  <title>ClipIndex 侧边栏</title>
+  <title>iSnippets 侧边栏</title>
   <style>
     body {
       width: 320px;
@@ -130,7 +131,9 @@
       background: #ffffff;
     }
 
-    .stats, .recent-items, .note-section {
+    .stats,
+    .recent-items,
+    .note-section {
       background: #ffffff;
       border-radius: 12px;
       padding: 16px;
@@ -295,11 +298,11 @@
       border-radius: 50%;
     }
 
-    input:checked + .slider {
+    input:checked+.slider {
       background-color: #3b82f6;
     }
 
-    input:checked + .slider:before {
+    input:checked+.slider:before {
       transform: translateX(14px);
     }
 
@@ -420,6 +423,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="sidebar">
     <div class="header">
@@ -464,7 +468,8 @@
         </label>
       </div>
       <div class="note-input-container">
-        <textarea id="noteTextarea" class="note-input" placeholder="记下你的片段内容..." data-i18n-placeholder="take_note_placeholder" rows="3" maxlength="144"></textarea>
+        <textarea id="noteTextarea" class="note-input" placeholder="记下你的片段内容..."
+          data-i18n-placeholder="take_note_placeholder" rows="3" maxlength="144"></textarea>
         <span class="char-counter"><span id="charCount">0</span>/144</span>
       </div>
       <div class="note-actions">
@@ -476,4 +481,5 @@
 
   <script src="popup.js"></script>
 </body>
+
 </html>

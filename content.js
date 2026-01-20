@@ -1,22 +1,22 @@
-// Content script for ClipIndex extension
+// Content script for iSnippets extension
 // Handles copy event detection and text highlighting
 
-class ClipIndexContent {
+class iSnippetsContent {
   constructor() {
     this.highlights = [];
     this.init();
   }
 
   async init() {
-    console.log('ClipIndex: Content script initializing...');
+    console.log('iSnippets: Content script initializing...');
 
     try {
       // Check if site is blocked
       const isBlocked = await this.checkIfSiteBlocked();
-      console.log('ClipIndex: Site blocked check result:', isBlocked);
+      console.log('iSnippets: Site blocked check result:', isBlocked);
 
       if (isBlocked) {
-        console.log('ClipIndex: Site is blocked, not initializing');
+        console.log('iSnippets: Site is blocked, not initializing');
         return;
       }
 
@@ -29,9 +29,9 @@ class ClipIndexContent {
       // Clean up on page unload
       window.addEventListener('beforeunload', this.cleanup.bind(this));
 
-      console.log('ClipIndex: Content script initialization complete');
+      console.log('iSnippets: Content script initialization complete');
     } catch (error) {
-      console.error('ClipIndex: Failed to initialize content script:', error);
+      console.error('iSnippets: Failed to initialize content script:', error);
     }
   }
 
@@ -66,16 +66,16 @@ class ClipIndexContent {
   }
 
   async handleCapture() {
-    console.log('ClipIndex: Capture command detected');
+    console.log('iSnippets: Capture command detected');
     const selectedText = this.getSelectedText();
 
     if (selectedText && selectedText.trim().length > 0) {
-      console.log('ClipIndex: Selected text found, saving snippet');
+      console.log('iSnippets: Selected text found, saving snippet');
       const text = selectedText.trim().substring(0, 144);
       await this.saveClip(text);
       this.highlightSelection(text);
     } else {
-      console.log('ClipIndex: No text selected, ignoring');
+      console.log('iSnippets: No text selected, ignoring');
       this.showToast('请先选中文字', false);
     }
   }
@@ -105,14 +105,14 @@ class ClipIndexContent {
       });
 
       if (result.success) {
-        console.log('ClipIndex: Clip saved successfully');
+        console.log('iSnippets: Clip saved successfully');
         this.showToast('已保存', true);
       } else {
-        console.log('ClipIndex: Failed to save clip');
+        console.log('iSnippets: Failed to save clip');
         this.showToast('保存失败', false);
       }
     } catch (error) {
-      console.error('ClipIndex: Failed to save clip:', error);
+      console.error('iSnippets: Failed to save clip:', error);
       this.showToast('保存失败', false);
     }
   }
@@ -123,13 +123,13 @@ class ClipIndexContent {
 
     const range = selection.getRangeAt(0);
     const highlightElement = document.createElement('span');
-    highlightElement.className = 'clipindex-highlight';
+    highlightElement.className = 'isnippets-highlight';
     highlightElement.textContent = text;
     highlightElement.style.backgroundColor = '#ffeb3b';
     highlightElement.style.borderRadius = '2px';
     highlightElement.style.padding = '2px 4px';
     highlightElement.style.cursor = 'pointer';
-    highlightElement.title = 'ClipIndex: 点击跳转到详情';
+    highlightElement.title = 'iSnippets: 点击跳转到详情';
 
     // Store highlight info for persistence
     const highlightId = Date.now().toString();
@@ -173,7 +173,7 @@ class ClipIndexContent {
         });
       }
     } catch (error) {
-      console.error('ClipIndex: Failed to load highlights:', error);
+      console.error('iSnippets: Failed to load highlights:', error);
     }
   }
 
@@ -196,13 +196,13 @@ class ClipIndexContent {
           range.setEnd(node, index + highlight.text.length);
 
           const highlightElement = document.createElement('span');
-          highlightElement.className = 'clipindex-highlight';
+          highlightElement.className = 'isnippets-highlight';
           highlightElement.textContent = highlight.text;
           highlightElement.style.backgroundColor = '#ffeb3b';
           highlightElement.style.borderRadius = '2px';
           highlightElement.style.padding = '2px 4px';
           highlightElement.style.cursor = 'pointer';
-          highlightElement.title = 'ClipIndex: 点击跳转到详情';
+          highlightElement.title = 'iSnippets: 点击跳转到详情';
           highlightElement.dataset.highlightId = highlight.id;
 
           highlightElement.addEventListener('click', () => {
@@ -228,13 +228,13 @@ class ClipIndexContent {
         highlight: highlight
       });
     } catch (error) {
-      console.error('ClipIndex: Failed to store highlight:', error);
+      console.error('iSnippets: Failed to store highlight:', error);
     }
   }
 
   showToast(message, isSuccess) {
     const toast = document.createElement('div');
-    toast.className = `clipindex-toast ${isSuccess ? 'success' : 'error'}`;
+    toast.className = `isnippets-toast ${isSuccess ? 'success' : 'error'}`;
     toast.textContent = message;
     toast.style.cssText = `
       position: fixed;
@@ -248,15 +248,15 @@ class ClipIndexContent {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 14px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      animation: clipindex-toast-slide-in 0.3s ease-out;
+      animation: isnippets-toast-slide-in 0.3s ease-out;
     `;
 
     // Add keyframes if not exist
-    if (!document.getElementById('clipindex-toast-styles')) {
+    if (!document.getElementById('isnippets-toast-styles')) {
       const style = document.createElement('style');
-      style.id = 'clipindex-toast-styles';
+      style.id = 'isnippets-toast-styles';
       style.textContent = `
-        @keyframes clipindex-toast-slide-in {
+        @keyframes isnippets-toast-slide-in {
           from { transform: translateX(100%); opacity: 0; }
           to { transform: translateX(0); opacity: 1; }
         }
@@ -274,22 +274,22 @@ class ClipIndexContent {
   }
 
   async showPopupCard(text, isPageIndex) {
-    console.log('ClipIndex: showPopupCard called with text length:', text.length, 'isPageIndex:', isPageIndex);
+    console.log('iSnippets: showPopupCard called with text length:', text.length, 'isPageIndex:', isPageIndex);
 
     // Remove existing popup if any - ensure complete cleanup
     this.removePopupCard();
 
     try {
-      console.log('ClipIndex: Creating new PopupCard...');
+      console.log('iSnippets: Creating new PopupCard...');
       // Create new popup card
       this.popupCard = new PopupCard(text, isPageIndex, this);
-      console.log('ClipIndex: PopupCard created, calling init...');
+      console.log('iSnippets: PopupCard created, calling init...');
       await this.popupCard.init();
-      console.log('ClipIndex: PopupCard init complete, calling show...');
+      console.log('iSnippets: PopupCard init complete, calling show...');
       this.popupCard.show();
-      console.log('ClipIndex: PopupCard show called');
+      console.log('iSnippets: PopupCard show called');
     } catch (error) {
-      console.error('ClipIndex: Failed to create popup card:', error);
+      console.error('iSnippets: Failed to create popup card:', error);
     }
   }
 
@@ -335,8 +335,8 @@ class ClipIndexContent {
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    new ClipIndexContent();
+    new iSnippetsContent();
   });
 } else {
-  new ClipIndexContent();
+  new iSnippetsContent();
 }

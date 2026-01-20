@@ -1,6 +1,6 @@
-// ClipIndex Settings Page Script
+// iSnippets Settings Page Script
 
-class ClipIndexSettings {
+class iSnippetsSettings {
   constructor() {
     this.currentLanguage = 'zh-CN';
     this.translations = {};
@@ -262,6 +262,7 @@ class ClipIndexSettings {
         about_section: 'About',
         version_label: 'Version',
         version_desc: 'iSnippets v2.0.2 - Intelligent clipping tool',
+        block_current_desc: 'Disable iSnippets on the current website, no longer automatically save clips',
         features_label: 'Features',
         features_desc: 'Automatically save snippets when selecting text on web pages and pressing Alt+C, supports multi-language interface and waterfall layout',
         privacy_label: 'Privacy Statement',
@@ -931,5 +932,5 @@ class ClipIndexSettings {
 
 // Initialize settings when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  new ClipIndexSettings();
+  new iSnippetsSettings();
 });

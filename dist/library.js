@@ -1,6 +1,6 @@
-// ClipIndex Sidebar Script - Side Panel Version
+// iSnippets Sidebar Script - Side Panel Version
 
-class ClipIndexSidebar {
+class iSnippetsSidebar {
     constructor() {
         this.cards = [];
         this.filteredCards = [];
@@ -790,5 +790,5 @@ class ClipIndexSidebar {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    new ClipIndexSidebar();
+    new iSnippetsSidebar();
 });

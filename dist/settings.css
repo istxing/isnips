@@ -1,4 +1,4 @@
-/* EClip Settings Styles */
+/* iSnippets Settings Styles */
 
 * {
   box-sizing: border-box;
@@ -149,11 +149,11 @@ body {
   border-radius: 50%;
 }
 
-.toggle input:checked + .toggle-slider {
+.toggle input:checked+.toggle-slider {
   background-color: #007acc;
 }
 
-.toggle input:checked + .toggle-slider:before {
+.toggle input:checked+.toggle-slider:before {
   transform: translateX(26px);
 }
 

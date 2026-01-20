@@ -1,7 +1,7 @@
-// Popup script for ClipIndex extension
+// Popup script for iSnippets extension
 // Handles the toolbar popup UI
 
-class ClipIndexPopup {
+class iSnippetsPopup {
   constructor() {
     this.currentLanguage = 'zh-CN';
     this.translations = {};
@@ -215,9 +215,9 @@ class ClipIndexPopup {
 
   async loadStats() {
     try {
-      console.log('ClipIndex: Loading stats...');
+      console.log('iSnippets: Loading stats...');
       const cardsResult = await chrome.runtime.sendMessage({ action: 'getSnippets' });
-      console.log('ClipIndex: Stats result:', cardsResult);
+      console.log('iSnippets: Stats result:', cardsResult);
 
       if (cardsResult && cardsResult.success) {
         const cards = cardsResult.cards || [];
@@ -247,7 +247,7 @@ class ClipIndexPopup {
 
   async loadRecentItems() {
     try {
-      console.log('ClipIndex: Loading recent items...');
+      console.log('iSnippets: Loading recent items...');
       const result = await chrome.runtime.sendMessage({
         action: 'getSnippets',
         filters: {}
@@ -486,5 +486,5 @@ class ClipIndexPopup {
 
 // Initialize popup when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  new ClipIndexPopup();
+  new iSnippetsPopup();
 });

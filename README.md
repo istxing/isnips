@@ -1,4 +1,4 @@
-# ClipIndex - 智能摘录工具
+# iSnippets - 智能摘录工具
 
 使用现代技术栈构建的Chrome浏览器扩展，用于智能网页文本摘录和管理。
 
@@ -33,7 +33,7 @@
 ## 📁 项目结构
 
 ```
-ClipIndex/
+iSnippets/
 ├── src/                          # TypeScript 源代码
 │   ├── components/               # React 组件
 │   │   ├── ClipCard.tsx         # 摘录卡片组件
@@ -121,7 +121,7 @@ bun run type-check
 
 4. 点击"加载已解压的扩展程序"
 
-5. 选择 `ClipIndex/dist` 目录
+5. 选择 `iSnippets/dist` 目录
 
 ## 🎯 使用方法
 
@@ -200,4 +200,4 @@ export interface ClipCard {
 
 ---
 
-**注意**: 这是一个现代化的重构版本，保持了原有 ClipIndex 扩展的所有核心功能，同时采用了最新的前端开发技术和最佳实践。
+**注意**: 这是一个现代化的重构版本，保持了原有 iSnippets 扩展的所有核心功能，同时采用了最新的前端开发技术和最佳实践。
