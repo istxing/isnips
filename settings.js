@@ -12,7 +12,6 @@ class ClipIndexSettings {
     this.bindEvents();
     this.loadLanguage();
     this.loadSettings();
-    this.loadBlockedSites();
     this.loadShortcuts();
     this.loadSyncSettings();
   }
@@ -109,15 +108,7 @@ class ClipIndexSettings {
     }
   }
 
-  async loadBlockedSites() {
-    try {
-      const blockedSites = await this.getSetting('blockedSites', []);
-      this.renderBlockedSites(blockedSites);
-    } catch (error) {
-      console.error('Failed to load blocked sites:', error);
-      document.getElementById('blockedSitesList').innerHTML = `<div class="error">${this.translations[this.currentLanguage]?.load_blocked_error || '加载禁用站点失败'}</div>`;
-    }
-  }
+
 
   async loadShortcuts() {
     try {
@@ -186,12 +177,7 @@ class ClipIndexSettings {
         clear_label: '清除所有数据',
         clear_desc: '删除所有摘录数据和设置。此操作无法撤销',
         clear_btn: '清除数据',
-        blocking_section: '站点禁用',
-        block_current_label: '禁用当前站点',
-        block_current_desc: '在当前网站上禁用 ClipIndex，不再自动保存摘录',
-        block_current_btn: '禁用当前站点',
-        blocked_sites_title: '已禁用站点',
-        no_blocked_sites: '暂无禁用站点',
+
         about_section: '关于',
         version_label: '版本',
         version_desc: 'iSnippets v2.0.2 - 智能摘录工具',
@@ -203,7 +189,7 @@ class ClipIndexSettings {
         confirm_cancel: '取消',
         confirm_ok: '确认',
         load_error: '加载设置失败',
-        load_blocked_error: '加载禁用站点失败',
+
         shortcuts_section: '快捷键设置',
         capture_shortcut_label: '自动记下片段',
         capture_shortcut_desc: '选中网页文本后按下此快捷键自动保存',
@@ -228,13 +214,7 @@ class ClipIndexSettings {
         clear_error: '清除数据失败',
         clear_confirm: '确定要清除所有数据吗？此操作无法撤销，包括所有摘录和设置。',
         import_confirm: '确定要导入数据吗？这将覆盖现有的所有摘录数据。',
-        block_success: '已禁用站点：{0}',
-        block_already: '此站点已被禁用',
-        block_current_error: '无法获取当前网站信息',
-        block_system_error: '无法禁用 Chrome 系统页面',
-        block_error: '禁用站点失败',
-        unblock_success: '已取消禁用站点：{0}',
-        unblock_error: '取消禁用失败',
+
         no_results: '无匹配结果',
         sync_section: '数据同步',
         sync_method_label: '同步方法',
@@ -278,12 +258,7 @@ class ClipIndexSettings {
         clear_label: 'Clear All Data',
         clear_desc: 'Delete all clip data and settings. This action cannot be undone',
         clear_btn: 'Clear Data',
-        blocking_section: 'Site Blocking',
-        block_current_label: 'Block Current Site',
-        block_current_desc: 'Disable ClipIndex on the current website, no longer automatically save clips',
-        block_current_btn: 'Block Current Site',
-        blocked_sites_title: 'Blocked Sites',
-        no_blocked_sites: 'No blocked sites',
+
         about_section: 'About',
         version_label: 'Version',
         version_desc: 'iSnippets v2.0.2 - Intelligent clipping tool',
@@ -295,7 +270,7 @@ class ClipIndexSettings {
         confirm_cancel: 'Cancel',
         confirm_ok: 'Confirm',
         load_error: 'Failed to load settings',
-        load_blocked_error: 'Failed to load blocked sites',
+
         shortcuts_section: 'Shortcuts',
         capture_shortcut_label: 'Capture Snippet',
         capture_shortcut_desc: 'Save selected text automatically when pressing this shortcut',
@@ -320,13 +295,7 @@ class ClipIndexSettings {
         clear_error: 'Failed to clear data',
         clear_confirm: 'Are you sure you want to clear all data? This action cannot be undone, including all clips and settings.',
         import_confirm: 'Are you sure you want to import data? This will overwrite all existing clip data.',
-        block_success: 'Site blocked: {0}',
-        block_already: 'This site is already blocked',
-        block_current_error: 'Unable to get current website information',
-        block_system_error: 'Unable to block Chrome system pages',
-        block_error: 'Failed to block site',
-        unblock_success: 'Site unblocked: {0}',
-        unblock_error: 'Failed to unblock site',
+
         no_results: 'No matching results',
         sync_section: 'Synchronization',
         sync_method_label: 'Sync Method',
@@ -370,12 +339,7 @@ class ClipIndexSettings {
         clear_label: 'すべてのデータをクリア',
         clear_desc: 'すべてのクリップデータと設定を削除。この操作は元に戻せません',
         clear_btn: 'データをクリア',
-        blocking_section: 'サイトブロック',
-        block_current_label: '現在のサイトをブロック',
-        block_current_desc: '現在のウェブサイトでClipIndexを無効化、クリップの自動保存を停止',
-        block_current_btn: '現在のサイトをブロック',
-        blocked_sites_title: 'ブロックされたサイト',
-        no_blocked_sites: 'ブロックされたサイトはありません',
+
         about_section: 'について',
         version_label: 'バージョン',
         version_desc: 'iSnippets v2.0.2 - インテリジェントなクリッピングツール',
@@ -387,7 +351,7 @@ class ClipIndexSettings {
         confirm_cancel: 'キャンセル',
         confirm_ok: '確認',
         load_error: '設定の読み込みに失敗しました',
-        load_blocked_error: 'ブロックされたサイトの読み込みに失敗しました',
+
         shortcuts_section: 'ショートカット',
         capture_shortcut_label: 'スニペットをキャプチャ',
         capture_shortcut_desc: 'テキストを選択してこのショートカットを押すと自動的に保存されます',
@@ -412,13 +376,7 @@ class ClipIndexSettings {
         clear_error: 'データのクリアに失敗しました',
         clear_confirm: 'すべてのデータをクリアしてもよろしいですか？この操作は元に戻せません、すべてのクリップと設定を含む。',
         import_confirm: 'データをインポートしてもよろしいですか？これにより既存のすべてのクリップデータが上書きされます。',
-        block_success: 'サイトをブロックしました：{0}',
-        block_already: 'このサイトはすでにブロックされています',
-        block_current_error: '現在のウェブサイト情報を取得できません',
-        block_system_error: 'Chromeシステムページをブロックできません',
-        block_error: 'サイトのブロックに失敗しました',
-        unblock_success: 'サイトのブロックを解除しました：{0}',
-        unblock_error: 'サイトのブロック解除に失敗しました',
+
         no_results: '一致する結果がありません',
         sync_section: 'データ同期',
         sync_method_label: '同期方法',
@@ -481,31 +439,7 @@ class ClipIndexSettings {
     }
   }
 
-  renderBlockedSites(blockedSites) {
-    const container = document.getElementById('blockedSitesList');
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || {};
 
-    if (blockedSites.length === 0) {
-      container.innerHTML = `<div style="color: #6b7280; font-size: 14px;">${t.no_blocked_sites || '暂无禁用站点'}</div>`;
-      return;
-    }
-
-    const html = blockedSites.map(domain => `
-      <div class="blocked-site-item">
-        <span class="blocked-site-domain">${this.escapeHtml(domain)}</span>
-        <button class="blocked-site-remove" data-domain="${this.escapeHtml(domain)}" title="${t.unblock_success ? t.unblock_success.replace('：', '') : '取消禁用'}">×</button>
-      </div>
-    `).join('');
-
-    container.innerHTML = html;
-
-    // Bind remove events
-    container.querySelectorAll('.blocked-site-remove').forEach(btn => {
-      btn.addEventListener('click', () => {
-        this.unblockSite(btn.dataset.domain);
-      });
-    });
-  }
 
   async setLanguage(lang) {
     console.log('Settings: Setting language to', lang);
@@ -759,59 +693,7 @@ class ClipIndexSettings {
     });
   }
 
-  async blockCurrentSite() {
-    try {
-      // Get current tab
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab || !tab.url) {
-        this.showMessage('block_current_error', 'error');
-        return;
-      }
 
-      const url = new URL(tab.url);
-      const domain = url.hostname;
-
-      const protocol = url.protocol;
-      if (protocol === 'chrome:' || protocol === 'chrome-extension:' || protocol === 'about:') {
-        this.showMessage('block_system_error', 'error');
-        return;
-      }
-
-      // Get current blocked sites
-      const blockedSites = await this.getSetting('blockedSites', []);
-      if (blockedSites.includes(domain)) {
-        this.showMessage('block_already', 'error');
-        return;
-      }
-
-      // Add to blocked sites
-      blockedSites.push(domain);
-      await this.saveSetting('blockedSites', blockedSites);
-
-      // Refresh blocked sites list
-      this.loadBlockedSites();
-
-      this.showMessage('block_success', 'success', domain);
-    } catch (error) {
-      console.error('Failed to block site:', error);
-      this.showMessage('block_error', 'error');
-    }
-  }
-
-  async unblockSite(domain) {
-    try {
-      const blockedSites = await this.getSetting('blockedSites', []);
-      const updatedSites = blockedSites.filter(site => site !== domain);
-
-      await this.saveSetting('blockedSites', updatedSites);
-      this.loadBlockedSites();
-
-      this.showMessage('unblock_success', 'success', domain);
-    } catch (error) {
-      console.error('Failed to unblock site:', error);
-      this.showMessage('unblock_error', 'error');
-    }
-  }
 
   showConfirmModal() {
     document.getElementById('confirmModal').classList.add('open');
