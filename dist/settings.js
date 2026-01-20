@@ -135,6 +135,7 @@ class ClipIndexSettings {
             display.textContent = captureCommand.shortcut || (t.not_set || '未设置');
           }
         }
+
         if (sidebarCommand) {
           const display = document.getElementById('sidebarShortcutDisplay');
           if (display) {
