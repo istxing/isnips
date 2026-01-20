@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <title data-i18n="settings_title">iSnippets - 设置</title>
@@ -302,7 +303,7 @@
       font-size: 13px;
       font-weight: 600;
       color: #475569;
-      box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
     }
 
     .loading {
@@ -338,8 +339,49 @@
         margin-right: 0;
       }
     }
+
+    /* Sync Method Radio Group */
+    .sync-method-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .sync-method-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+    }
+
+    .sync-method-option:hover {
+      border-color: #cbd5e1;
+      background: #f1f5f9;
+    }
+
+    .sync-method-option:has(input:checked) {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .sync-method-option input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #3b82f6;
+      cursor: pointer;
+    }
   </style>
 </head>
+
 <body>
   <div class="settings-page">
     <header class="settings-header">
@@ -466,17 +508,24 @@
       <section class="settings-section">
         <h2 data-i18n="sync_section">数据同步</h2>
 
-        <div class="setting-item">
-          <div class="setting-info">
+        <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+          <div class="setting-info" style="margin-bottom: 16px;">
             <h3 data-i18n="sync_method_label">同步方法</h3>
             <p data-i18n="sync_method_desc">选择您偏好的同步服务</p>
           </div>
-          <div class="setting-control">
-            <select id="syncMethodSelect" class="language-select">
-              <option value="none" data-i18n="sync_method_none">禁用同步</option>
-              <option value="webdav">WebDAV</option>
-              <option value="googledrive">Google Drive</option>
-            </select>
+          <div class="sync-method-group">
+            <label class="sync-method-option">
+              <input type="radio" name="syncMethod" value="none" checked>
+              <span data-i18n="sync_method_none">禁用同步</span>
+            </label>
+            <label class="sync-method-option">
+              <input type="radio" name="syncMethod" value="webdav">
+              <span>WebDAV</span>
+            </label>
+            <label class="sync-method-option">
+              <input type="radio" name="syncMethod" value="googledrive">
+              <span>Google Drive</span>
+            </label>
           </div>
         </div>
 
@@ -484,8 +533,10 @@
         <div id="webdavConfig" class="sync-config-area" style="display: none; padding-top: 16px;">
           <div style="display: grid; gap: 12px;">
             <div>
-              <label style="display: block; font-size: 14px; margin-bottom: 4px;" data-i18n="webdav_url">WebDAV 地址</label>
-              <input type="text" id="webdavUrl" class="language-select" style="width: 100%;" placeholder="https://example.com/dav">
+              <label style="display: block; font-size: 14px; margin-bottom: 4px;" data-i18n="webdav_url">WebDAV
+                地址</label>
+              <input type="text" id="webdavUrl" class="language-select" style="width: 100%;"
+                placeholder="https://example.com/dav">
             </div>
             <div>
               <label style="display: block; font-size: 14px; margin-bottom: 4px;" data-i18n="webdav_user">用户名</label>
@@ -495,15 +546,20 @@
               <label style="display: block; font-size: 14px; margin-bottom: 4px;" data-i18n="webdav_pass">密码</label>
               <input type="password" id="webdavPass" class="language-select" style="width: 100%;">
             </div>
-            <button id="saveWebdavBtn" class="btn btn-primary" style="justify-content: center;" data-i18n="save_sync_config">保存配置</button>
+            <button id="saveWebdavBtn" class="btn btn-primary" style="justify-content: center;"
+              data-i18n="save_sync_config">保存配置</button>
           </div>
         </div>
 
         <!-- Google Drive Config -->
         <div id="googledriveConfig" class="sync-config-area" style="display: none; padding-top: 16px;">
-          <div style="display: flex; gap: 12px; align-items: center;">
+          <div id="gdriveNotLoggedIn" style="display: flex; gap: 12px; align-items: center;">
             <button id="gdriveLoginBtn" class="btn btn-primary" data-i18n="gdrive_login">登录 Google Drive</button>
-            <span id="gdriveStatus" style="font-size: 14px; color: #6b7280;"></span>
+          </div>
+          <div id="gdriveLoggedIn" style="display: none; gap: 12px; align-items: center;">
+            <span class="status-indicator" style="background: #d1fae5; color: #065f46;">✓ 已连接 Google Drive</span>
+            <button id="gdriveLogoutBtn" class="btn btn-secondary" style="margin-left: 12px;"
+              data-i18n="gdrive_logout">断开连接</button>
           </div>
         </div>
 
@@ -587,4 +643,5 @@
 
   <script src="settings.js"></script>
 </body>
+
 </html>

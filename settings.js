@@ -248,6 +248,8 @@ class ClipIndexSettings {
         webdav_pass: '密码',
         save_sync_config: '保存配置',
         gdrive_login: '登录 Google Drive',
+        gdrive_logout: '断开连接',
+        gdrive_connected: '✓ 已连接 Google Drive',
         sync_now_label: '立即同步',
         last_sync_desc: '上次同步时间：{0}',
         sync_now_btn: '立即同步',
@@ -335,6 +337,8 @@ class ClipIndexSettings {
         webdav_pass: 'Password',
         save_sync_config: 'Save Config',
         gdrive_login: 'Login with Google Drive',
+        gdrive_logout: 'Disconnect',
+        gdrive_connected: '✓ Connected to Google Drive',
         sync_now_label: 'Sync Now',
         last_sync_desc: 'Last sync: {0}',
         sync_now_btn: 'Sync Now',
@@ -422,6 +426,8 @@ class ClipIndexSettings {
         webdav_pass: 'パスワード',
         save_sync_config: '設定を保存',
         gdrive_login: 'Google Drive でログイン',
+        gdrive_logout: '切断する',
+        gdrive_connected: '✓ Google Drive に接続済み',
         sync_now_label: '今すぐ同期',
         last_sync_desc: '最終同期：{0}',
         sync_now_btn: '今すぐ同期',
@@ -815,10 +821,16 @@ class ClipIndexSettings {
   }
 
   bindSyncEvents() {
-    const syncMethodSelect = document.getElementById('syncMethodSelect');
-    syncMethodSelect.addEventListener('change', (e) => {
-      this.toggleSyncArea(e.target.value);
-      this.saveSyncConfig({ type: e.target.value });
+    // Radio button group for sync method
+    const syncMethodRadios = document.querySelectorAll('input[name="syncMethod"]');
+    syncMethodRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        this.toggleSyncArea(e.target.value);
+        this.saveSyncConfig({ type: e.target.value });
+        if (e.target.value === 'googledrive') {
+          this.checkGoogleDriveStatus();
+        }
+      });
     });
 
     document.getElementById('saveWebdavBtn').addEventListener('click', () => {
@@ -831,12 +843,18 @@ class ClipIndexSettings {
       this.saveSyncConfig(config);
     });
 
-    document.getElementById('gdriveLoginBtn').addEventListener('click', () => {
-      this.syncNow('googledrive');
+    document.getElementById('gdriveLoginBtn').addEventListener('click', async () => {
+      await this.syncNow('googledrive');
+      await this.checkGoogleDriveStatus();
+    });
+
+    document.getElementById('gdriveLogoutBtn').addEventListener('click', async () => {
+      await this.logoutGoogleDrive();
     });
 
     document.getElementById('syncNowBtn').addEventListener('click', () => {
-      const type = document.getElementById('syncMethodSelect').value;
+      const checkedRadio = document.querySelector('input[name="syncMethod"]:checked');
+      const type = checkedRadio ? checkedRadio.value : 'none';
       if (type === 'none') return;
       this.syncNow(type);
     });
@@ -850,7 +868,11 @@ class ClipIndexSettings {
 
   async loadSyncSettings() {
     const config = await this.getSetting('syncConfig', { type: 'none' });
-    document.getElementById('syncMethodSelect').value = config.type;
+
+    // Set the correct radio button
+    const radio = document.querySelector(`input[name="syncMethod"][value="${config.type}"]`);
+    if (radio) radio.checked = true;
+
     this.toggleSyncArea(config.type);
 
     if (config.type === 'webdav') {
@@ -859,8 +881,63 @@ class ClipIndexSettings {
       document.getElementById('webdavPass').value = config.password || '';
     }
 
+    if (config.type === 'googledrive') {
+      await this.checkGoogleDriveStatus();
+    }
+
     const lastSyncTime = await this.getSetting('lastSyncTime', null);
     this.updateLastSyncDisplay(lastSyncTime);
+  }
+
+  async checkGoogleDriveStatus() {
+    try {
+      // Try to get token without interactive mode to check if already logged in
+      const token = await new Promise((resolve) => {
+        chrome.identity.getAuthToken({ interactive: false }, (token) => {
+          resolve(token || null);
+        });
+      });
+
+      const notLoggedIn = document.getElementById('gdriveNotLoggedIn');
+      const loggedIn = document.getElementById('gdriveLoggedIn');
+
+      if (token) {
+        notLoggedIn.style.display = 'none';
+        loggedIn.style.display = 'flex';
+      } else {
+        notLoggedIn.style.display = 'flex';
+        loggedIn.style.display = 'none';
+      }
+    } catch (error) {
+      console.error('Failed to check Google Drive status:', error);
+    }
+  }
+
+  async logoutGoogleDrive() {
+    try {
+      const token = await new Promise((resolve) => {
+        chrome.identity.getAuthToken({ interactive: false }, (token) => {
+          resolve(token || null);
+        });
+      });
+
+      if (token) {
+        // Revoke the token
+        await fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`);
+        // Remove cached token
+        await new Promise((resolve) => {
+          chrome.identity.removeCachedAuthToken({ token }, resolve);
+        });
+      }
+
+      // Update UI
+      document.getElementById('gdriveNotLoggedIn').style.display = 'flex';
+      document.getElementById('gdriveLoggedIn').style.display = 'none';
+
+      this.showMessage('gdrive_disconnected', 'success');
+    } catch (error) {
+      console.error('Failed to logout from Google Drive:', error);
+    }
   }
 
   async saveSyncConfig(config) {
