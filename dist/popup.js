@@ -216,7 +216,7 @@ class ClipIndexPopup {
   async loadStats() {
     try {
       console.log('ClipIndex: Loading stats...');
-      const cardsResult = await chrome.runtime.sendMessage({ action: 'getIndexCards' });
+      const cardsResult = await chrome.runtime.sendMessage({ action: 'getSnippets' });
       console.log('ClipIndex: Stats result:', cardsResult);
 
       if (cardsResult && cardsResult.success) {
@@ -249,7 +249,7 @@ class ClipIndexPopup {
     try {
       console.log('ClipIndex: Loading recent items...');
       const result = await chrome.runtime.sendMessage({
-        action: 'getIndexCards',
+        action: 'getSnippets',
         filters: {}
       });
 
@@ -263,7 +263,6 @@ class ClipIndexPopup {
         }
 
         const itemsHtml = recentCards.map(card => {
-          const isNote = card.category === '记下' || card.category === '随笔';
           const hasUrl = card.url && card.url.length > 0;
           const sourceLink = hasUrl ? `<span class="source-link" data-url="${card.url}">${this.escapeHtml(card.domain)}</span>` :
             `<span class="source-link" style="cursor: default; color: inherit;">${t.page_index}</span>`;
@@ -272,11 +271,11 @@ class ClipIndexPopup {
             <div class="recent-item" data-card-id="${card.id}">
               <button class="delete-item-btn" data-id="${card.id}" title="删除">✕</button>
               <div class="recent-text">
-                ${card.clipText ? this.escapeHtml(card.clipText) : t.page_index}
+                ${card.text ? this.escapeHtml(card.text) : t.page_index}
               </div>
               <div class="recent-meta">
                 ${sourceLink}
-                <span>${this.formatDate(card.createdAt)}</span>
+                <span>${this.formatDate(card.created_at)}</span>
               </div>
             </div>
           `;
@@ -311,8 +310,8 @@ class ClipIndexPopup {
 
             const cardId = item.dataset.cardId;
             const card = recentCards.find(c => c.id == cardId);
-            if (card && card.clipText) {
-              navigator.clipboard.writeText(card.clipText).then(() => {
+            if (card && card.text) {
+              navigator.clipboard.writeText(card.text).then(() => {
                 this.showToast('已复制内容', true);
               });
             }
@@ -331,7 +330,7 @@ class ClipIndexPopup {
   async deleteItem(cardId) {
     try {
       const result = await chrome.runtime.sendMessage({
-        action: 'softDeleteIndexCard',
+        action: 'softDeleteSnippet',
         cardId: cardId
       });
 
@@ -351,7 +350,7 @@ class ClipIndexPopup {
     today.setHours(0, 0, 0, 0);
     const todayTime = today.getTime();
 
-    return cards.filter(card => card.createdAt >= todayTime).length;
+    return cards.filter(card => card.created_at >= todayTime).length;
   }
 
   formatDate(timestamp) {
@@ -394,9 +393,8 @@ class ClipIndexPopup {
     }
 
     try {
-      let url = '';
-      let domain = '记下';
-      let title = '';
+      let url = null;
+      let domain = null;
 
       const includeLink = document.getElementById('includeLinkToggle').checked;
       if (includeLink) {
@@ -407,27 +405,27 @@ class ClipIndexPopup {
           tab.url.startsWith('about:');
         if (tab && tab.url && !isInternalPage) {
           url = tab.url;
-          title = tab.title || '';
           try {
             domain = new URL(tab.url).hostname;
           } catch (e) {
-            domain = '记下';
+            domain = null;
           }
         }
       }
 
       const cardData = {
-        url: url,
-        clipText: noteText,
-        domain: domain,
-        title: title,
-        category: '记下',
-        createdAt: Date.now(),
-        updatedAt: Date.now()
+        type: 'note',
+        text: noteText.slice(0, 144),
+        url,
+        domain,
+        created_at: Date.now(),
+        updated_at: Date.now(),
+        deleted_at: null,
+        purged_at: null
       };
 
       const result = await chrome.runtime.sendMessage({
-        action: 'saveIndexCard',
+        action: 'saveSnippet',
         data: cardData
       });
 

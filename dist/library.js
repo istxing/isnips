@@ -145,7 +145,7 @@ class ClipIndexSidebar {
                 web_clips: '网页',
                 jotted_notes: '记下',
                 scrap_trash: '回收站',
-                trash_info: '这些片段已进入回收站，7天后将自动永久删除。',
+                trash_info: '这些片段已进入回收站，30天后将自动永久删除。',
                 empty_trash: '立即清空回收站',
                 new_note: '新建片段',
                 cancel: '取消',
@@ -166,7 +166,7 @@ class ClipIndexSidebar {
                 web_clips: 'Web',
                 jotted_notes: 'Jotted',
                 scrap_trash: 'Trash',
-                trash_info: 'Items in trash will be permanently deleted after 7 days.',
+                trash_info: 'Items in trash will be permanently deleted after 30 days.',
                 empty_trash: 'Empty Trash Now',
                 new_note: 'New Snippet',
                 cancel: 'Cancel',
@@ -187,7 +187,7 @@ class ClipIndexSidebar {
                 web_clips: 'ウェブ',
                 jotted_notes: '記した',
                 scrap_trash: 'ゴミ箱',
-                trash_info: 'ゴミ箱内の項目は7日後に永久に削除されます。',
+                trash_info: 'ゴミ箱内の項目は30日後に永久に削除されます。',
                 empty_trash: '今すぐゴミ箱を空にする',
                 new_note: '新しいスニペット',
                 cancel: 'キャンセル',
@@ -245,11 +245,11 @@ class ClipIndexSidebar {
             let result;
 
             if (this.currentFilters.category === 'scrap') {
-                result = await chrome.runtime.sendMessage({ action: 'getDeletedCards' });
-                console.log('Library: getDeletedCards result:', result);
+                result = await chrome.runtime.sendMessage({ action: 'getDeletedSnippets' });
+                console.log('Library: getDeletedSnippets result:', result);
             } else {
-                result = await chrome.runtime.sendMessage({ action: 'getIndexCards' });
-                console.log('Library: getIndexCards result:', result);
+                result = await chrome.runtime.sendMessage({ action: 'getSnippets' });
+                console.log('Library: getSnippets result:', result);
             }
 
             if (result && result.success) {
@@ -284,9 +284,9 @@ class ClipIndexSidebar {
                 // Map old category names to new ones if necessary for filtering existing data
                 const cat = this.currentFilters.category;
                 filtered = filtered.filter(card => {
-                    if (cat === 'web') return card.category === '网页' || card.category === '收集' || card.category === 'web';
-                    if (cat === 'jotted') return card.category === '记下' || card.category === '随笔' || card.category === 'jotted';
-                    return card.category === cat;
+                    if (cat === 'web') return card.type === 'web';
+                    if (cat === 'jotted') return card.type === 'note';
+                    return card.type === cat;
                 });
             }
         }
@@ -295,9 +295,8 @@ class ClipIndexSidebar {
         if (this.currentFilters.search) {
             const searchTerm = this.currentFilters.search.toLowerCase();
             filtered = filtered.filter(card =>
-                card.clipText.toLowerCase().includes(searchTerm) ||
-                card.domain.toLowerCase().includes(searchTerm) ||
-                (card.title && card.title.toLowerCase().includes(searchTerm))
+                (card.text || '').toLowerCase().includes(searchTerm) ||
+                (card.domain || '').toLowerCase().includes(searchTerm)
             );
         }
 
@@ -386,7 +385,7 @@ class ClipIndexSidebar {
     async performRestore(card) {
         try {
             const result = await chrome.runtime.sendMessage({
-                action: 'restoreCard',
+                action: 'restoreSnippet',
                 cardId: card.id
             });
 
@@ -417,7 +416,7 @@ class ClipIndexSidebar {
         const isTrash = this.currentFilters.category === 'scrap';
 
         cards.forEach(card => {
-            const timestamp = isTrash ? card.deletedAt : card.createdAt;
+            const timestamp = isTrash ? card.deleted_at : card.created_at;
             const cardDate = new Date(timestamp);
             const cardDay = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate());
 
@@ -465,7 +464,7 @@ class ClipIndexSidebar {
 
         return sortedGroups.map(groupKey => ({
             title: groupKey,
-            cards: groups[groupKey].sort((a, b) => (isTrash ? b.deletedAt : b.createdAt) - (isTrash ? a.deletedAt : a.createdAt)) // Sort cards within group by time
+            cards: groups[groupKey].sort((a, b) => (isTrash ? b.deleted_at : b.created_at) - (isTrash ? a.deleted_at : a.created_at))
         }));
     }
 
@@ -475,15 +474,15 @@ class ClipIndexSidebar {
         cardDiv.dataset.cardId = card.id;
 
         const isTrash = this.currentFilters.category === 'scrap';
-        const dateToShow = isTrash ? card.deletedAt : card.createdAt;
+        const dateToShow = isTrash ? card.deleted_at : card.created_at;
 
         if (isTrash) {
             // Trash view: Only Restore button
             cardDiv.innerHTML = `
         <button class="restore-btn" title="恢复">恢复</button>
-        <div class="clip-text">${this.escapeHtml(card.clipText)}</div>
+        <div class="clip-text">${this.escapeHtml(card.text)}</div>
         <div class="clip-meta">
-          <div class="clip-domain">${this.escapeHtml(card.domain)}</div>
+          <div class="clip-domain">${this.escapeHtml(card.domain || '')}</div>
           <div class="clip-date">${this.formatDate(dateToShow)}</div>
         </div>
       `;
@@ -500,9 +499,9 @@ class ClipIndexSidebar {
             cardDiv.innerHTML = `
         <button class="edit-btn" title="编辑">编辑</button>
         <button class="delete-btn" title="删除">删除</button>
-        <div class="clip-text">${this.escapeHtml(card.clipText)}</div>
+        <div class="clip-text">${this.escapeHtml(card.text)}</div>
         <div class="clip-meta">
-          <div class="clip-domain">${this.escapeHtml(card.domain)}</div>
+          <div class="clip-domain">${this.escapeHtml(card.domain || '')}</div>
           <div class="clip-date">${this.formatDate(dateToShow)}</div>
         </div>
       `;
@@ -518,7 +517,7 @@ class ClipIndexSidebar {
                 e.stopPropagation();
                 try {
                     const result = await chrome.runtime.sendMessage({
-                        action: 'softDeleteIndexCard',
+                        action: 'softDeleteSnippet',
                         cardId: card.id
                     });
 
@@ -572,7 +571,7 @@ class ClipIndexSidebar {
                 }
             } else {
                 // Copy to clipboard
-                navigator.clipboard.writeText(card.clipText).then(() => {
+                navigator.clipboard.writeText(card.text).then(() => {
                     this.showToast('已复制内容', true);
                 });
             }
@@ -592,7 +591,7 @@ class ClipIndexSidebar {
 
         const textarea = document.createElement('textarea');
         textarea.className = 'edit-textarea';
-        textarea.value = card.clipText;
+        textarea.value = card.text;
         textarea.placeholder = '输入摘录内容...';
 
         clipText.replaceWith(textarea);
@@ -629,16 +628,16 @@ class ClipIndexSidebar {
 
         try {
             const result = await chrome.runtime.sendMessage({
-                action: 'updateIndexCard',
+                action: 'updateSnippet',
                 cardId: card.id,
-                updates: { clipText: newText.trim() }
+                updates: { text: newText.trim() }
             });
 
             if (result.success) {
                 const cardIndex = this.cards.findIndex(c => c.id === card.id);
                 if (cardIndex !== -1) {
-                    this.cards[cardIndex].clipText = newText.trim();
-                    this.cards[cardIndex].updatedAt = Date.now();
+                    this.cards[cardIndex].text = newText.trim();
+                    this.cards[cardIndex].updated_at = Date.now();
                 }
                 this.applyFilters();
             } else {
@@ -725,17 +724,18 @@ class ClipIndexSidebar {
 
         try {
             const cardData = {
-                url: '',
-                clipText: noteText,
-                domain: '记下',
-                title: '',
-                category: '记下',
-                createdAt: Date.now(),
-                updatedAt: Date.now()
+                url: null,
+                type: 'note',
+                text: noteText.slice(0, 144),
+                domain: null,
+                created_at: Date.now(),
+                updated_at: Date.now(),
+                deleted_at: null,
+                purged_at: null
             };
 
             const result = await chrome.runtime.sendMessage({
-                action: 'saveIndexCard',
+                action: 'saveSnippet',
                 data: cardData
             });
 

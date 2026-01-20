@@ -88,17 +88,19 @@ class ClipIndexContent {
   async saveClip(text) {
     try {
       const cardData = {
+        type: 'web',
+        text: text.slice(0, 144),
         url: window.location.href,
-        clipText: text,
         domain: this.extractDomain(window.location.href),
         title: document.title,
-        category: '网页', // 网页收集的片段自动归为"网页"
-        createdAt: Date.now(),
-        updatedAt: Date.now()
+        created_at: Date.now(),
+        updated_at: Date.now(),
+        deleted_at: null,
+        purged_at: null
       };
 
       const result = await chrome.runtime.sendMessage({
-        action: 'saveIndexCard',
+        action: 'saveSnippet',
         data: cardData
       });
 
@@ -298,15 +300,15 @@ class ClipIndexContent {
     }
   }
 
-  async saveIndexCard(cardData) {
+  async saveSnippet(cardData) {
     try {
       const result = await chrome.runtime.sendMessage({
-        action: 'saveIndexCard',
+        action: 'saveSnippet',
         data: cardData
       });
       return result;
     } catch (error) {
-      console.error('Failed to save index card:', error);
+      console.error('Failed to save snippet:', error);
       return { success: false, error: error.message };
     }
   }

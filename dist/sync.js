@@ -3,9 +3,12 @@
  * Handles data bundling, merging, and communication with Google Drive/WebDAV.
  */
 
+importScripts('merge.js');
+
 class SyncService {
   constructor() {
-    this.syncFileName = 'iSnippets-sync.json';
+    this.syncFolderName = 'iSnippets';
+    this.syncFileName = 'snippets.json';
     this.db = null;
   }
 
@@ -18,97 +21,77 @@ class SyncService {
    */
   async bundleData() {
     if (!this.db) throw new Error('Database not initialized');
-    
-    const [cards, settings] = await Promise.all([
-      this.db.getIndexCards({}), // This returns only non-deleted cards based on background.js
-      this._getAllSettings()
-    ]);
-
-    // We also need deleted cards to sync logic
-    const deletedCards = await this.db.getDeletedCards();
-    const allCards = [...cards, ...deletedCards];
 
     return {
-      version: '2.0.0',
+      version: '3.0.0',
       lastSync: Date.now(),
-      cards: allCards,
-      settings: settings
+      snippets: await this.db.getAllSnippetsIncludingDeleted()
     };
-  }
-
-  async _getAllSettings() {
-    const keys = ['language', 'columnCount', 'blockedSites', 'recentTags', 'syncConfig'];
-    const settings = {};
-    for (const key of keys) {
-      settings[key] = await this.db.getSetting(key);
-    }
-    return settings;
   }
 
   /**
    * Merges remote data into local storage.
-   * Logic: For each item, keep the one with the latest updatedAt.
+   * Logic: For each item, keep the one with the latest updated_at.
    */
   async mergeData(remoteData) {
     if (!this.db) throw new Error('Database not initialized');
-    if (!remoteData || !remoteData.cards) return { success: false, error: 'Invalid remote data' };
-
-    const localData = await this.bundleData();
-    const localCardsMap = new Map(localData.cards.map(c => [c.id, c]));
-    const remoteCardsMap = new Map(remoteData.cards.map(c => [c.id, c]));
-
-    const mergedCards = [];
-    const allIds = new Set([...localCardsMap.keys(), ...remoteCardsMap.keys()]);
-
-    let updatedCount = 0;
-
-    for (const id of allIds) {
-      const local = localCardsMap.get(id);
-      const remote = remoteCardsMap.get(id);
-
-      if (local && remote) {
-        if ((remote.updatedAt || remote.createdAt || 0) > (local.updatedAt || local.createdAt || 0)) {
-          mergedCards.push(remote);
-          updatedCount++;
-        } else {
-          mergedCards.push(local);
-        }
-      } else if (remote) {
-        mergedCards.push(remote);
-        updatedCount++;
-      } else {
-        mergedCards.push(local);
-      }
+    if (!remoteData || !Array.isArray(remoteData.snippets)) {
+      return { success: false, error: 'Invalid remote data' };
     }
 
-    // Save merged cards back to IndexedDB
-    // Note: background.js uses transaction for single operations. 
-    // We should ideally use a bulk operation.
-    for (const card of mergedCards) {
-      await this._upsertCard(card);
+    const localSnippets = await this.db.getAllSnippetsIncludingDeleted();
+    const mergedSnippets = mergeSnippets(localSnippets, remoteData.snippets, { preferRemoteOnTie: true });
+
+    for (const snippet of mergedSnippets) {
+      await this._upsertSnippet(snippet);
     }
 
-    // Merge settings (optional, simple overwrite for now or check timestamps)
-    if (remoteData.settings) {
-      for (const [key, value] of Object.entries(remoteData.settings)) {
-        if (key !== 'syncConfig') { // Don't overwrite sync config
-          await this.db.setSetting(key, value);
-        }
-      }
-    }
-
-    return { success: true, updatedCount };
+    return { success: true, updatedCount: mergedSnippets.length };
   }
 
-  async _upsertCard(card) {
+  async _upsertSnippet(snippet) {
     const db = await this.db.initialize();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(['indexCards'], 'readwrite');
-      const store = transaction.objectStore('indexCards');
-      const request = store.put(card);
+      const transaction = db.transaction(['snippets'], 'readwrite');
+      const store = transaction.objectStore('snippets');
+      const request = store.put(snippet);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
+  }
+
+  async _updateSyncConfig(patch) {
+    const current = await this.db.getSetting('syncConfig', {});
+    const next = { ...current, ...patch };
+    await this.db.setSetting('syncConfig', next);
+    return next;
+  }
+
+  _normalizeFolderUrl(baseUrl) {
+    const trimmed = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    if (trimmed.endsWith(`/${this.syncFolderName}`)) {
+      return `${trimmed}/`;
+    }
+    return `${trimmed}/${this.syncFolderName}/`;
+  }
+
+  async _ensureWebDAVFolder(folderUrl, headers) {
+    const propfind = await fetch(folderUrl, { method: 'PROPFIND', headers });
+    if (propfind.ok) return;
+    if (propfind.status !== 404) {
+      throw new Error(`WebDAV Folder Check Failed: ${propfind.statusText}`);
+    }
+
+    const mkcol = await fetch(folderUrl, { method: 'MKCOL', headers });
+    if (!mkcol.ok && mkcol.status !== 405) {
+      throw new Error(`WebDAV Folder Create Failed: ${mkcol.statusText}`);
+    }
+  }
+
+  async _getWebDAVETag(fileUrl, headers) {
+    const response = await fetch(fileUrl, { method: 'HEAD', headers });
+    if (!response.ok) return null;
+    return response.headers.get('ETag');
   }
 
   /**
@@ -116,15 +99,19 @@ class SyncService {
    */
   async syncWebDAV(config) {
     const { url, username, password } = config;
-    const fullUrl = url.endsWith('/') ? url + this.syncFileName : url + '/' + this.syncFileName;
+    const folderUrl = this._normalizeFolderUrl(url);
+    const fullUrl = `${folderUrl}${this.syncFileName}`;
     
     const headers = new Headers();
     headers.set('Authorization', 'Basic ' + btoa(username + ':' + password));
 
     try {
+      await this._ensureWebDAVFolder(folderUrl, headers);
+
       // 1. Download remote data
       const response = await fetch(fullUrl, { headers });
       let remoteData = null;
+      const remoteEtag = response.headers.get('ETag');
       if (response.ok) {
         remoteData = await response.json();
       } else if (response.status !== 404) {
@@ -134,6 +121,21 @@ class SyncService {
       // 2. Merge if remote data exists
       if (remoteData) {
         await this.mergeData(remoteData);
+      }
+
+      if (remoteEtag) {
+        await this._updateSyncConfig({ last_remote_etag: remoteEtag });
+      }
+
+      const currentConfig = await this.db.getSetting('syncConfig', {});
+      const latestEtag = await this._getWebDAVETag(fullUrl, headers);
+      if (latestEtag && currentConfig.last_remote_etag && latestEtag !== currentConfig.last_remote_etag) {
+        const refreshResponse = await fetch(fullUrl, { headers });
+        if (refreshResponse.ok) {
+          const refreshedData = await refreshResponse.json();
+          await this.mergeData(refreshedData);
+          await this._updateSyncConfig({ last_remote_etag: latestEtag });
+        }
       }
 
       // 3. Upload merged data
@@ -151,6 +153,11 @@ class SyncService {
         throw new Error(`WebDAV Upload Failed: ${uploadResponse.statusText}`);
       }
 
+      const uploadedEtag = uploadResponse.headers.get('ETag') || await this._getWebDAVETag(fullUrl, headers);
+      if (uploadedEtag) {
+        await this._updateSyncConfig({ last_remote_etag: uploadedEtag });
+      }
+
       return { success: true };
     } catch (error) {
       console.error('WebDAV Sync Error:', error);
@@ -166,10 +173,15 @@ class SyncService {
       const token = await this._getGoogleToken();
       if (!token) throw new Error('Failed to get Google Token');
 
-      // 1. Find the sync file in Google Drive
-      let fileId = await this._findGoogleDriveFile(token);
+      // 1. Ensure folder exists
+      const folderId = await this._ensureGoogleDriveFolder(token);
 
-      // 2. Download remote data
+      // 2. Find the sync file in Google Drive
+      let file = await this._findGoogleDriveFile(token, folderId);
+      let fileId = file ? file.id : null;
+      let remoteTag = file ? (file.headRevisionId || file.modifiedTime) : null;
+
+      // 3. Download remote data
       let remoteData = null;
       if (fileId) {
         const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
@@ -180,12 +192,32 @@ class SyncService {
         }
       }
 
-      // 3. Merge if remote data exists
+      // 4. Merge if remote data exists
       if (remoteData) {
         await this.mergeData(remoteData);
       }
 
-      // 4. Upload merged data
+      if (remoteTag) {
+        await this._updateSyncConfig({ last_remote_etag: remoteTag });
+      }
+
+      const currentConfig = await this.db.getSetting('syncConfig', {});
+      if (fileId) {
+        const latestMeta = await this._getGoogleDriveFileMeta(token, fileId);
+        const latestTag = latestMeta ? (latestMeta.headRevisionId || latestMeta.modifiedTime) : null;
+        if (latestTag && currentConfig.last_remote_etag && latestTag !== currentConfig.last_remote_etag) {
+          const refreshResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (refreshResponse.ok) {
+            const refreshedData = await refreshResponse.json();
+            await this.mergeData(refreshedData);
+            await this._updateSyncConfig({ last_remote_etag: latestTag });
+          }
+        }
+      }
+
+      // 5. Upload merged data
       const mergedBundle = await this.bundleData();
       if (fileId) {
         // Update existing file
@@ -201,7 +233,8 @@ class SyncService {
         // Create new file
         const metadata = {
           name: this.syncFileName,
-          mimeType: 'application/json'
+          mimeType: 'application/json',
+          parents: [folderId]
         };
         const form = new FormData();
         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
@@ -212,6 +245,15 @@ class SyncService {
           headers: { 'Authorization': `Bearer ${token}` },
           body: form
         });
+      }
+
+      if (fileId) {
+        const updatedMeta = await this._getGoogleDriveFileMeta(token, fileId);
+        if (updatedMeta) {
+          await this._updateSyncConfig({
+            last_remote_etag: updatedMeta.headRevisionId || updatedMeta.modifiedTime
+          });
+        }
       }
 
       return { success: true };
@@ -233,12 +275,46 @@ class SyncService {
     });
   }
 
-  async _findGoogleDriveFile(token) {
-    const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${this.syncFileName}' and trashed=false`, {
+  async _ensureGoogleDriveFolder(token) {
+    const query = encodeURIComponent(`name='${this.syncFolderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await response.json();
-    return data.files && data.files.length > 0 ? data.files[0].id : null;
+    if (data.files && data.files.length > 0) {
+      return data.files[0].id;
+    }
+
+    const createResponse = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: this.syncFolderName,
+        mimeType: 'application/vnd.google-apps.folder'
+      })
+    });
+    const created = await createResponse.json();
+    return created.id;
+  }
+
+  async _findGoogleDriveFile(token, folderId) {
+    const query = encodeURIComponent(`name='${this.syncFileName}' and '${folderId}' in parents and trashed=false`);
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,headRevisionId,modifiedTime)`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    return data.files && data.files.length > 0 ? data.files[0] : null;
+  }
+
+  async _getGoogleDriveFileMeta(token, fileId) {
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=headRevisionId,modifiedTime`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) return null;
+    return await response.json();
   }
 }
 

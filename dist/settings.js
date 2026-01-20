@@ -562,7 +562,7 @@ class ClipIndexSettings {
     try {
       // Get all data
       const [cardsResult, highlightsResult, settingsResult] = await Promise.all([
-        chrome.runtime.sendMessage({ action: 'getIndexCards' }),
+        chrome.runtime.sendMessage({ action: 'getAllSnippets' }),
         this.getAllHighlights(),
         this.getAllSettings()
       ]);
@@ -572,9 +572,9 @@ class ClipIndexSettings {
       }
 
       const exportData = {
-        version: '2.0.0',
+        version: '3.0.0',
         exportDate: new Date().toISOString(),
-        cards: cardsResult.cards,
+        snippets: cardsResult.cards,
         highlights: highlightsResult,
         settings: settingsResult
       };
@@ -608,7 +608,7 @@ class ClipIndexSettings {
       const importData = JSON.parse(text);
 
       // Validate data structure
-      if (!importData.cards) {
+      if (!importData.snippets && !importData.cards) {
         throw new Error('Invalid data format');
       }
 
@@ -632,11 +632,23 @@ class ClipIndexSettings {
   async performImport(importData) {
     try {
       // Import cards
-      for (const card of importData.cards) {
+      const rawSnippets = importData.snippets || importData.cards || [];
+      for (const card of rawSnippets) {
         try {
+          const normalized = card.text ? card : {
+            id: card.id,
+            type: card.url ? 'web' : 'note',
+            text: (card.clipText || card.title || '').slice(0, 144),
+            url: card.url || null,
+            domain: card.domain || null,
+            created_at: card.createdAt || Date.now(),
+            updated_at: card.updatedAt || card.createdAt || Date.now(),
+            deleted_at: card.deletedAt || null,
+            purged_at: null
+          };
           await chrome.runtime.sendMessage({
-            action: 'saveIndexCard',
-            data: card
+            action: 'saveSnippet',
+            data: normalized
           });
         } catch (e) {
           console.error('Failed to import card:', card.id, e);
@@ -698,7 +710,7 @@ class ClipIndexSettings {
     try {
       // Clear IndexedDB
       const db = await this.openDatabase();
-      const stores = ['indexCards', 'highlights', 'settings'];
+      const stores = ['snippets', 'indexCards', 'highlights', 'settings', 'spaces'];
 
       for (const storeName of stores) {
         const transaction = db.transaction([storeName], 'readwrite');
@@ -726,7 +738,7 @@ class ClipIndexSettings {
 
   openDatabase() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('ClipIndexDB', 1);
+      const request = indexedDB.open('ClipIndexDB', 3);
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
