@@ -45,11 +45,6 @@ class ClipIndexSettings {
       this.confirmClearData();
     });
 
-    // Site blocking
-    document.getElementById('blockCurrentSiteBtn').addEventListener('click', () => {
-      this.blockCurrentSite();
-    });
-
     // Shortcuts management
     const openShortcutsBtn = document.getElementById('openShortcutsBtn');
     if (openShortcutsBtn) {
