@@ -8,9 +8,9 @@ class iSnippetsSidebar {
             search: '',
             category: 'all' // 'all', '收集', '随笔', 'trash'
         };
-        this.currentLanguage = 'zh-CN';
+        this.currentLanguage = 'en';
         this.translations = {};
-        this.columns = 3;
+        this.columns = 5;
 
         this.init();
     }
@@ -104,9 +104,9 @@ class iSnippetsSidebar {
             const result = await chrome.runtime.sendMessage({
                 action: 'getSetting',
                 key: 'language',
-                defaultValue: 'zh-CN'
+                defaultValue: 'en'
             });
-            this.currentLanguage = result.success ? result.value : 'zh-CN';
+            this.currentLanguage = result.success ? result.value : 'en';
             this.loadTranslations();
             this.updateUI();
         } catch (error) {
@@ -119,9 +119,9 @@ class iSnippetsSidebar {
             const result = await chrome.runtime.sendMessage({
                 action: 'getSetting',
                 key: 'columnCount',
-                defaultValue: 3
+                defaultValue: 5
             });
-            const count = result.success ? result.value : 3;
+            const count = result.success ? result.value : 5;
             document.documentElement.style.setProperty('--column-count', count);
         } catch (error) {
             console.error('Failed to load settings:', error);
@@ -207,7 +207,7 @@ class iSnippetsSidebar {
     }
 
     updateUI() {
-        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+        const t = this.translations[this.currentLanguage] || this.translations['en'];
 
         // Update language select value
         const languageSelect = document.getElementById('languageSelect');

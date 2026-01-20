@@ -2,7 +2,7 @@
 
 class iSnippetsSettings {
   constructor() {
-    this.currentLanguage = 'zh-CN';
+    this.currentLanguage = 'en';
     this.translations = {};
     this.loadTranslations(); // Load translations immediately
     this.init();
@@ -96,11 +96,11 @@ class iSnippetsSettings {
   async loadSettings() {
     try {
       // Load language setting
-      const language = await this.getSetting('language', 'zh-CN');
+      const language = await this.getSetting('language', 'en');
       document.getElementById('languageSelect').value = language;
 
       // Load column count setting
-      const columnCount = await this.getSetting('columnCount', 3);
+      const columnCount = await this.getSetting('columnCount', 5);
       document.getElementById('columnCountSelect').value = columnCount;
     } catch (error) {
       console.error('Failed to load settings:', error);

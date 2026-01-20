@@ -3,7 +3,7 @@
 
 class iSnippetsPopup {
   constructor() {
-    this.currentLanguage = 'zh-CN';
+    this.currentLanguage = 'en';
     this.translations = {};
     this.init();
   }
@@ -96,9 +96,9 @@ class iSnippetsPopup {
       const result = await chrome.runtime.sendMessage({
         action: 'getSetting',
         key: 'language',
-        defaultValue: 'zh-CN'
+        defaultValue: 'en'
       });
-      this.currentLanguage = result.success ? result.value : 'zh-CN';
+      this.currentLanguage = result.success ? result.value : 'en';
       this.loadTranslations();
       this.updateUI();
     } catch (error) {
@@ -166,7 +166,7 @@ class iSnippetsPopup {
   }
 
   updateUI() {
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    const t = this.translations[this.currentLanguage] || this.translations['en'];
 
     // Update elements with data-i18n attributes
     document.querySelectorAll('[data-i18n]').forEach(el => {
