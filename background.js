@@ -877,6 +877,20 @@ chrome.runtime.onInstalled.addListener(async () => {
     // Add some sample data for testing
     const db = await getDatabase();
 
+    // Set initial language based on browser environment
+    const existingLang = await db.getSetting('language');
+    if (!existingLang) {
+      const uiLang = chrome.i18n.getUILanguage();
+      let defaultLang = 'en';
+      if (uiLang.startsWith('zh')) {
+        defaultLang = 'zh-CN';
+      } else if (uiLang.startsWith('ja')) {
+        defaultLang = 'ja';
+      }
+      console.log(`Detected browser language: ${uiLang}, setting default to: ${defaultLang}`);
+      await db.setSetting('language', defaultLang);
+    }
+
     // Check if we already have data
     const existingCards = await db.getAllSnippetsIncludingDeleted();
     if (existingCards.length === 0) {
