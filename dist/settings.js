@@ -2,7 +2,7 @@
 
 class iSnipsSettings {
   constructor() {
-    this.currentLanguage = 'zh-CN';
+    this.currentLanguage = 'en';
     this.translations = {};
     this.loadTranslations(); // Load translations immediately
     this.init();
@@ -122,7 +122,7 @@ class iSnipsSettings {
         if (captureCommand) {
           const display = document.getElementById('captureShortcutDisplay');
           if (display) {
-            const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || {};
+            const t = this.translations[this.currentLanguage] || this.translations['en'] || {};
             display.textContent = captureCommand.shortcut || (t.not_set || '未设置');
           }
         }
@@ -130,7 +130,7 @@ class iSnipsSettings {
         if (sidebarCommand) {
           const display = document.getElementById('sidebarShortcutDisplay');
           if (display) {
-            const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || {};
+            const t = this.translations[this.currentLanguage] || this.translations['en'] || {};
             display.textContent = sidebarCommand.shortcut || (t.not_set || '未设置');
           }
         }
@@ -145,14 +145,14 @@ class iSnipsSettings {
       const result = await chrome.runtime.sendMessage({
         action: 'getSetting',
         key: 'language',
-        defaultValue: 'zh-CN'
+        defaultValue: 'en'
       });
-      this.currentLanguage = result.success ? result.value : 'zh-CN';
+      this.currentLanguage = result.success ? result.value : 'en';
       this.loadTranslations();
       this.updateUI();
     } catch (error) {
       console.error('Failed to load language:', error);
-      this.currentLanguage = 'zh-CN';
+      this.currentLanguage = 'en';
       this.loadTranslations();
       this.updateUI();
     }
@@ -414,7 +414,7 @@ class iSnipsSettings {
     // Get primary language code (e.g., 'en-US' -> 'en')
     const lang = this.currentLanguage;
     const baseLang = lang.split('-')[0];
-    const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'] || this.translations['en'];
+    const t = this.translations[lang] || this.translations[baseLang] || this.translations['en'] || this.translations['en'];
 
     // Update document title
     document.title = t.settings_title;
@@ -571,7 +571,7 @@ class iSnipsSettings {
 
       const lang = this.currentLanguage;
       const baseLang = lang.split('-')[0];
-      const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'];
+      const t = this.translations[lang] || this.translations[baseLang] || this.translations['en'];
 
       document.getElementById('confirmMessage').textContent = t.import_confirm || '确定要导入数据吗？这将覆盖现有的所有摘录数据。';
       this.showConfirmModal();
@@ -582,7 +582,7 @@ class iSnipsSettings {
       console.error('Failed to import data:', error);
       const lang = this.currentLanguage;
       const baseLang = lang.split('-')[0];
-      const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'];
+      const t = this.translations[lang] || this.translations[baseLang] || this.translations['en'];
       this.showMessage('import_invalid', 'error');
       document.getElementById('importDataInput').value = '';
     }
@@ -661,7 +661,7 @@ class iSnipsSettings {
 
   confirmClearData() {
     this.pendingAction = () => this.clearAllData();
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    const t = this.translations[this.currentLanguage] || this.translations['en'];
     document.getElementById('confirmMessage').textContent = t.clear_confirm || '确定要清除所有数据吗？此操作无法撤销，包括所有摘录和设置。';
     this.showConfirmModal();
   }
@@ -878,7 +878,7 @@ class iSnipsSettings {
     const el = document.getElementById('lastSyncTime');
     if (!el) return;
 
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || {};
+    const t = this.translations[this.currentLanguage] || this.translations['en'] || {};
     if (timestamp) {
       const dateStr = new Date(timestamp).toLocaleString();
       el.textContent = (t.last_sync_desc || '上次同步时间：{0}').replace('{0}', dateStr);
@@ -891,7 +891,7 @@ class iSnipsSettings {
     // Get primary language code (e.g., 'en-US' -> 'en')
     const lang = this.currentLanguage;
     const baseLang = lang.split('-')[0];
-    const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'] || {};
+    const t = this.translations[lang] || this.translations[baseLang] || this.translations['en'] || {};
 
     // Use translated message if key is provided
     let displayMessage = message;

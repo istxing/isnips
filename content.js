@@ -4,7 +4,7 @@
 class iSnipsContent {
   constructor() {
     this.highlights = [];
-    this.currentLanguage = 'zh-CN';
+    this.currentLanguage = 'en';
     this.translations = {};
     this.init();
   }
@@ -26,7 +26,7 @@ class iSnipsContent {
       const langResult = await chrome.runtime.sendMessage({
         action: 'getSetting',
         key: 'language',
-        defaultValue: 'zh-CN'
+        defaultValue: 'en'
       });
       this.currentLanguage = langResult.success ? langResult.value : 'zh-CN';
       this.loadTranslations();
@@ -110,7 +110,7 @@ class iSnipsContent {
       this.highlightSelection(text);
     } else {
       console.log('iSnips: No text selected, ignoring');
-      const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+      const t = this.translations[this.currentLanguage] || this.translations['en'];
       this.showToast(t.no_text_selected || '尚未选中任何思维片段', false);
     }
   }
@@ -139,7 +139,7 @@ class iSnipsContent {
         data: cardData
       });
 
-      const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+      const t = this.translations[this.currentLanguage] || this.translations['en'];
       if (result.success) {
         console.log('iSnips: Clip saved successfully');
         this.showToast(t.clip_saved || '已记录思维瞬间', true);
@@ -149,7 +149,7 @@ class iSnipsContent {
       }
     } catch (error) {
       console.error('iSnips: Failed to save clip:', error);
-      const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+      const t = this.translations[this.currentLanguage] || this.translations['en'];
       this.showToast(t.save_error || '记录片段出错', false);
     }
   }
@@ -166,7 +166,7 @@ class iSnipsContent {
     highlightElement.style.borderRadius = '2px';
     highlightElement.style.padding = '2px 4px';
     highlightElement.style.cursor = 'pointer';
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    const t = this.translations[this.currentLanguage] || this.translations['en'];
     highlightElement.title = t.highlight_title || 'iSnips: 点击查看片段详情';
 
     // Store highlight info for persistence
@@ -240,7 +240,7 @@ class iSnipsContent {
           highlightElement.style.borderRadius = '2px';
           highlightElement.style.padding = '2px 4px';
           highlightElement.style.cursor = 'pointer';
-          const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+          const t = this.translations[this.currentLanguage] || this.translations['en'];
           highlightElement.title = t.highlight_title || 'iSnips: 点击查看片段详情';
           highlightElement.dataset.highlightId = highlight.id;
 

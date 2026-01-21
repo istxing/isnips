@@ -3,7 +3,7 @@
 
 class iSnipsPopup {
   constructor() {
-    this.currentLanguage = 'zh-CN';
+    this.currentLanguage = 'en';
     this.translations = {};
     this.init();
   }
@@ -98,12 +98,12 @@ class iSnipsPopup {
         key: 'language',
         defaultValue: 'en'
       });
-      this.currentLanguage = result.success ? result.value : 'zh-CN';
+      this.currentLanguage = result.success ? result.value : 'en';
       this.loadTranslations();
       this.updateUI();
     } catch (error) {
       console.error('Failed to load language:', error);
-      this.currentLanguage = 'zh-CN';
+      this.currentLanguage = 'en';
       this.loadTranslations();
       this.updateUI();
     }
@@ -194,7 +194,7 @@ class iSnipsPopup {
   }
 
   updateUI() {
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || this.translations['en'];
+    const t = this.translations[this.currentLanguage] || this.translations['en'] || this.translations['en'];
 
     // Update elements with data-i18n attributes
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -258,7 +258,7 @@ class iSnipsPopup {
       if (cardsResult && cardsResult.success) {
         const cards = cardsResult.cards || [];
 
-        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+        const t = this.translations[this.currentLanguage] || this.translations['en'];
         const statsHtml = `
           <div class="stat-item">
             <span class="stat-label">${t.total_clips}</span>
@@ -276,7 +276,7 @@ class iSnipsPopup {
       }
     } catch (error) {
       console.error('Failed to load stats:', error);
-      const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+      const t = this.translations[this.currentLanguage] || this.translations['en'];
       document.getElementById('stats').innerHTML = `<div class="error">${t.load_stats_error}: ${error.message}</div>`;
     }
   }
@@ -291,7 +291,7 @@ class iSnipsPopup {
 
       if (result && result.success) {
         const recentCards = (result.cards || []).slice(0, 9);
-        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+        const t = this.translations[this.currentLanguage] || this.translations['en'];
 
         if (recentCards.length === 0) {
           document.getElementById('recentItems').innerHTML = `<div style="text-align: center; color: #999; padding: 20px;">${t.no_items}</div>`;
@@ -358,7 +358,7 @@ class iSnipsPopup {
       }
     } catch (error) {
       console.error('Failed to load recent items:', error);
-      const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+      const t = this.translations[this.currentLanguage] || this.translations['en'];
       document.getElementById('recentItems').innerHTML = `<div class="error">${t.load_recent_error}: ${error.message}</div>`;
     }
   }
@@ -390,7 +390,7 @@ class iSnipsPopup {
   }
 
   formatDate(timestamp) {
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    const t = this.translations[this.currentLanguage] || this.translations['en'];
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now - date;
@@ -425,7 +425,7 @@ class iSnipsPopup {
   async saveNote() {
     const noteTextarea = document.getElementById('noteTextarea');
     const noteText = noteTextarea ? noteTextarea.value.trim() : '';
-    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    const t = this.translations[this.currentLanguage] || this.translations['en'];
 
     if (!noteText) {
       alert(t.empty_note_error || '随笔内容不能为空');
@@ -477,7 +477,7 @@ class iSnipsPopup {
       }
     } catch (error) {
       console.error('Save note error:', error);
-      const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+      const t = this.translations[this.currentLanguage] || this.translations['en'];
       alert((t.save_error || '保存随笔失败') + '：' + error.message);
     }
   }
