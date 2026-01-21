@@ -379,6 +379,9 @@ class iSnipsPopup {
 
   formatDate(timestamp) {
     const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
 
     if (diff < 60000) { // Less than 1 minute
       return t.just_now || '刚刚';
@@ -411,7 +414,7 @@ class iSnipsPopup {
     const noteTextarea = document.getElementById('noteTextarea');
     const noteText = noteTextarea ? noteTextarea.value.trim() : '';
     const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
-    
+
     if (!noteText) {
       alert(t.empty_note_error || '随笔内容不能为空');
       return;
