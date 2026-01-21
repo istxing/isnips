@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "iSnippets",
+  "name": "iSnips · 片语",
   "version": "2.0.2",
-  "description": "个人知识片段与灵感足迹管理系统",
+  "description": "一键记下网页片段与想法，自动保留来源，随时可回顾。",
   "permissions": [
     "storage",
     "activeTab",
@@ -38,7 +38,7 @@
     "default_path": "popup.html"
   },
   "action": {
-    "default_title": "iSnippets"
+    "default_title": "iSnips · 片语"
   },
   "commands": {
     "capture-snippet": {
@@ -46,14 +46,14 @@
         "default": "Alt+C",
         "mac": "Alt+C"
       },
-      "description": "刻下这段思维足迹"
+      "description": "记录这个思维瞬间"
     },
     "_execute_action": {
       "suggested_key": {
         "default": "Alt+S",
         "mac": "Alt+S"
       },
-      "description": "打开足迹库侧边栏"
+      "description": "打开片段库侧边栏"
     }
   },
   "options_page": "settings.html",

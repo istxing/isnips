@@ -106,14 +106,14 @@ class iSnippetsContent {
 
       if (result.success) {
         console.log('iSnippets: Clip saved successfully');
-        this.showToast('已刻下足迹', true);
+        this.showToast('已记录思维瞬间', true);
       } else {
         console.log('iSnippets: Failed to save clip');
-        this.showToast('记录足迹出错', false);
+        this.showToast('记录片段出错', false);
       }
     } catch (error) {
       console.error('iSnippets: Failed to save clip:', error);
-      this.showToast('记录足迹出错', false);
+      this.showToast('记录片段出错', false);
     }
   }
 
@@ -129,7 +129,7 @@ class iSnippetsContent {
     highlightElement.style.borderRadius = '2px';
     highlightElement.style.padding = '2px 4px';
     highlightElement.style.cursor = 'pointer';
-    highlightElement.title = 'iSnippets: 点击追溯思维足迹';
+    highlightElement.title = 'iSnips: 点击查看片段详情';
 
     // Store highlight info for persistence
     const highlightId = Date.now().toString();
@@ -202,7 +202,7 @@ class iSnippetsContent {
           highlightElement.style.borderRadius = '2px';
           highlightElement.style.padding = '2px 4px';
           highlightElement.style.cursor = 'pointer';
-          highlightElement.title = 'iSnippets: 点击追溯思维足迹';
+          highlightElement.title = 'iSnips: 点击查看片段详情';
           highlightElement.dataset.highlightId = highlight.id;
 
           highlightElement.addEventListener('click', () => {

@@ -1,7 +1,7 @@
 {
   "name": "clipindex-extension",
   "version": "2.0.0",
-  "description": "智能摘录工具 - 选中网页文本自动保存，支持多语言瀑布流展示",
+  "description": "一键记下网页片段与想法，自动保留来源，随时可回顾。",
   "scripts": {
     "build": "bun run build.js",
     "watch": "bun run build.js --watch"

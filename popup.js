@@ -109,26 +109,26 @@ class iSnippetsPopup {
   loadTranslations() {
     this.translations = {
       'zh-CN': {
-        popup_title: 'iSnippets',
-        popup_desc: '留存你的灵感与思维足迹',
-        all_snippets: '全部足迹',
-        recent_snippets: '近期足迹',
+        popup_title: 'iSnips · 片语',
+        popup_desc: '一键记下网页片段与想法，自动保留来源，随时可回顾。',
+        all_snippets: '全部片段',
+        recent_snippets: '近期片段',
         take_note: '随笔',
-        take_note_placeholder: '记录此刻的思维足迹...',
+        take_note_placeholder: '记录此刻的思维瞬间...',
         link_page: '关联网页',
         settings: '偏好设置',
-        search_placeholder: '搜索足迹…',
-        total_clips: '已刻下的足迹',
-        today_saved: '今日足迹',
-        no_items: '暂无足迹',
+        search_placeholder: '搜索片段…',
+        total_clips: '已记录的片段',
+        today_saved: '今日片段',
+        no_items: '暂无片段',
         page_index: '随笔',
-        load_data_error: '加载足迹失败',
+        load_data_error: '加载片段失败',
         load_stats_error: '加载统计失败',
-        load_recent_error: '加载近期足迹失败'
+        load_recent_error: '加载近期片段失败'
       },
       'en': {
-        popup_title: 'iSnippets',
-        popup_desc: 'Note down what you really want to remember',
+        popup_title: 'iSnips',
+        popup_desc: 'Save web snippets and thoughts with one click.',
         all_snippets: 'All Snippets',
         recent_snippets: 'Recent Snippets',
         take_note: 'Take Note',
@@ -190,11 +190,11 @@ class iSnippetsPopup {
           const shortcut = captureCommand.shortcut || (this.currentLanguage === 'zh-CN' ? '未设置' : (this.currentLanguage === 'ja' ? '未設定' : 'Not set'));
 
           if (this.currentLanguage === 'zh-CN') {
-            hintEl.innerHTML = `在网页选中文字后按 <kbd>${shortcut}</kbd> 即可快速记下片段`;
+            hintEl.innerHTML = `在网页选中文字后按 <kbd>${shortcut}</kbd> 即可快速记录片段`;
           } else if (this.currentLanguage === 'ja') {
-            hintEl.innerHTML = `テキストを選択し、<kbd>${shortcut}</kbd> を押すと片段を保存します`;
+            hintEl.innerHTML = `テキストを選択し、<kbd>${shortcut}</kbd> を押すとスニペットを保存します`;
           } else {
-            hintEl.innerHTML = `Select text and press <kbd>${shortcut}</kbd> to save a snippet`;
+            hintEl.innerHTML = `Select text and press <kbd>${shortcut}</kbd> to save a fragment`;
           }
         }
       }
