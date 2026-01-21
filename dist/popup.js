@@ -114,13 +114,15 @@ class iSnipsPopup {
       'zh-CN': {
         popup_title: 'iSnips · 片语',
         popup_desc: '一键记下网页片段与想法，自动保留来源，随时可回顾。',
-        all_snippets: '全部片段',
-        recent_snippets: '近期片段',
-        take_note: '随笔',
-        take_note_placeholder: '记录此刻的思维瞬间...',
-        link_page: '关联网页',
-        settings: '偏好设置',
-        search_placeholder: '搜索片段…',
+        all_snippets: '全部',
+        recent_snippets: '最近片段',
+        take_note: 'Take Note',
+        take_note_placeholder: '记下你的片段内容...',
+        link_page: 'Link Page',
+        settings: '设置',
+        save: '保存',
+        clear: '清空',
+        search_placeholder: '搜索片段...',
         total_clips: '已记录的片段',
         today_saved: '今日片段',
         no_items: '暂无片段',
@@ -132,9 +134,9 @@ class iSnipsPopup {
         minutes_ago: '分钟前',
         hours_ago: '小时前',
         copied: '已复制内容',
-        save_success: '随笔保存成功',
-        save_error: '保存随笔失败',
-        empty_note_error: '随笔内容不能为空'
+        save_success: '保存成功',
+        save_error: '保存失败',
+        empty_note_error: '内容不能为空'
       },
       'en': {
         popup_title: 'iSnips',
@@ -145,7 +147,9 @@ class iSnipsPopup {
         take_note_placeholder: 'Note down your snippet content...',
         link_page: 'Link Page',
         settings: 'Settings',
-        search_placeholder: 'Search…',
+        save: 'Save',
+        clear: 'Clear',
+        search_placeholder: 'Search...',
         total_clips: 'Total Snippets',
         today_saved: 'Saved today',
         no_items: 'No items yet',
@@ -197,6 +201,14 @@ class iSnipsPopup {
       const key = el.dataset.i18n;
       if (t[key]) {
         el.textContent = t[key];
+      }
+    });
+
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.dataset.i18nPlaceholder;
+      if (t[key]) {
+        el.placeholder = t[key];
       }
     });
 

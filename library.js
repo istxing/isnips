@@ -261,17 +261,21 @@ class iSnipsSidebar {
         }
 
         // Update document title
-        document.title = t.library_title;
+        document.title = t.library_header_title || t.sidebar_title || 'iSnips';
 
         // Update elements with data-i18n attributes
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.dataset.i18n;
             if (t[key]) {
-                if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
-                    el.placeholder = t[key];
-                } else {
-                    el.textContent = t[key];
-                }
+                el.textContent = t[key];
+            }
+        });
+
+        // Update placeholders
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.dataset.i18nPlaceholder;
+            if (t[key]) {
+                el.placeholder = t[key];
             }
         });
 
