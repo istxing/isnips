@@ -134,9 +134,10 @@ class iSnipsSidebar {
     loadTranslations() {
         this.translations = {
             'zh-CN': {
-                library_title: 'iSnips · 片语｜个人知识片段库',
+                sidebar_title: 'iSnips · 片语',
+                library_header_title: '个人知识片段库',
                 settings: '设置',
-                search_placeholder: '搜索片段…',
+                search_placeholder: '搜索片段...',
                 loading: '寻觅中...',
                 no_clips_title: '尚未记录任何片段',
                 no_clips_desc: '在网页选中文字，用 Alt+C 记录你的思维瞬间',
@@ -168,7 +169,8 @@ class iSnipsSidebar {
                 copied: '已复制内容'
             },
             'en': {
-                library_title: 'iSnips · Fragments｜Personal Knowledge Library',
+                sidebar_title: 'iSnips',
+                library_header_title: 'Knowledge Library',
                 settings: 'Settings',
                 search_placeholder: 'Search fragments...',
                 loading: 'Searching...',
@@ -202,9 +204,10 @@ class iSnipsSidebar {
                 copied: 'Copied to clipboard'
             },
             'ja': {
-                library_title: 'iSnips - スニペットライブラリ',
+                sidebar_title: 'iSnips',
+                library_header_title: '知識ライブラリ',
                 settings: '設定',
-                search_placeholder: '検索…',
+                search_placeholder: 'スニペットを検索...',
                 loading: '読み込み中...',
                 no_clips_title: 'スニペットがありません',
                 no_clips_desc: 'ウェブページのテキストを選択し、Ctrl+Cで保存',
