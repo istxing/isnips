@@ -654,7 +654,6 @@ class iSnipsSidebar {
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'edit-actions';
 
-        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
         const saveBtn = document.createElement('button');
         saveBtn.className = 'btn-small btn-save';
         saveBtn.textContent = t.save || '保存';
