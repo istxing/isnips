@@ -8,7 +8,7 @@ class iSnipsSidebar {
             search: '',
             category: 'all' // 'all', '收集', '随笔', 'trash'
         };
-        this.currentLanguage = 'en';
+        this.currentLanguage = 'zh-CN';
         this.translations = {};
         this.columns = 5;
 
@@ -106,11 +106,14 @@ class iSnipsSidebar {
                 key: 'language',
                 defaultValue: 'en'
             });
-            this.currentLanguage = result.success ? result.value : 'en';
+            this.currentLanguage = result.success ? result.value : 'zh-CN';
             this.loadTranslations();
             this.updateUI();
         } catch (error) {
             console.error('Failed to load language:', error);
+            this.currentLanguage = 'zh-CN';
+            this.loadTranslations();
+            this.updateUI();
         }
     }
 
@@ -149,7 +152,20 @@ class iSnipsSidebar {
                 empty_trash: '清空回收站',
                 new_note: '记录新思维',
                 cancel: '取消',
-                save: '保存'
+                save: '保存',
+                just_now: '刚刚',
+                minutes_ago: '分钟前',
+                hours_ago: '小时前',
+                days_ago: '天前',
+                restore_confirm: '确定要恢复这个摘录吗？',
+                restore_success: '恢复成功',
+                restore_error: '恢复失败',
+                delete_error: '删除失败',
+                empty_note_error: '内容不能为空',
+                edit: '编辑',
+                delete: '删除',
+                restore: '恢复',
+                copied: '已复制内容'
             },
             'en': {
                 library_title: 'iSnips · Fragments｜Personal Knowledge Library',
@@ -170,7 +186,20 @@ class iSnipsSidebar {
                 empty_trash: 'Empty Trash',
                 new_note: 'New Thought',
                 cancel: 'Cancel',
-                save: 'Save'
+                save: 'Save',
+                just_now: 'Just now',
+                minutes_ago: 'm ago',
+                hours_ago: 'h ago',
+                days_ago: 'd ago',
+                restore_confirm: 'Are you sure you want to restore this snippet?',
+                restore_success: 'Restored successfully',
+                restore_error: 'Restore failed',
+                delete_error: 'Delete failed',
+                empty_note_error: 'Content cannot be empty',
+                edit: 'Edit',
+                delete: 'Delete',
+                restore: 'Restore',
+                copied: 'Copied to clipboard'
             },
             'ja': {
                 library_title: 'iSnips - スニペットライブラリ',
@@ -191,7 +220,20 @@ class iSnipsSidebar {
                 empty_trash: '今すぐゴミ箱を空にする',
                 new_note: '新しいスニペット',
                 cancel: 'キャンセル',
-                save: '保存'
+                save: '保存',
+                just_now: 'たった今',
+                minutes_ago: '分前',
+                hours_ago: '時間前',
+                days_ago: '日前',
+                restore_confirm: 'このスニペットを復元してもよろしいですか？',
+                restore_success: '復元に成功しました',
+                restore_error: '復元に失敗しました',
+                delete_error: '削除に失敗しました',
+                empty_note_error: '内容は空にできません',
+                edit: '編集',
+                delete: '削除',
+                restore: '復元',
+                copied: 'コピーしました'
             }
         };
     }
@@ -207,7 +249,7 @@ class iSnipsSidebar {
     }
 
     updateUI() {
-        const t = this.translations[this.currentLanguage] || this.translations['en'];
+        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || this.translations['en'];
 
         // Update language select value
         const languageSelect = document.getElementById('languageSelect');
@@ -394,13 +436,17 @@ class iSnipsSidebar {
                 if (cardIndex !== -1) {
                     this.cards.splice(cardIndex, 1);
                 }
+                const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+                this.showToast(t.restore_success || '恢复成功', true);
                 this.applyFilters();
             } else {
-                alert('恢复失败：' + (result.error || '未知错误'));
+                const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+                alert((t.restore_error || '恢复失败') + '：' + (result.error || '未知错误'));
             }
         } catch (error) {
             console.error('Restore error:', error);
-            alert('恢复失败：' + error.message);
+            const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+            alert((t.restore_error || '恢复失败') + '：' + error.message);
         }
     }
 
@@ -478,8 +524,9 @@ class iSnipsSidebar {
 
         if (isTrash) {
             // Trash view: Only Restore button
+            const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
             cardDiv.innerHTML = `
-        <button class="restore-btn" title="恢复">恢复</button>
+        <button class="restore-btn" title="${t.restore || '恢复'}">${t.restore || '恢复'}</button>
         <div class="clip-text">${this.escapeHtml(card.text)}</div>
         <div class="clip-meta">
           <div class="clip-domain">${this.escapeHtml(card.domain || '')}</div>
@@ -490,15 +537,17 @@ class iSnipsSidebar {
             const restoreBtn = cardDiv.querySelector('.restore-btn');
             restoreBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                if (confirm('确定要恢复这个摘录吗？')) {
+                const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+                if (confirm(t.restore_confirm || '确定要恢复这个摘录吗？')) {
                     this.performRestore(card);
                 }
             });
         } else {
             // Normal view: Edit and Delete buttons
+            const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
             cardDiv.innerHTML = `
-        <button class="edit-btn" title="编辑">编辑</button>
-        <button class="delete-btn" title="删除">删除</button>
+        <button class="edit-btn" title="${t.edit || '编辑'}">${t.edit || '编辑'}</button>
+        <button class="delete-btn" title="${t.delete || '删除'}">${t.delete || '删除'}</button>
         <div class="clip-text">${this.escapeHtml(card.text)}</div>
         <div class="clip-meta">
           <div class="clip-domain">${this.escapeHtml(card.domain || '')}</div>
@@ -528,11 +577,13 @@ class iSnipsSidebar {
                         }
                         this.applyFilters();
                     } else {
-                        alert('删除失败：' + (result.error || '未知错误'));
+                        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+                        alert((t.delete_error || '删除失败') + '：' + (result.error || '未知错误'));
                     }
                 } catch (error) {
                     console.error('Delete error:', error);
-                    alert('删除失败：' + error.message);
+                    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+                    alert((t.delete_error || '删除失败') + '：' + error.message);
                 }
             });
         }
@@ -566,13 +617,15 @@ class iSnipsSidebar {
             }
 
             if (isTrash) {
-                if (confirm('确定要恢复这个摘录吗？')) {
+                const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+                if (confirm(t.restore_confirm || '确定要恢复这个摘录吗？')) {
                     this.performRestore(card);
                 }
             } else {
                 // Copy to clipboard
                 navigator.clipboard.writeText(card.text).then(() => {
-                    this.showToast('已复制内容', true);
+                    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+                    this.showToast(t.copied || '已复制内容', true);
                 });
             }
         });
@@ -589,10 +642,11 @@ class iSnipsSidebar {
 
         if (editBtn) editBtn.style.display = 'none';
 
+        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
         const textarea = document.createElement('textarea');
         textarea.className = 'edit-textarea';
         textarea.value = card.text;
-        textarea.placeholder = '输入摘录内容...';
+        textarea.placeholder = t.search_placeholder || '输入摘录内容...';
 
         clipText.replaceWith(textarea);
         clipMeta.style.display = 'none';
@@ -600,14 +654,15 @@ class iSnipsSidebar {
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'edit-actions';
 
+        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
         const saveBtn = document.createElement('button');
         saveBtn.className = 'btn-small btn-save';
-        saveBtn.textContent = '保存';
+        saveBtn.textContent = t.save || '保存';
         saveBtn.addEventListener('click', () => this.saveEdit(cardDiv, card, textarea.value));
 
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn-small btn-cancel';
-        cancelBtn.textContent = '取消';
+        cancelBtn.textContent = t.cancel || '取消';
         cancelBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             this.cancelEdit(cardDiv, card);
@@ -621,8 +676,9 @@ class iSnipsSidebar {
     }
 
     async saveEdit(cardDiv, card, newText) {
+        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
         if (!newText.trim()) {
-            alert('摘录内容不能为空');
+            alert(t.empty_note_error || '摘录内容不能为空');
             return;
         }
 
@@ -641,11 +697,11 @@ class iSnipsSidebar {
                 }
                 this.applyFilters();
             } else {
-                alert('保存失败：' + (result.error || '未知错误'));
+                alert((t.save_error || '保存失败') + '：' + (result.error || '未知错误'));
             }
         } catch (error) {
             console.error('Save edit error:', error);
-            alert('保存失败：' + error.message);
+            alert((t.save_error || '保存失败') + '：' + error.message);
         }
     }
 
@@ -678,14 +734,16 @@ class iSnipsSidebar {
     }
 
     formatDate(timestamp) {
+        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
         const date = new Date(timestamp);
         const now = new Date();
         const diff = now - date;
-        if (diff < 60000) return '刚刚';
-        if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
-        if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
-        if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
-        return date.toLocaleDateString(this.currentLanguage === 'zh-CN' ? 'zh-CN' : 'en-US');
+        if (diff < 60000) return t.just_now || '刚刚';
+        if (diff < 3600000) return `${Math.floor(diff / 60000)}${t.minutes_ago || '分钟前'}`;
+        if (diff < 86400000) return `${Math.floor(diff / 3600000)}${t.hours_ago || '小时前'}`;
+        if (diff < 604800000) return `${Math.floor(diff / 86400000)}${t.days_ago || '天前'}`;
+        const locale = this.currentLanguage === 'zh-CN' ? 'zh-CN' : (this.currentLanguage === 'ja' ? 'ja-JP' : 'en-US');
+        return date.toLocaleDateString(locale);
     }
 
     setCategory(category) {
@@ -717,8 +775,9 @@ class iSnipsSidebar {
     async saveNewNote() {
         const textarea = document.getElementById('newNoteTextarea');
         const noteText = textarea ? textarea.value.trim() : '';
+        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
         if (!noteText) {
-            alert('内容不能为空');
+            alert(t.empty_note_error || '内容不能为空');
             return;
         }
 
@@ -743,11 +802,13 @@ class iSnipsSidebar {
                 this.hideNewNoteModal();
                 this.loadData();
             } else {
-                alert('保存随笔失败：' + (result.error || '未知错误'));
+                const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+                alert((t.save_error || '保存随笔失败') + '：' + (result.error || '未知错误'));
             }
         } catch (error) {
             console.error('Save note error:', error);
-            alert('保存随笔失败：' + error.message);
+            const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+            alert((t.save_error || '保存随笔失败') + '：' + error.message);
         }
     }
 
@@ -769,7 +830,8 @@ class iSnipsSidebar {
     }
 
     async emptyTrash() {
-        if (!confirm('确定要清空回收站吗？此操作不可撤销。')) return;
+        const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+        if (!confirm(t.clear_confirm || '确定要清空回收站吗？此操作不可撤销。')) return;
         try {
             const result = await chrome.runtime.sendMessage({ action: 'emptyTrash' });
             if (result.success) {

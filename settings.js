@@ -2,7 +2,7 @@
 
 class iSnipsSettings {
   constructor() {
-    this.currentLanguage = 'en';
+    this.currentLanguage = 'zh-CN';
     this.translations = {};
     this.loadTranslations(); // Load translations immediately
     this.init();
@@ -152,6 +152,9 @@ class iSnipsSettings {
       this.updateUI();
     } catch (error) {
       console.error('Failed to load language:', error);
+      this.currentLanguage = 'zh-CN';
+      this.loadTranslations();
+      this.updateUI();
     }
   }
 
@@ -214,6 +217,9 @@ class iSnipsSettings {
         clear_error: '抹除失败',
         clear_confirm: '这是危险操作：您确定要抹除所有记录的思维瞬间吗？此过程不可逆。',
         import_confirm: '核实警告：导入操作将覆盖您当前的本地片段库，是否继续？',
+        empty_trash_confirm: '确定要清空回收站吗？此操作不可撤销。',
+        delete_confirm: '确定要删除这个摘录吗？',
+        restore_confirm: '确定要恢复这个摘录吗？',
 
         no_results: '无匹配结果',
         sync_section: '数据同步',
@@ -408,7 +414,7 @@ class iSnipsSettings {
     // Get primary language code (e.g., 'en-US' -> 'en')
     const lang = this.currentLanguage;
     const baseLang = lang.split('-')[0];
-    const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'];
+    const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'] || this.translations['en'];
 
     // Update document title
     document.title = t.settings_title;
@@ -567,7 +573,7 @@ class iSnipsSettings {
         await this.performImport(importData);
       };
 
-      document.getElementById('confirmMessage').textContent = this.translations[this.currentLanguage]?.import_confirm || '确定要导入数据吗？这将覆盖现有的所有摘录数据。';
+      document.getElementById('confirmMessage').textContent = t.import_confirm || '确定要导入数据吗？这将覆盖现有的所有摘录数据。';
       this.showConfirmModal();
 
       // Clear file input
@@ -652,7 +658,8 @@ class iSnipsSettings {
 
   confirmClearData() {
     this.pendingAction = () => this.clearAllData();
-    document.getElementById('confirmMessage').textContent = this.translations[this.currentLanguage]?.clear_confirm || '确定要清除所有数据吗？此操作无法撤销，包括所有摘录和设置。';
+    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    document.getElementById('confirmMessage').textContent = t.clear_confirm || '确定要清除所有数据吗？此操作无法撤销，包括所有摘录和设置。';
     this.showConfirmModal();
   }
 

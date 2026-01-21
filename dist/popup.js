@@ -3,7 +3,7 @@
 
 class iSnipsPopup {
   constructor() {
-    this.currentLanguage = 'en';
+    this.currentLanguage = 'zh-CN';
     this.translations = {};
     this.init();
   }
@@ -98,11 +98,14 @@ class iSnipsPopup {
         key: 'language',
         defaultValue: 'en'
       });
-      this.currentLanguage = result.success ? result.value : 'en';
+      this.currentLanguage = result.success ? result.value : 'zh-CN';
       this.loadTranslations();
       this.updateUI();
     } catch (error) {
       console.error('Failed to load language:', error);
+      this.currentLanguage = 'zh-CN';
+      this.loadTranslations();
+      this.updateUI();
     }
   }
 
@@ -124,7 +127,14 @@ class iSnipsPopup {
         page_index: '随笔',
         load_data_error: '加载片段失败',
         load_stats_error: '加载统计失败',
-        load_recent_error: '加载近期片段失败'
+        load_recent_error: '加载近期片段失败',
+        just_now: '刚刚',
+        minutes_ago: '分钟前',
+        hours_ago: '小时前',
+        copied: '已复制内容',
+        save_success: '随笔保存成功',
+        save_error: '保存随笔失败',
+        empty_note_error: '随笔内容不能为空'
       },
       'en': {
         popup_title: 'iSnips',
@@ -142,7 +152,14 @@ class iSnipsPopup {
         page_index: 'Jotted',
         load_data_error: 'Failed to load data',
         load_stats_error: 'Failed to load stats',
-        load_recent_error: 'Failed to load recent items'
+        load_recent_error: 'Failed to load recent items',
+        just_now: 'Just now',
+        minutes_ago: 'm ago',
+        hours_ago: 'h ago',
+        copied: 'Copied to clipboard',
+        save_success: 'Note saved successfully',
+        save_error: 'Failed to save note',
+        empty_note_error: 'Note content cannot be empty'
       },
       'ja': {
         popup_title: 'iSnips',
@@ -160,13 +177,20 @@ class iSnipsPopup {
         page_index: '記した',
         load_data_error: 'データの読み込みに失败しました',
         load_stats_error: '統計の読み込みに失敗しました',
-        load_recent_error: '最近のアイテムの読み込みに失敗しました'
+        load_recent_error: '最近のアイテムの読み込みに失敗しました',
+        just_now: 'たった今',
+        minutes_ago: '分前',
+        hours_ago: '時間前',
+        copied: 'コピーしました',
+        save_success: 'メモを保存しました',
+        save_error: 'メモの保存に失敗しました',
+        empty_note_error: 'メモの内容は空にできません'
       }
     };
   }
 
   updateUI() {
-    const t = this.translations[this.currentLanguage] || this.translations['en'];
+    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'] || this.translations['en'];
 
     // Update elements with data-i18n attributes
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -312,7 +336,7 @@ class iSnipsPopup {
             const card = recentCards.find(c => c.id == cardId);
             if (card && card.text) {
               navigator.clipboard.writeText(card.text).then(() => {
-                this.showToast('已复制内容', true);
+                this.showToast(t.copied || '已复制内容', true);
               });
             }
           });
@@ -354,18 +378,17 @@ class iSnipsPopup {
   }
 
   formatDate(timestamp) {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
+    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
 
     if (diff < 60000) { // Less than 1 minute
-      return '刚刚';
+      return t.just_now || '刚刚';
     } else if (diff < 3600000) { // Less than 1 hour
-      return `${Math.floor(diff / 60000)}分钟前`;
+      return `${Math.floor(diff / 60000)}${t.minutes_ago || '分钟前'}`;
     } else if (diff < 86400000) { // Less than 1 day
-      return `${Math.floor(diff / 3600000)}小时前`;
+      return `${Math.floor(diff / 3600000)}${t.hours_ago || '小时前'}`;
     } else {
-      return date.toLocaleDateString('zh-CN');
+      const locale = this.currentLanguage === 'zh-CN' ? 'zh-CN' : (this.currentLanguage === 'ja' ? 'ja-JP' : 'en-US');
+      return date.toLocaleDateString(locale);
     }
   }
 
@@ -386,8 +409,11 @@ class iSnipsPopup {
 
   async saveNote() {
     const noteTextarea = document.getElementById('noteTextarea');
+    const noteText = noteTextarea ? noteTextarea.value.trim() : '';
+    const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+    
     if (!noteText) {
-      alert('随笔内容不能为空');
+      alert(t.empty_note_error || '随笔内容不能为空');
       return;
     }
 
@@ -430,13 +456,14 @@ class iSnipsPopup {
 
       if (result.success) {
         this.clearNote();
-        this.showToast('随笔保存成功', true);
+        this.showToast(t.save_success || '随笔保存成功', true);
       } else {
-        alert('保存随笔失败：' + (result.error || '未知错误'));
+        alert((t.save_error || '保存随笔失败') + '：' + (result.error || '未知错误'));
       }
     } catch (error) {
       console.error('Save note error:', error);
-      alert('保存随笔失败：' + error.message);
+      const t = this.translations[this.currentLanguage] || this.translations['zh-CN'];
+      alert((t.save_error || '保存随笔失败') + '：' + error.message);
     }
   }
 
