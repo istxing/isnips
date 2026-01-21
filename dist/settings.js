@@ -427,23 +427,14 @@ class iSnipsSettings {
       }
     });
 
-    // Update header
-    document.querySelector('.settings-header h1').textContent = t.settings_header_title;
-    document.querySelector('.settings-header p').textContent = t.settings_header_desc;
+    // Elements with data-i18n attributes are now handled in the loop above.
+    // Manual updates for elements without data-i18n or special cases below:
 
-    // Update status text
-    const statusEl = document.querySelector('.status-indicator');
-    if (statusEl && t.local_storage) {
-      statusEl.textContent = t.local_storage;
-    }
-
-    // No manual button updates needed as they use data-i18n
-
-    // Update blocked sites section
-    const blockedTitle = document.querySelector('.blocked-sites h3');
-    if (blockedTitle && t.blocked_sites_title) {
-      blockedTitle.textContent = t.blocked_sites_title;
-    }
+    // Update status text (ensure we target all indicators if multiple exist)
+    document.querySelectorAll('.status-indicator').forEach(el => {
+      if (el.dataset.i18n === 'gdrive_connected') return; // Handled by i18n loop
+      if (t.local_storage) el.textContent = t.local_storage;
+    });
   }
 
 
@@ -472,7 +463,12 @@ class iSnipsSettings {
         });
       });
 
-      // Broadcast language change to all extension pages
+      // Update local state immediately for the current page
+      this.currentLanguage = lang;
+      this.loadTranslations();
+      this.updateUI();
+
+      // Broadcast language change to other extension pages
       const broadcastResult = await chrome.runtime.sendMessage({
         action: 'languageChanged',
         language: lang
@@ -573,6 +569,10 @@ class iSnipsSettings {
         await this.performImport(importData);
       };
 
+      const lang = this.currentLanguage;
+      const baseLang = lang.split('-')[0];
+      const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'];
+
       document.getElementById('confirmMessage').textContent = t.import_confirm || '确定要导入数据吗？这将覆盖现有的所有摘录数据。';
       this.showConfirmModal();
 
@@ -580,6 +580,9 @@ class iSnipsSettings {
       document.getElementById('importDataInput').value = '';
     } catch (error) {
       console.error('Failed to import data:', error);
+      const lang = this.currentLanguage;
+      const baseLang = lang.split('-')[0];
+      const t = this.translations[lang] || this.translations[baseLang] || this.translations['zh-CN'];
       this.showMessage('import_invalid', 'error');
       document.getElementById('importDataInput').value = '';
     }
