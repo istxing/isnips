@@ -1,7 +1,7 @@
-// Popup script for iSnippets extension
+// Popup script for iSnips extension
 // Handles the toolbar popup UI
 
-class iSnippetsPopup {
+class iSnipsPopup {
   constructor() {
     this.currentLanguage = 'en';
     this.translations = {};
@@ -145,7 +145,7 @@ class iSnippetsPopup {
         load_recent_error: 'Failed to load recent items'
       },
       'ja': {
-        popup_title: 'iSnippets',
+        popup_title: 'iSnips',
         popup_desc: '本当に覚えたいことをメモする',
         all_snippets: 'すべてのスニペット',
         recent_snippets: '最近のスニペット',
@@ -215,9 +215,9 @@ class iSnippetsPopup {
 
   async loadStats() {
     try {
-      console.log('iSnippets: Loading stats...');
+      console.log('iSnips: Loading stats...');
       const cardsResult = await chrome.runtime.sendMessage({ action: 'getSnippets' });
-      console.log('iSnippets: Stats result:', cardsResult);
+      console.log('iSnips: Stats result:', cardsResult);
 
       if (cardsResult && cardsResult.success) {
         const cards = cardsResult.cards || [];
@@ -247,7 +247,7 @@ class iSnippetsPopup {
 
   async loadRecentItems() {
     try {
-      console.log('iSnippets: Loading recent items...');
+      console.log('iSnips: Loading recent items...');
       const result = await chrome.runtime.sendMessage({
         action: 'getSnippets',
         filters: {}
@@ -485,5 +485,5 @@ class iSnippetsPopup {
 
 // Initialize popup when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  new iSnippetsPopup();
+  new iSnipsPopup();
 });

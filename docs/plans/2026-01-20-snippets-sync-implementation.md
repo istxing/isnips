@@ -4,7 +4,7 @@
 
 **Goal:** Replace legacy indexCards storage and sync with the new snippets schema and Pull->Merge->Push flow using a single remote snapshot file.
 
-**Architecture:** Introduce a dedicated `snippets` IndexedDB store with one-time migration from `indexCards`. Sync uses a single snapshot file `iSnippets/snippets.json`, merging by `id` and `updated_at`, and tracks remote versions via ETag/headRevisionId.
+**Architecture:** Introduce a dedicated `snippets` IndexedDB store with one-time migration from `indexCards`. Sync uses a single snapshot file `iSnips/snippets.json`, merging by `id` and `updated_at`, and tracks remote versions via ETag/headRevisionId.
 
 **Tech Stack:** Chrome extension (MV3), IndexedDB, Fetch API, Google Drive API, WebDAV, esbuild (bun).
 
@@ -382,8 +382,8 @@ Manual: create snippets from content and note, verify UI displays and stats use 
 
 **Step 1: Write the failing test**
 
-Manual: trigger sync and verify it reads `iSnippets/snippets.json` and uses new fields.
-Expected: old `iSnippets-sync.json` used
+Manual: trigger sync and verify it reads `iSnips/snippets.json` and uses new fields.
+Expected: old `iSnips-sync.json` used
 
 **Step 2: Write minimal implementation**
 
@@ -391,7 +391,7 @@ Update sync filename and bundle structure:
 
 ```js
 this.syncFileName = 'snippets.json';
-this.syncFolderName = 'iSnippets';
+this.syncFolderName = 'iSnips';
 ```
 
 Bundle only snippets:
@@ -430,7 +430,7 @@ await this.db.setSetting('syncConfig', { ...config, last_remote_etag: etag });
 ```
 
 Google Drive:
-- Ensure `iSnippets` folder exists (create if missing)
+- Ensure `iSnips` folder exists (create if missing)
 - Find `snippets.json` inside that folder
 - Use `headRevisionId` or `modifiedTime` as `last_remote_etag`
 

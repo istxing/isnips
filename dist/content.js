@@ -1,22 +1,22 @@
-// Content script for iSnippets extension
+// Content script for iSnips extension
 // Handles copy event detection and text highlighting
 
-class iSnippetsContent {
+class iSnipsContent {
   constructor() {
     this.highlights = [];
     this.init();
   }
 
   async init() {
-    console.log('iSnippets: Content script initializing...');
+    console.log('iSnips: Content script initializing...');
 
     try {
       // Check if site is blocked
       const isBlocked = await this.checkIfSiteBlocked();
-      console.log('iSnippets: Site blocked check result:', isBlocked);
+      console.log('iSnips: Site blocked check result:', isBlocked);
 
       if (isBlocked) {
-        console.log('iSnippets: Site is blocked, not initializing');
+        console.log('iSnips: Site is blocked, not initializing');
         return;
       }
 
@@ -29,9 +29,9 @@ class iSnippetsContent {
       // Clean up on page unload
       window.addEventListener('beforeunload', this.cleanup.bind(this));
 
-      console.log('iSnippets: Content script initialization complete');
+      console.log('iSnips: Content script initialization complete');
     } catch (error) {
-      console.error('iSnippets: Failed to initialize content script:', error);
+      console.error('iSnips: Failed to initialize content script:', error);
     }
   }
 
@@ -66,16 +66,16 @@ class iSnippetsContent {
   }
 
   async handleCapture() {
-    console.log('iSnippets: Capture command detected');
+    console.log('iSnips: Capture command detected');
     const selectedText = this.getSelectedText();
 
     if (selectedText && selectedText.trim().length > 0) {
-      console.log('iSnippets: Selected text found, saving snippet');
+      console.log('iSnips: Selected text found, saving snippet');
       const text = selectedText.trim().substring(0, 144);
       await this.saveClip(text);
       this.highlightSelection(text);
     } else {
-      console.log('iSnippets: No text selected, ignoring');
+      console.log('iSnips: No text selected, ignoring');
       this.showToast('尚未选中任何思维片段', false);
     }
   }
@@ -105,14 +105,14 @@ class iSnippetsContent {
       });
 
       if (result.success) {
-        console.log('iSnippets: Clip saved successfully');
+        console.log('iSnips: Clip saved successfully');
         this.showToast('已记录思维瞬间', true);
       } else {
-        console.log('iSnippets: Failed to save clip');
+        console.log('iSnips: Failed to save clip');
         this.showToast('记录片段出错', false);
       }
     } catch (error) {
-      console.error('iSnippets: Failed to save clip:', error);
+      console.error('iSnips: Failed to save clip:', error);
       this.showToast('记录片段出错', false);
     }
   }
@@ -123,7 +123,7 @@ class iSnippetsContent {
 
     const range = selection.getRangeAt(0);
     const highlightElement = document.createElement('span');
-    highlightElement.className = 'isnippets-highlight';
+    highlightElement.className = 'isnips-highlight';
     highlightElement.textContent = text;
     highlightElement.style.backgroundColor = '#ffeb3b';
     highlightElement.style.borderRadius = '2px';
@@ -173,7 +173,7 @@ class iSnippetsContent {
         });
       }
     } catch (error) {
-      console.error('iSnippets: Failed to load highlights:', error);
+      console.error('iSnips: Failed to load highlights:', error);
     }
   }
 
@@ -196,7 +196,7 @@ class iSnippetsContent {
           range.setEnd(node, index + highlight.text.length);
 
           const highlightElement = document.createElement('span');
-          highlightElement.className = 'isnippets-highlight';
+          highlightElement.className = 'isnips-highlight';
           highlightElement.textContent = highlight.text;
           highlightElement.style.backgroundColor = '#ffeb3b';
           highlightElement.style.borderRadius = '2px';
@@ -228,13 +228,13 @@ class iSnippetsContent {
         highlight: highlight
       });
     } catch (error) {
-      console.error('iSnippets: Failed to store highlight:', error);
+      console.error('iSnips: Failed to store highlight:', error);
     }
   }
 
   showToast(message, isSuccess) {
     const toast = document.createElement('div');
-    toast.className = `isnippets-toast ${isSuccess ? 'success' : 'error'}`;
+    toast.className = `isnips-toast ${isSuccess ? 'success' : 'error'}`;
     toast.textContent = message;
     toast.style.cssText = `
       position: fixed;
@@ -248,15 +248,15 @@ class iSnippetsContent {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 14px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      animation: isnippets-toast-slide-in 0.3s ease-out;
+      animation: isnips-toast-slide-in 0.3s ease-out;
     `;
 
     // Add keyframes if not exist
-    if (!document.getElementById('isnippets-toast-styles')) {
+    if (!document.getElementById('isnips-toast-styles')) {
       const style = document.createElement('style');
-      style.id = 'isnippets-toast-styles';
+      style.id = 'isnips-toast-styles';
       style.textContent = `
-        @keyframes isnippets-toast-slide-in {
+        @keyframes isnips-toast-slide-in {
           from { transform: translateX(100%); opacity: 0; }
           to { transform: translateX(0); opacity: 1; }
         }
@@ -274,22 +274,22 @@ class iSnippetsContent {
   }
 
   async showPopupCard(text, isPageIndex) {
-    console.log('iSnippets: showPopupCard called with text length:', text.length, 'isPageIndex:', isPageIndex);
+    console.log('iSnips: showPopupCard called with text length:', text.length, 'isPageIndex:', isPageIndex);
 
     // Remove existing popup if any - ensure complete cleanup
     this.removePopupCard();
 
     try {
-      console.log('iSnippets: Creating new PopupCard...');
+      console.log('iSnips: Creating new PopupCard...');
       // Create new popup card
       this.popupCard = new PopupCard(text, isPageIndex, this);
-      console.log('iSnippets: PopupCard created, calling init...');
+      console.log('iSnips: PopupCard created, calling init...');
       await this.popupCard.init();
-      console.log('iSnippets: PopupCard init complete, calling show...');
+      console.log('iSnips: PopupCard init complete, calling show...');
       this.popupCard.show();
-      console.log('iSnippets: PopupCard show called');
+      console.log('iSnips: PopupCard show called');
     } catch (error) {
-      console.error('iSnippets: Failed to create popup card:', error);
+      console.error('iSnips: Failed to create popup card:', error);
     }
   }
 
@@ -335,8 +335,8 @@ class iSnippetsContent {
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    new iSnippetsContent();
+    new iSnipsContent();
   });
 } else {
-  new iSnippetsContent();
+  new iSnipsContent();
 }

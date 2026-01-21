@@ -1,9 +1,9 @@
-// Background service worker for iSnippets extension
+// Background service worker for iSnips extension
 // Handles data storage and message routing
 // Import sync service
 importScripts('sync.js');
 
-class iSnippetsDatabase {
+class iSnipsDatabase {
   constructor() {
     this.db = null;
     this.dbName = 'ClipIndexDB';
@@ -631,7 +631,7 @@ let dbInstance = null;
 
 async function getDatabase() {
   if (!dbInstance) {
-    dbInstance = new iSnippetsDatabase();
+    dbInstance = new iSnipsDatabase();
     await dbInstance.initialize();
     await dbInstance.migrateIndexCardsToSnippets();
     syncService.setDatabase(dbInstance);

@@ -1,6 +1,6 @@
-// iSnippets Settings Page Script
+// iSnips Settings Page Script
 
-class iSnippetsSettings {
+class iSnipsSettings {
   constructor() {
     this.currentLanguage = 'en';
     this.translations = {};
@@ -261,8 +261,8 @@ class iSnippetsSettings {
 
         about_section: 'About',
         version_label: 'Version',
-        version_desc: 'iSnippets v2.0.2 - Intelligent clipping tool',
-        block_current_desc: 'Disable iSnippets on the current website, no longer automatically save clips',
+        version_desc: 'iSnips v2.0.2 - Intelligent clipping tool',
+        block_current_desc: 'Disable iSnips on the current website, no longer automatically save clips',
         features_label: 'Features',
         features_desc: 'Automatically save snippets when selecting text on web pages and pressing Alt+C, supports multi-language interface and waterfall layout',
         privacy_label: 'Privacy Statement',
@@ -321,8 +321,8 @@ class iSnippetsSettings {
         not_synced: 'Never synced'
       },
       'ja': {
-        settings_title: 'iSnippets - 設定',
-        settings_header_title: 'iSnippets 設定',
+        settings_title: 'iSnips - 設定',
+        settings_header_title: 'iSnips 設定',
         settings_header_desc: '本当に覚えたいことをメモする',
         language_section: '言語設定',
         language_label: 'インターフェース言語',
@@ -343,7 +343,7 @@ class iSnippetsSettings {
 
         about_section: 'について',
         version_label: 'バージョン',
-        version_desc: 'iSnippets v2.0.2 - インテリジェントなクリッピングツール',
+        version_desc: 'iSnips v2.0.2 - インテリジェントなクリッピングツール',
         features_label: '機能説明',
         features_desc: 'ウェブページのテキストを選択してAlt+Cを押すと自動的に片段を保存、多言語インターフェースとウォーターフォールレイアウトをサポート',
         privacy_label: 'プライバシーポリシー',
@@ -932,5 +932,5 @@ class iSnippetsSettings {
 
 // Initialize settings when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  new iSnippetsSettings();
+  new iSnipsSettings();
 });

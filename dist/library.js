@@ -1,6 +1,6 @@
-// iSnippets Sidebar Script - Side Panel Version
+// iSnips Sidebar Script - Side Panel Version
 
-class iSnippetsSidebar {
+class iSnipsSidebar {
     constructor() {
         this.cards = [];
         this.filteredCards = [];
@@ -173,7 +173,7 @@ class iSnippetsSidebar {
                 save: 'Save'
             },
             'ja': {
-                library_title: 'iSnippets - スニペットライブラリ',
+                library_title: 'iSnips - スニペットライブラリ',
                 settings: '設定',
                 search_placeholder: '検索…',
                 loading: '読み込み中...',
@@ -790,5 +790,5 @@ class iSnippetsSidebar {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    new iSnippetsSidebar();
+    new iSnipsSidebar();
 });

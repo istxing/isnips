@@ -1,5 +1,5 @@
 /**
- * iSnippets Sync Service
+ * iSnips Sync Service
  * Handles data bundling, merging, and communication with Google Drive/WebDAV.
  */
 
@@ -7,7 +7,7 @@ importScripts('merge.js');
 
 class SyncService {
   constructor() {
-    this.syncFolderName = 'iSnippets';
+    this.syncFolderName = 'iSnips';
     this.syncFileName = 'snippets.json';
     this.db = null;
   }

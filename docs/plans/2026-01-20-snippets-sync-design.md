@@ -1,8 +1,8 @@
-# iSnippets Snippets Sync Design
+# iSnips Snippets Sync Design
 
 ## Goal
-Unify local data model and sync protocol for iSnippets using a single remote snapshot file
-`iSnippets/snippets.json` with deterministic merge semantics based on `id` and `updated_at`.
+Unify local data model and sync protocol for iSnips using a single remote snapshot file
+`iSnips/snippets.json` with deterministic merge semantics based on `id` and `updated_at`.
 
 ## Data Model
 Local IndexedDB adds a new `snippets` store (keyPath `id`). Each record uses the new schema:
@@ -38,7 +38,7 @@ settings (e.g. `snippets_migrated = true`). Mapping rules:
 After migration, all reads/writes use `snippets`; `indexCards` remains but is no longer used.
 
 ## Sync Protocol
-Remote stores a single snapshot file: `iSnippets/snippets.json` (Drive/WebDAV).
+Remote stores a single snapshot file: `iSnips/snippets.json` (Drive/WebDAV).
 Sync button runs: Pull -> Merge -> Push.
 
 Merge rules:
