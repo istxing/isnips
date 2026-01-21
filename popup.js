@@ -110,21 +110,21 @@ class iSnippetsPopup {
     this.translations = {
       'zh-CN': {
         popup_title: 'iSnippets',
-        popup_desc: '记下你真正想记住的内容',
-        all_snippets: '全部片段',
-        recent_snippets: '最近片段',
-        take_note: '记下',
-        take_note_placeholder: '记下你的片段内容...',
+        popup_desc: '留存你的灵感与思维足迹',
+        all_snippets: '全部足迹',
+        recent_snippets: '近期足迹',
+        take_note: '随笔',
+        take_note_placeholder: '记录此刻的思维足迹...',
         link_page: '关联网页',
-        settings: '设置',
-        search_placeholder: '搜索…',
-        total_clips: '总片段数',
-        today_saved: '今日保存',
-        no_items: '暂无条目',
-        page_index: '记下',
-        load_data_error: '加载数据失败',
+        settings: '偏好设置',
+        search_placeholder: '搜索足迹…',
+        total_clips: '已刻下的足迹',
+        today_saved: '今日足迹',
+        no_items: '暂无足迹',
+        page_index: '随笔',
+        load_data_error: '加载足迹失败',
         load_stats_error: '加载统计失败',
-        load_recent_error: '加载最近条目失败'
+        load_recent_error: '加载近期足迹失败'
       },
       'en': {
         popup_title: 'iSnippets',
@@ -271,7 +271,7 @@ class iSnippetsPopup {
             <div class="recent-item" data-card-id="${card.id}">
               <button class="delete-item-btn" data-id="${card.id}" title="删除">✕</button>
               <div class="recent-text">
-                ${card.text ? this.escapeHtml(card.text) : t.page_index}
+                ${card.text ? this.escapeHtml(card.text) : '无标题'}
               </div>
               <div class="recent-meta">
                 ${sourceLink}
@@ -386,7 +386,6 @@ class iSnippetsPopup {
 
   async saveNote() {
     const noteTextarea = document.getElementById('noteTextarea');
-    const noteText = noteTextarea.value.trim();
     if (!noteText) {
       alert('随笔内容不能为空');
       return;

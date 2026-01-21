@@ -76,7 +76,7 @@ class iSnippetsContent {
       this.highlightSelection(text);
     } else {
       console.log('iSnippets: No text selected, ignoring');
-      this.showToast('请先选中文字', false);
+      this.showToast('尚未选中任何思维片段', false);
     }
   }
 
@@ -106,14 +106,14 @@ class iSnippetsContent {
 
       if (result.success) {
         console.log('iSnippets: Clip saved successfully');
-        this.showToast('已保存', true);
+        this.showToast('已刻下足迹', true);
       } else {
         console.log('iSnippets: Failed to save clip');
-        this.showToast('保存失败', false);
+        this.showToast('记录足迹出错', false);
       }
     } catch (error) {
       console.error('iSnippets: Failed to save clip:', error);
-      this.showToast('保存失败', false);
+      this.showToast('记录足迹出错', false);
     }
   }
 
@@ -129,7 +129,7 @@ class iSnippetsContent {
     highlightElement.style.borderRadius = '2px';
     highlightElement.style.padding = '2px 4px';
     highlightElement.style.cursor = 'pointer';
-    highlightElement.title = 'iSnippets: 点击跳转到详情';
+    highlightElement.title = 'iSnippets: 点击追溯思维足迹';
 
     // Store highlight info for persistence
     const highlightId = Date.now().toString();
@@ -202,7 +202,7 @@ class iSnippetsContent {
           highlightElement.style.borderRadius = '2px';
           highlightElement.style.padding = '2px 4px';
           highlightElement.style.cursor = 'pointer';
-          highlightElement.title = 'iSnippets: 点击跳转到详情';
+          highlightElement.title = 'iSnippets: 点击追溯思维足迹';
           highlightElement.dataset.highlightId = highlight.id;
 
           highlightElement.addEventListener('click', () => {

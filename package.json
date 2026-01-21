@@ -7,7 +7,6 @@
     "watch": "bun run build.js --watch"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.268",
-    "esbuild": "^0.20.2"
+    "@types/chrome": "^0.0.268"
   }
 }

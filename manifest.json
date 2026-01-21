@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "iSnippets",
   "version": "2.0.2",
-  "description": "记下你真正想记住的内容",
+  "description": "个人知识片段与灵感足迹管理系统",
   "permissions": [
     "storage",
     "activeTab",
@@ -46,14 +46,14 @@
         "default": "Alt+C",
         "mac": "Alt+C"
       },
-      "description": "保存选中的片段"
+      "description": "刻下这段思维足迹"
     },
     "_execute_action": {
       "suggested_key": {
         "default": "Alt+S",
         "mac": "Alt+S"
       },
-      "description": "打开侧边栏"
+      "description": "打开足迹库侧边栏"
     }
   },
   "options_page": "settings.html",
