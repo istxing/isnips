@@ -536,7 +536,7 @@ class iSnipsSidebar {
         <button class="restore-btn" title="${t.restore || '恢复'}">${t.restore || '恢复'}</button>
         <div class="clip-text">${this.escapeHtml(card.text)}</div>
         <div class="clip-meta">
-          <div class="clip-domain">${this.escapeHtml(card.domain || '')}</div>
+          <div class="clip-domain">${this.escapeHtml(card.domain || t.jotted_notes || '随笔')}</div>
           <div class="clip-date">${this.formatDate(dateToShow)}</div>
         </div>
       `;
@@ -557,7 +557,7 @@ class iSnipsSidebar {
         <button class="delete-btn" title="${t.delete || '删除'}">${t.delete || '删除'}</button>
         <div class="clip-text">${this.escapeHtml(card.text)}</div>
         <div class="clip-meta">
-          <div class="clip-domain">${this.escapeHtml(card.domain || '')}</div>
+          <div class="clip-domain">${this.escapeHtml(card.domain || t.jotted_notes || '随笔')}</div>
           <div class="clip-date">${this.formatDate(dateToShow)}</div>
         </div>
       `;
