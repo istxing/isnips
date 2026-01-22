@@ -194,8 +194,8 @@ class iSnipsSettings {
         load_error: '配置加载失败',
 
         shortcuts_section: '交互热键',
-        capture_shortcut_label: '捕捉思维瞬间',
-        capture_shortcut_desc: '选中内容后按下此键，将其永久记录在您的片段库中',
+        capture_shortcut_label: '捕捉网页片段',
+        capture_shortcut_desc: '选中内容后按下此键，将其记录在您的片段库中',
         sidebar_shortcut_label: '呼出侧边栏',
         sidebar_shortcut_desc: '快速开启您的知识侧边视角',
         shortcut_change_tip: '提示：您可以随时在浏览器“快捷键”设置中调整这些热键',
