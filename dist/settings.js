@@ -201,7 +201,7 @@ class iSnipsSettings {
         shortcut_change_tip: '提示：您可以随时在浏览器“快捷键”设置中调整这些热键',
         manage_shortcuts_btn: '自定义热键',
         display_section: '展示偏好',
-        columns_label: '足迹展示规模',
+        columns_label: '片段展示规模',
         columns_desc: '调整片段库在大屏幕上的列数展示效果',
         save_lang_success: '语言偏好已就绪',
         save_lang_error: '语言设置同步失败',
