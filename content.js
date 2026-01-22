@@ -158,33 +158,34 @@ class iSnipsContent {
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
 
-    const range = selection.getRangeAt(0);
-    const highlightElement = document.createElement('span');
-    highlightElement.className = 'isnips-highlight';
-    highlightElement.textContent = text;
-    highlightElement.style.backgroundColor = '#ffeb3b';
-    highlightElement.style.borderRadius = '2px';
-    highlightElement.style.padding = '2px 4px';
-    highlightElement.style.cursor = 'pointer';
-    const t = this.translations[this.currentLanguage] || this.translations['en'];
-    highlightElement.title = t.highlight_title || 'iSnips: Click to view details';
+    // Check if CSS Custom Highlight API is supported
+    if (!CSS.highlights) {
+      console.log('iSnips: CSS Custom Highlight API not supported, skipping highlight');
+      selection.removeAllRanges();
+      return;
+    }
 
-    // Store highlight info for persistence
+    // Clone the range to avoid modifying the original
+    const range = selection.getRangeAt(0).cloneRange();
     const highlightId = Date.now().toString();
-    highlightElement.dataset.highlightId = highlightId;
 
-    highlightElement.addEventListener('click', () => {
-      // Open library with this clip highlighted
-      chrome.runtime.sendMessage({
-        action: 'openLibraryWithHighlight',
-        highlightId: highlightId,
-        url: window.location.href
-      });
+    // Inject highlight styles if not already present
+    this.injectHighlightStyles();
+
+    // Add style rule for this highlight
+    this.addHighlightStyleRule(highlightId);
+
+    // Create a new Highlight object and register it
+    const highlight = new Highlight(range);
+    CSS.highlights.set(`isnips-highlight-${highlightId}`, highlight);
+
+    // Store highlight info for persistence (range info for potential restoration)
+    this.highlights.push({
+      id: highlightId,
+      text: text,
+      url: window.location.href,
+      timestamp: Date.now()
     });
-
-    // Replace the selected text with highlighted version
-    range.deleteContents();
-    range.insertNode(highlightElement);
 
     // Clear selection
     selection.removeAllRanges();
@@ -196,6 +197,31 @@ class iSnipsContent {
       url: window.location.href,
       timestamp: Date.now()
     });
+  }
+
+  injectHighlightStyles() {
+    if (document.getElementById('isnips-highlight-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'isnips-highlight-styles';
+    document.head.appendChild(style);
+  }
+
+  addHighlightStyleRule(highlightId) {
+    let style = document.getElementById('isnips-highlight-styles');
+    if (!style) {
+      this.injectHighlightStyles();
+      style = document.getElementById('isnips-highlight-styles');
+    }
+
+    // Add a rule for this specific highlight
+    const ruleName = `isnips-highlight-${highlightId}`;
+    const rule = `::highlight(${ruleName}) { background-color: #ffeb3b; color: inherit; }`;
+
+    // Avoid duplicate rules
+    if (!style.textContent.includes(ruleName)) {
+      style.textContent += rule + '\n';
+    }
   }
 
   async loadHighlights() {
@@ -216,7 +242,16 @@ class iSnipsContent {
   }
 
   restoreHighlight(highlight) {
-    // Find text in document and highlight it
+    // Check if CSS Custom Highlight API is supported
+    if (!CSS.highlights) {
+      console.log('iSnips: CSS Custom Highlight API not supported, skipping restore');
+      return;
+    }
+
+    // Inject highlight styles if not already present
+    this.injectHighlightStyles();
+
+    // Find text in document and highlight it using CSS Custom Highlight API
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT,
@@ -233,27 +268,13 @@ class iSnipsContent {
           range.setStart(node, index);
           range.setEnd(node, index + highlight.text.length);
 
-          const highlightElement = document.createElement('span');
-          highlightElement.className = 'isnips-highlight';
-          highlightElement.textContent = highlight.text;
-          highlightElement.style.backgroundColor = '#ffeb3b';
-          highlightElement.style.borderRadius = '2px';
-          highlightElement.style.padding = '2px 4px';
-          highlightElement.style.cursor = 'pointer';
-          const t = this.translations[this.currentLanguage] || this.translations['en'];
-          highlightElement.title = t.highlight_title || 'iSnips: Click to view details';
-          highlightElement.dataset.highlightId = highlight.id;
+          // Add style rule for this highlight
+          this.addHighlightStyleRule(highlight.id);
 
-          highlightElement.addEventListener('click', () => {
-            chrome.runtime.sendMessage({
-              action: 'openLibraryWithHighlight',
-              highlightId: highlight.id,
-              url: window.location.href
-            });
-          });
+          // Create a new Highlight object and register it
+          const cssHighlight = new Highlight(range);
+          CSS.highlights.set(`isnips-highlight-${highlight.id}`, cssHighlight);
 
-          range.deleteContents();
-          range.insertNode(highlightElement);
           break; // Only highlight first occurrence
         }
       }
