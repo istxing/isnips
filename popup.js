@@ -247,7 +247,7 @@ class iSnipsPopup {
       await this.loadRecentItems();
     } catch (error) {
       console.error('Failed to load popup data:', error);
-      this.showError(this.translations[this.currentLanguage]?.load_data_error || '加载数据失败');
+      this.showError(this.translations[this.currentLanguage]?.load_data_error || 'Failed to load data');
     }
   }
 
@@ -350,7 +350,7 @@ class iSnipsPopup {
             const card = recentCards.find(c => c.id == cardId);
             if (card && card.text) {
               navigator.clipboard.writeText(card.text).then(() => {
-                this.showToast(t.copied || '已复制内容', true);
+                this.showToast(t.copied || 'Copied', true);
               });
             }
           });
@@ -398,11 +398,11 @@ class iSnipsPopup {
     const diff = now - date;
 
     if (diff < 60000) { // Less than 1 minute
-      return t.just_now || '刚刚';
+      return t.just_now || 'Just now';
     } else if (diff < 3600000) { // Less than 1 hour
-      return `${Math.floor(diff / 60000)}${t.minutes_ago || '分钟前'}`;
+      return `${Math.floor(diff / 60000)}${t.minutes_ago || 'm ago'}`;
     } else if (diff < 86400000) { // Less than 1 day
-      return `${Math.floor(diff / 3600000)}${t.hours_ago || '小时前'}`;
+      return `${Math.floor(diff / 3600000)}${t.hours_ago || 'h ago'}`;
     } else {
       const locale = this.currentLanguage === 'zh-CN' ? 'zh-CN' : (this.currentLanguage === 'ja' ? 'ja-JP' : 'en-US');
       return date.toLocaleDateString(locale);
@@ -430,7 +430,7 @@ class iSnipsPopup {
     const t = this.translations[this.currentLanguage] || this.translations['en'];
 
     if (!noteText) {
-      alert(t.empty_note_error || '随笔内容不能为空');
+      alert(t.empty_note_error || 'Note content cannot be empty');
       return;
     }
 
@@ -473,14 +473,14 @@ class iSnipsPopup {
 
       if (result.success) {
         this.clearNote();
-        this.showToast(t.save_success || '随笔保存成功', true);
+        this.showToast(t.save_success || 'Note saved successfully', true);
       } else {
-        alert((t.save_error || '保存随笔失败') + '：' + (result.error || '未知错误'));
+        alert((t.save_error || 'Failed to save note') + '：' + (result.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Save note error:', error);
       const t = this.translations[this.currentLanguage] || this.translations['en'];
-      alert((t.save_error || '保存随笔失败') + '：' + error.message);
+      alert((t.save_error || 'Failed to save note') + '：' + error.message);
     }
   }
 

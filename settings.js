@@ -123,7 +123,7 @@ class iSnipsSettings {
           const display = document.getElementById('captureShortcutDisplay');
           if (display) {
             const t = this.translations[this.currentLanguage] || this.translations['en'] || {};
-            display.textContent = captureCommand.shortcut || (t.not_set || '未设置');
+            display.textContent = captureCommand.shortcut || (t.not_set || 'Not set');
           }
         }
 
@@ -131,7 +131,7 @@ class iSnipsSettings {
           const display = document.getElementById('sidebarShortcutDisplay');
           if (display) {
             const t = this.translations[this.currentLanguage] || this.translations['en'] || {};
-            display.textContent = sidebarCommand.shortcut || (t.not_set || '未设置');
+            display.textContent = sidebarCommand.shortcut || (t.not_set || 'Not set');
           }
         }
       }
@@ -573,7 +573,7 @@ class iSnipsSettings {
       const baseLang = lang.split('-')[0];
       const t = this.translations[lang] || this.translations[baseLang] || this.translations['en'];
 
-      document.getElementById('confirmMessage').textContent = t.import_confirm || '确定要导入数据吗？这将覆盖现有的所有摘录数据。';
+      document.getElementById('confirmMessage').textContent = t.import_confirm || 'Are you sure you want to import? This will overwrite all existing data.';
       this.showConfirmModal();
 
       // Clear file input
@@ -662,7 +662,7 @@ class iSnipsSettings {
   confirmClearData() {
     this.pendingAction = () => this.clearAllData();
     const t = this.translations[this.currentLanguage] || this.translations['en'];
-    document.getElementById('confirmMessage').textContent = t.clear_confirm || '确定要清除所有数据吗？此操作无法撤销，包括所有摘录和设置。';
+    document.getElementById('confirmMessage').textContent = t.clear_confirm || 'Are you sure you want to clear all data? This action cannot be undone.';
     this.showConfirmModal();
   }
 
@@ -881,9 +881,9 @@ class iSnipsSettings {
     const t = this.translations[this.currentLanguage] || this.translations['en'] || {};
     if (timestamp) {
       const dateStr = new Date(timestamp).toLocaleString();
-      el.textContent = (t.last_sync_desc || '上次同步时间：{0}').replace('{0}', dateStr);
+      el.textContent = (t.last_sync_desc || 'Last synced: {0}').replace('{0}', dateStr);
     } else {
-      el.textContent = t.not_synced || '尚未同步';
+      el.textContent = t.not_synced || 'Not synced yet';
     }
   }
 

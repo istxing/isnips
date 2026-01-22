@@ -111,7 +111,7 @@ class iSnipsContent {
     } else {
       console.log('iSnips: No text selected, ignoring');
       const t = this.translations[this.currentLanguage] || this.translations['en'];
-      this.showToast(t.no_text_selected || '尚未选中任何思维片段', false);
+      this.showToast(t.no_text_selected || 'No text selected', false);
     }
   }
 
@@ -142,15 +142,15 @@ class iSnipsContent {
       const t = this.translations[this.currentLanguage] || this.translations['en'];
       if (result.success) {
         console.log('iSnips: Clip saved successfully');
-        this.showToast(t.clip_saved || '已记录思维瞬间', true);
+        this.showToast(t.clip_saved || 'Snippet saved', true);
       } else {
         console.log('iSnips: Failed to save clip');
-        this.showToast(t.save_error || '记录片段出错', false);
+        this.showToast(t.save_error || 'Failed to save snippet', false);
       }
     } catch (error) {
       console.error('iSnips: Failed to save clip:', error);
       const t = this.translations[this.currentLanguage] || this.translations['en'];
-      this.showToast(t.save_error || '记录片段出错', false);
+      this.showToast(t.save_error || 'Failed to save snippet', false);
     }
   }
 
@@ -167,7 +167,7 @@ class iSnipsContent {
     highlightElement.style.padding = '2px 4px';
     highlightElement.style.cursor = 'pointer';
     const t = this.translations[this.currentLanguage] || this.translations['en'];
-    highlightElement.title = t.highlight_title || 'iSnips: 点击查看片段详情';
+    highlightElement.title = t.highlight_title || 'iSnips: Click to view details';
 
     // Store highlight info for persistence
     const highlightId = Date.now().toString();
@@ -241,7 +241,7 @@ class iSnipsContent {
           highlightElement.style.padding = '2px 4px';
           highlightElement.style.cursor = 'pointer';
           const t = this.translations[this.currentLanguage] || this.translations['en'];
-          highlightElement.title = t.highlight_title || 'iSnips: 点击查看片段详情';
+          highlightElement.title = t.highlight_title || 'iSnips: Click to view details';
           highlightElement.dataset.highlightId = highlight.id;
 
           highlightElement.addEventListener('click', () => {
