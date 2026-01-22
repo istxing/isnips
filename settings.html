@@ -458,42 +458,6 @@
         </div>
       </section>
 
-      <!-- Data Management -->
-      <section class="settings-section">
-        <h2 data-i18n="privacy_section">数据管理</h2>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <h3 data-i18n="export_label">数据导出</h3>
-            <p data-i18n="export_desc">将您的所有摘录数据导出为 JSON 文件</p>
-          </div>
-          <div class="setting-control">
-            <button id="exportDataBtn" class="btn btn-secondary" data-i18n="export_btn">导出数据</button>
-          </div>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <h3 data-i18n="import_label">数据导入</h3>
-            <p data-i18n="import_desc">从 JSON 文件导入摘录数据</p>
-          </div>
-          <div class="setting-control">
-            <input type="file" id="importDataInput" accept=".json" style="display: none;">
-            <button id="importDataBtn" class="btn btn-secondary" data-i18n="import_btn">导入数据</button>
-          </div>
-        </div>
-
-        <div class="setting-item danger">
-          <div class="setting-info">
-            <h3 data-i18n="clear_label">清除所有数据</h3>
-            <p data-i18n="clear_desc">删除所有摘录数据和设置。此操作无法撤销</p>
-          </div>
-          <div class="setting-control">
-            <button id="clearDataBtn" class="btn btn-danger" data-i18n="clear_btn">清除数据</button>
-          </div>
-        </div>
-      </section>
-
       <!-- Synchronization -->
       <section class="settings-section">
         <h2 data-i18n="sync_section">数据同步</h2>
@@ -561,6 +525,42 @@
           </div>
           <div class="setting-control">
             <button id="syncNowBtn" class="btn btn-primary" data-i18n="sync_now_btn">立即同步</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Data Management -->
+      <section class="settings-section">
+        <h2 data-i18n="privacy_section">数据管理</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="export_label">数据导出</h3>
+            <p data-i18n="export_desc">将您的所有摘录数据导出为 JSON 文件</p>
+          </div>
+          <div class="setting-control">
+            <button id="exportDataBtn" class="btn btn-secondary" data-i18n="export_btn">导出数据</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="import_label">数据导入</h3>
+            <p data-i18n="import_desc">从 JSON 文件导入摘录数据</p>
+          </div>
+          <div class="setting-control">
+            <input type="file" id="importDataInput" accept=".json" style="display: none;">
+            <button id="importDataBtn" class="btn btn-secondary" data-i18n="import_btn">导入数据</button>
+          </div>
+        </div>
+
+        <div class="setting-item danger">
+          <div class="setting-info">
+            <h3 data-i18n="clear_label">清除所有数据</h3>
+            <p data-i18n="clear_desc">删除所有摘录数据和设置。此操作无法撤销</p>
+          </div>
+          <div class="setting-control">
+            <button id="clearDataBtn" class="btn btn-danger" data-i18n="clear_btn">清除数据</button>
           </div>
         </div>
       </section>
