@@ -174,6 +174,8 @@ class iSnipsPopup {
         take_note_placeholder: 'スニペットの内容をメモする...',
         link_page: 'ページをリンク',
         settings: '設定',
+        save: '保存',
+        clear: 'クリア',
         search_placeholder: '検索…',
         total_clips: 'スニペット総数',
         today_saved: '今日保存',
