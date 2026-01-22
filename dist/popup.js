@@ -136,7 +136,10 @@ class iSnipsPopup {
         copied: '已复制内容',
         save_success: '保存成功',
         save_error: '保存失败',
-        empty_note_error: '内容不能为空'
+        empty_note_error: '内容不能为空',
+        edit: '编辑',
+        delete: '删除',
+        cancel: '取消'
       },
       'en': {
         popup_title: 'iSnips',
@@ -163,7 +166,10 @@ class iSnipsPopup {
         copied: 'Copied to clipboard',
         save_success: 'Note saved successfully',
         save_error: 'Failed to save note',
-        empty_note_error: 'Note content cannot be empty'
+        empty_note_error: 'Note content cannot be empty',
+        edit: 'Edit',
+        delete: 'Delete',
+        cancel: 'Cancel'
       },
       'ja': {
         popup_title: 'iSnips',
@@ -190,7 +196,10 @@ class iSnipsPopup {
         copied: 'コピーしました',
         save_success: 'メモを保存しました',
         save_error: 'メモの保存に失敗しました',
-        empty_note_error: 'メモの内容は空にできません'
+        empty_note_error: 'メモの内容は空にできません',
+        edit: '編集',
+        delete: '削除',
+        cancel: 'キャンセル'
       }
     };
   }
@@ -307,9 +316,10 @@ class iSnipsPopup {
 
           return `
             <div class="recent-item" data-card-id="${card.id}">
-              <button class="delete-item-btn" data-id="${card.id}" title="删除">✕</button>
+              <button class="edit-item-btn" data-id="${card.id}" title="${t.edit || 'Edit'}">✎</button>
+              <button class="delete-item-btn" data-id="${card.id}" title="${t.delete || 'Delete'}">✕</button>
               <div class="recent-text">
-                ${card.text ? this.escapeHtml(card.text) : '无标题'}
+                ${card.text ? this.escapeHtml(card.text) : 'No content'}
               </div>
               <div class="recent-meta">
                 ${sourceLink}
@@ -338,11 +348,28 @@ class iSnipsPopup {
           });
         });
 
+        // Bind edit events
+        document.querySelectorAll('.edit-item-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const cardId = e.target.dataset.id;
+            const card = recentCards.find(c => c.id == cardId);
+            if (card) {
+              this.enterEditMode(e.target.closest('.recent-item'), card);
+            }
+          });
+        });
+
         // Bind card click for copy
         document.querySelectorAll('.recent-item').forEach(item => {
           item.addEventListener('click', (e) => {
-            // Don't trigger if clicking buttons or links
-            if (e.target.closest('.delete-item-btn') || e.target.closest('.source-link')) {
+            // Don't trigger if clicking buttons or links or in edit mode
+            if (e.target.closest('.delete-item-btn') ||
+              e.target.closest('.edit-item-btn') ||
+              e.target.closest('.source-link') ||
+              e.target.closest('.edit-textarea') ||
+              e.target.closest('.edit-actions') ||
+              item.classList.contains('editing')) {
               return;
             }
 
@@ -362,6 +389,82 @@ class iSnipsPopup {
       console.error('Failed to load recent items:', error);
       const t = this.translations[this.currentLanguage] || this.translations['en'];
       document.getElementById('recentItems').innerHTML = `<div class="error">${t.load_recent_error}: ${error.message}</div>`;
+    }
+  }
+
+  enterEditMode(itemDiv, card) {
+    const t = this.translations[this.currentLanguage] || this.translations['en'];
+
+    itemDiv.classList.add('editing');
+
+    // Hide edit and delete buttons
+    const editBtn = itemDiv.querySelector('.edit-item-btn');
+    const deleteBtn = itemDiv.querySelector('.delete-item-btn');
+    if (editBtn) editBtn.style.display = 'none';
+    if (deleteBtn) deleteBtn.style.display = 'none';
+
+    // Replace text content with textarea
+    const textDiv = itemDiv.querySelector('.recent-text');
+    const metaDiv = itemDiv.querySelector('.recent-meta');
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'edit-textarea';
+    textarea.value = card.text || '';
+
+    textDiv.replaceWith(textarea);
+    if (metaDiv) metaDiv.style.display = 'none';
+
+    // Add action buttons
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'edit-actions';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-small btn-cancel';
+    cancelBtn.textContent = t.cancel || 'Cancel';
+    cancelBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.loadRecentItems(); // Refresh to reset
+    });
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-small btn-save';
+    saveBtn.textContent = t.save || 'Save';
+    saveBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await this.saveEdit(card.id, textarea.value);
+    });
+
+    actionsDiv.appendChild(cancelBtn);
+    actionsDiv.appendChild(saveBtn);
+    itemDiv.appendChild(actionsDiv);
+
+    setTimeout(() => textarea.focus(), 0);
+  }
+
+  async saveEdit(cardId, newText) {
+    const t = this.translations[this.currentLanguage] || this.translations['en'];
+
+    if (!newText.trim()) {
+      alert(t.empty_note_error || 'Content cannot be empty');
+      return;
+    }
+
+    try {
+      const result = await chrome.runtime.sendMessage({
+        action: 'updateSnippet',
+        cardId: cardId,
+        updates: { text: newText.trim() }
+      });
+
+      if (result.success) {
+        await this.loadRecentItems();
+        this.showToast(t.save_success || 'Saved', true);
+      } else {
+        alert((t.save_error || 'Save failed') + ': ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Save edit error:', error);
+      alert((t.save_error || 'Save failed') + ': ' + error.message);
     }
   }
 

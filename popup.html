@@ -209,10 +209,10 @@
       text-decoration: underline;
     }
 
-    .delete-item-btn {
+    .delete-item-btn,
+    .edit-item-btn {
       position: absolute;
       top: 8px;
-      right: 8px;
       width: 24px;
       height: 24px;
       display: flex;
@@ -228,13 +228,76 @@
       font-size: 12px;
     }
 
-    .recent-item:hover .delete-item-btn {
+    .delete-item-btn {
+      right: 8px;
+    }
+
+    .edit-item-btn {
+      right: 36px;
+    }
+
+    .recent-item:hover .delete-item-btn,
+    .recent-item:hover .edit-item-btn {
       opacity: 1;
     }
 
     .delete-item-btn:hover {
       background: #fee2e2;
       color: #ef4444;
+    }
+
+    .edit-item-btn:hover {
+      background: #dbeafe;
+      color: #3b82f6;
+    }
+
+    .recent-item.editing {
+      background: #f8fafc;
+    }
+
+    .recent-item .edit-textarea {
+      width: 100%;
+      min-height: 60px;
+      padding: 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: none;
+      margin-bottom: 8px;
+    }
+
+    .recent-item .edit-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .recent-item .btn-small {
+      padding: 4px 12px;
+      font-size: 12px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .recent-item .btn-save {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .recent-item .btn-save:hover {
+      background: #2563eb;
+    }
+
+    .recent-item .btn-cancel {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .recent-item .btn-cancel:hover {
+      background: #e2e8f0;
     }
 
     .note-section {
