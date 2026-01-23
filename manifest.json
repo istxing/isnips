@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "iSnips · 片语",
+  "default_locale": "zh_CN",
+  "name": "__MSG_app_name__",
   "version": "2.0.2",
-  "description": "一键记下网页片段与想法，自动保留来源，随时可回顾。",
+  "description": "__MSG_app_desc__",
   "permissions": [
     "storage",
     "activeTab",
@@ -38,7 +39,7 @@
     "default_path": "popup.html"
   },
   "action": {
-    "default_title": "iSnips · 片语"
+    "default_title": "__MSG_app_name__"
   },
   "commands": {
     "capture-snippet": {
@@ -46,14 +47,14 @@
         "default": "Alt+C",
         "mac": "Alt+C"
       },
-      "description": "记录这个思维瞬间"
+      "description": "__MSG_capture_command_desc__"
     },
     "_execute_action": {
       "suggested_key": {
         "default": "Alt+S",
         "mac": "Alt+S"
       },
-      "description": "打开片段库侧边栏"
+      "description": "__MSG_toggle_sidebar_command_desc__"
     }
   },
   "options_page": "settings.html",
