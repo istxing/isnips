@@ -10,5 +10,8 @@
     },
     "toggle_sidebar_command_desc": {
         "message": "打开片段库侧边栏"
+    },
+    "context_menu_save": {
+        "message": "记录到 iSnips"
     }
 }
