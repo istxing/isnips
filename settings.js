@@ -176,7 +176,7 @@ class iSnipsSettings {
       'zh-CN': {
         settings_title: 'iSnips · 偏好设置',
         settings_header_title: 'iSnips · 片语',
-        settings_header_desc: '一键记下网页片段与想法，自动保留来源，随时可回顾。',
+        settings_header_desc: '一键闪记网页片段与想法，自动保留来源，随时可回顾。',
         language_section: '语言与显示',
         language_label: '界面语言',
         language_desc: '选择您偏好的界面语言',
@@ -185,7 +185,7 @@ class iSnipsSettings {
         storage_desc: '您的思维数据仅存储在本地设备，确保绝对隐私',
         local_storage: '本地安全存储',
         export_label: '片段备份',
-        export_desc: '导出所有摘录与随笔，用于外部备份或迁移',
+        export_desc: '导出所有摘录与闪记，用于外部备份或迁移',
         export_btn: '导出备份',
         import_label: '恢复片段',
         import_desc: '从备份文件恢复您的知识片段',

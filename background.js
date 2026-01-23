@@ -889,7 +889,7 @@ chrome.runtime.onInstalled.addListener(async () => {
         {
           url: null,
           type: 'note',
-          text: '这是我的第一条随笔记录，用于测试笔记功能。',
+          text: '这是我的第一条闪记，用于捕捉瞬间灵感。',
           domain: null,
           created_at: Date.now() - 7200000,
           updated_at: Date.now() - 7200000,
