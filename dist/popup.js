@@ -241,17 +241,17 @@ class iSnipsPopup {
           if (this.currentLanguage === 'zh-CN') {
             hintEl.innerHTML = `
               <div>网页选中文字后按 <kbd>${captureShortcut}</kbd> 记录片段</div>
-              <div>按 <kbd>${toggleShortcut}</kbd> 快速呼出/隐藏此侧边栏</div>
+              <div>按 <kbd>${toggleShortcut}</kbd> 快速呼出此侧边栏</div>
             `;
           } else if (this.currentLanguage === 'ja') {
             hintEl.innerHTML = `
               <div>テキストを選択し、<kbd>${captureShortcut}</kbd> で保存</div>
-              <div><kbd>${toggleShortcut}</kbd> でサイドバーを表示/非表示</div>
+              <div><kbd>${toggleShortcut}</kbd> でサイドバーを表示</div>
             `;
           } else {
             hintEl.innerHTML = `
               <div>Select text and press <kbd>${captureShortcut}</kbd> to save</div>
-              <div>Press <kbd>${toggleShortcut}</kbd> to toggle this sidebar</div>
+              <div>Press <kbd>${toggleShortcut}</kbd> to show this sidebar</div>
             `;
           }
         }
