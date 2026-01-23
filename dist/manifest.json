@@ -10,7 +10,8 @@
     "tabs",
     "sidePanel",
     "alarms",
-    "identity"
+    "identity",
+    "contextMenus"
   ],
   "oauth2": {
     "client_id": "30003599100-7v7t6tkd26lsq1i3f9jo1977dt2hectt.apps.googleusercontent.com",

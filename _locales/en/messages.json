@@ -10,5 +10,8 @@
     },
     "toggle_sidebar_command_desc": {
         "message": "Open iSnips Sidebar"
+    },
+    "context_menu_save": {
+        "message": "Save to iSnips"
     }
 }

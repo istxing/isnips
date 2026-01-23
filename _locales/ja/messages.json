@@ -10,5 +10,8 @@
     },
     "toggle_sidebar_command_desc": {
         "message": "スニペットライブラリのサイドバーを開く"
+    },
+    "context_menu_save": {
+        "message": "iSnips に記録"
     }
 }

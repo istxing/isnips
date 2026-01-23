@@ -658,6 +658,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
+// Handle context menu clicks
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === 'save-to-isnips' && tab.id) {
+    chrome.tabs.sendMessage(tab.id, { action: 'captureSnippet' }).catch(err => {
+      console.error('Failed to send capture message to tab:', err);
+    });
+  }
+});
+
 async function broadcastDataChange(action, data = null) {
   // 1. Send to other extension components (popups, side panels)
   chrome.runtime.sendMessage({ action, ...data ? { data } : {} }).catch(() => { });
@@ -904,6 +913,16 @@ chrome.runtime.onInstalled.addListener(async () => {
       console.log(`Detected browser language: ${uiLang}, setting default to: ${defaultLang}`);
       await db.setSetting('language', defaultLang);
     }
+
+    // Initialize context menu
+    chrome.contextMenus.removeAll(() => {
+      chrome.contextMenus.create({
+        id: 'save-to-isnips',
+        title: chrome.i18n.getMessage('context_menu_save'),
+        contexts: ['selection']
+      });
+      console.log('Context menu created');
+    });
 
     // Check if we already have data
     const existingCards = await db.getAllSnippetsIncludingDeleted();
