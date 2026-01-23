@@ -62,6 +62,72 @@ class iSnipsDatabase {
     });
   }
 
+  // Generate localized sample data for first-time users
+  getSampleData(lang) {
+    const now = Date.now();
+    const samples = {
+      'zh-CN': [
+        {
+          url: 'https://isnips.app/welcome',
+          type: 'web',
+          text: '欢迎使用 iSnips！在网页上选中文字，右键或按 Alt+C 即可存为“摘录”。',
+          domain: 'isnips.app',
+          title: '入门指南',
+          created_at: now - 86400000,
+          updated_at: now - 86400000
+        },
+        {
+          url: null,
+          type: 'note',
+          text: '这是您的第一条“闪记”。您可以随时点击右下角的 + 号，记录脑海中闪现的灵感。',
+          domain: null,
+          created_at: now - 3600000,
+          updated_at: now - 3600000
+        }
+      ],
+      'en': [
+        {
+          url: 'https://isnips.app/welcome',
+          type: 'web',
+          text: 'Welcome to iSnips! Select text on any page, right-click or press Alt+C to save it as a "Clip".',
+          domain: 'isnips.app',
+          title: 'Getting Started',
+          created_at: now - 86400000,
+          updated_at: now - 86400000
+        },
+        {
+          url: null,
+          type: 'note',
+          text: 'This is your first "Flash Note". Click the + button to capture your quick thoughts and inspirations anytime.',
+          domain: null,
+          created_at: now - 3600000,
+          updated_at: now - 3600000
+        }
+      ],
+      'ja': [
+        {
+          url: 'https://isnips.app/welcome',
+          type: 'web',
+          text: 'iSnips へようこそ！テキストを選択して右クリック、または Alt+C で「摘録」として保存できます。',
+          domain: 'isnips.app',
+          title: 'スタートガイド',
+          created_at: now - 86400000,
+          updated_at: now - 86400000
+        },
+        {
+          url: null,
+          type: 'note',
+          text: 'これは最初の「閃記」です。右下の + ボタンから、いつでもアイデアを素早くメモできます。',
+          domain: null,
+          created_at: now - 3600000,
+          updated_at: now - 3600000
+        }
+      ]
+    };
+
+    return samples[lang] || samples['en'];
+  }
+
   // Snippets operations
   async saveSnippet(snippetData) {
     const db = await this.initialize();
@@ -831,7 +897,7 @@ if (chrome.alarms) {
 // Initialize default data on install
 chrome.runtime.onInstalled.addListener(async () => {
   try {
-    console.log('ClipIndex v2.0.0 installed successfully');
+    console.log('iSnips v2.0.2 installed successfully');
 
     // Add some sample data for testing
     const db = await getDatabase();
@@ -863,46 +929,16 @@ chrome.runtime.onInstalled.addListener(async () => {
     // Check if we already have data
     const existingCards = await db.getAllSnippetsIncludingDeleted();
     if (existingCards.length === 0) {
-      console.log('Adding sample data...');
+      console.log('Adding localized sample data...');
 
-      const sampleCards = [
-        {
-          url: 'https://example.com/article1',
-          type: 'web',
-          text: '这是一个示例摘录内容，用于测试 ClipIndex 功能。',
-          domain: 'example.com',
-          created_at: Date.now() - 86400000,
-          updated_at: Date.now() - 86400000,
-          deleted_at: null,
-          purged_at: null
-        },
-        {
-          url: 'https://example.com/article2',
-          type: 'web',
-          text: '另一个测试摘录，展示瀑布流布局的效果。',
-          domain: 'example.com',
-          created_at: Date.now() - 3600000,
-          updated_at: Date.now() - 3600000,
-          deleted_at: null,
-          purged_at: null
-        },
-        {
-          url: null,
-          type: 'note',
-          text: '这是我的第一条闪记，用于捕捉瞬间灵感。',
-          domain: null,
-          created_at: Date.now() - 7200000,
-          updated_at: Date.now() - 7200000,
-          deleted_at: null,
-          purged_at: null
-        }
-      ];
+      const currentLang = await db.getSetting('language', 'en');
+      const sampleCards = db.getSampleData(currentLang);
 
       for (const card of sampleCards) {
         await db.saveSnippet(card);
       }
 
-      console.log('Sample data added successfully');
+      console.log(`Sample data (${currentLang}) added successfully`);
     }
 
     // Run initial cleanup
