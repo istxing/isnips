@@ -230,18 +230,29 @@ class iSnipsPopup {
     try {
       if (chrome && chrome.commands) {
         const commands = await chrome.commands.getAll();
-        const captureCommand = commands.find(c => c.name === 'capture-snippet');
-
         const hintEl = document.getElementById('shortcutHint');
-        if (hintEl && captureCommand) {
-          const shortcut = captureCommand.shortcut || (this.currentLanguage === 'zh-CN' ? '未设置' : (this.currentLanguage === 'ja' ? '未設定' : 'Not set'));
+        if (hintEl) {
+          const captureCommand = commands.find(c => c.name === 'capture-snippet');
+          const toggleCommand = commands.find(c => c.name === '_execute_action');
+
+          const captureShortcut = (captureCommand && captureCommand.shortcut) || '⌥C';
+          const toggleShortcut = (toggleCommand && toggleCommand.shortcut) || '⌥S';
 
           if (this.currentLanguage === 'zh-CN') {
-            hintEl.innerHTML = `在网页选中文字后按 <kbd>${shortcut}</kbd> 即可快速记录片段`;
+            hintEl.innerHTML = `
+              <div>网页选中文字后按 <kbd>${captureShortcut}</kbd> 记录片段</div>
+              <div>按 <kbd>${toggleShortcut}</kbd> 快速呼出/隐藏此侧边栏</div>
+            `;
           } else if (this.currentLanguage === 'ja') {
-            hintEl.innerHTML = `テキストを選択し、<kbd>${shortcut}</kbd> を押すとスニペットを保存します`;
+            hintEl.innerHTML = `
+              <div>テキストを選択し、<kbd>${captureShortcut}</kbd> で保存</div>
+              <div><kbd>${toggleShortcut}</kbd> でサイドバーを表示/非表示</div>
+            `;
           } else {
-            hintEl.innerHTML = `Select text and press <kbd>${shortcut}</kbd> to save a fragment`;
+            hintEl.innerHTML = `
+              <div>Select text and press <kbd>${captureShortcut}</kbd> to save</div>
+              <div>Press <kbd>${toggleShortcut}</kbd> to toggle this sidebar</div>
+            `;
           }
         }
       }
