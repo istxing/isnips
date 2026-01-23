@@ -210,7 +210,7 @@ class iSnipsSidebar {
                 search_placeholder: 'スニペットを検索...',
                 loading: '読み込み中...',
                 no_clips_title: 'スニペットがありません',
-                no_clips_desc: 'ウェブページのテキストを選択し、Ctrl+Cで保存',
+                no_clips_desc: 'ウェブページのテキストを選択し、Alt+Cで保存',
                 no_results: '一致する結果はありません',
                 today: '今日',
                 yesterday: '昨日',
@@ -550,11 +550,13 @@ class iSnipsSidebar {
                 }
             });
         } else {
-            // Normal view: Edit and Delete buttons
+            // Normal view: Edit and Delete buttons in a floating banner
             const t = this.translations[this.currentLanguage] || this.translations['en'];
             cardDiv.innerHTML = `
-        <button class="edit-btn" title="${t.edit || 'Edit'}">${t.edit || 'Edit'}</button>
-        <button class="delete-btn" title="${t.delete || 'Delete'}">${t.delete || 'Delete'}</button>
+        <div class="card-actions-banner">
+          <button class="edit-btn" title="${t.edit || 'Edit'}">✎</button>
+          <button class="delete-btn" title="${t.delete || 'Delete'}">✕</button>
+        </div>
         <div class="clip-text">${this.escapeHtml(card.text)}</div>
         <div class="clip-meta">
           <div class="clip-domain">${this.escapeHtml(card.domain || t.jotted_notes || 'Jotted')}</div>

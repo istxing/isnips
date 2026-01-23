@@ -316,8 +316,10 @@ class iSnipsPopup {
 
           return `
             <div class="recent-item" data-card-id="${card.id}">
-              <button class="edit-item-btn" data-id="${card.id}" title="${t.edit || 'Edit'}">✎</button>
-              <button class="delete-item-btn" data-id="${card.id}" title="${t.delete || 'Delete'}">✕</button>
+              <div class="item-actions-banner">
+                <button class="edit-item-btn" data-id="${card.id}" title="${t.edit || 'Edit'}">✎</button>
+                <button class="delete-item-btn" data-id="${card.id}" title="${t.delete || 'Delete'}">✕</button>
+              </div>
               <div class="recent-text">
                 ${card.text ? this.escapeHtml(card.text) : 'No content'}
               </div>

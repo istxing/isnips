@@ -298,7 +298,7 @@ body {
 
 .btn-sm {
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* Trash Controls */
@@ -546,7 +546,7 @@ body {
   }
 
   .language-select {
-    font-size: 13px;
+    font-size: 14px;
     padding: 4px 8px;
   }
 }

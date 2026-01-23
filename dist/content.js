@@ -71,8 +71,8 @@ class iSnipsContent {
   loadTranslations() {
     this.translations = {
       'zh-CN': {
-        no_text_selected: '尚未选中任何思维片段',
-        clip_saved: '已记录思维瞬间',
+        no_text_selected: '尚未选中网页内容',
+        clip_saved: '已记录',
         save_error: '记录片段出错',
         highlight_title: 'iSnips: 点击查看片段详情'
       },
