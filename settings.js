@@ -763,7 +763,7 @@ class iSnipsSettings {
 
   openDatabase() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('ClipIndexDB', 3);
+      const request = indexedDB.open('iSnipsIndexDB', 3);
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
