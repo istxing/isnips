@@ -1,0 +1,17 @@
+{
+    "app_name": {
+        "message": "iSnips"
+    },
+    "app_desc": {
+        "message": "ウェブのスニペットや閃記をワンクリックで保存し、ソースを自動的に保持します。"
+    },
+    "capture_command_desc": {
+        "message": "この思考の瞬間を記録する"
+    },
+    "toggle_sidebar_command_desc": {
+        "message": "スニペットライブラリのサイドバーを開く"
+    },
+    "context_menu_save": {
+        "message": "iSnips に記録"
+    }
+}

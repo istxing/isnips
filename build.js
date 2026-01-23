@@ -1,14 +1,30 @@
 const fs = require('fs');
 const path = require('path');
 
+function copyRecursiveSync(src, dest) {
+  const exists = fs.existsSync(src);
+  const stats = exists && fs.statSync(src);
+  const isDirectory = exists && stats.isDirectory();
+  if (isDirectory) {
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest);
+    }
+    fs.readdirSync(src).forEach((childItemName) => {
+      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+    });
+  } else {
+    fs.copyFileSync(src, dest);
+  }
+}
+
 function build() {
   // Create dist directory if it doesn't exist
   if (!fs.existsSync('dist')) {
     fs.mkdirSync('dist');
   }
 
-  // Copy all necessary files to dist
-  const filesToCopy = [
+  // Files and directories to copy
+  const itemsToCopy = [
     'library.html',
     'library.js',
     'library.css',
@@ -23,15 +39,16 @@ function build() {
     'popup.html',
     'popup.js',
     'theme-manager.js',
-    'theme.css'
+    'theme.css',
+    '_locales'
   ];
 
-  filesToCopy.forEach(file => {
-    if (fs.existsSync(file)) {
-      fs.copyFileSync(file, `dist/${file}`);
-      console.log(`Copied ${file}`);
+  itemsToCopy.forEach(item => {
+    if (fs.existsSync(item)) {
+      copyRecursiveSync(item, `dist/${item}`);
+      console.log(`Copied ${item}`);
     } else {
-      console.warn(`Warning: ${file} not found, skipping`);
+      console.warn(`Warning: ${item} not found, skipping`);
     }
   });
 
