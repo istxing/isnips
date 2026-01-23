@@ -7,10 +7,8 @@ class iSnipsDatabase {
   constructor() {
     this.db = null;
     this.dbName = 'iSnipsIndexDB';
-    this.oldDbName = 'ClipIndexDB';
-    this.dbVersion = 3;
+    this.dbVersion = 1;
     this.initialized = false;
-    this.isMigrating = false;
   }
 
   async initialize() {
@@ -18,13 +16,7 @@ class iSnipsDatabase {
       return this.db;
     }
 
-    return new Promise(async (resolve, reject) => {
-      // If already initialized, return existing DB
-      if (this.db) return resolve(this.db);
-
-      // Check if migration is needed
-      await this.checkAndMigrate();
-
+    return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
 
       request.onerror = () => {
@@ -39,171 +31,35 @@ class iSnipsDatabase {
         resolve(this.db);
       };
 
-      request.onupgradeneeded = (event) => this.handleUpgrade(event);
-    });
-  }
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        console.log('Initializing IndexedDB schema version', this.dbVersion);
 
-  async migrateIndexCardsToSnippets() {
-    const migrated = await this.getSetting('snippets_migrated', false);
-    if (migrated) return;
-
-    const db = await this.initialize();
-    const cards = await new Promise((resolve, reject) => {
-      const transaction = db.transaction(['indexCards'], 'readonly');
-      const request = transaction.objectStore('indexCards').getAll();
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
-    });
-
-    if (cards.length === 0) {
-      await this.setSetting('snippets_migrated', true);
-      return;
-    }
-
-    await new Promise((resolve, reject) => {
-      const transaction = db.transaction(['snippets'], 'readwrite');
-      const store = transaction.objectStore('snippets');
-      for (const card of cards) {
-        const text = (card.clipText || card.title || '').trim();
-        const url = card.url || null;
-        const snippet = {
-          id: card.id,
-          type: url ? 'web' : 'note',
-          text: text.slice(0, 144),
-          url,
-          domain: card.domain || null,
-          spaceId: card.spaceId || null,
-          created_at: card.createdAt || Date.now(),
-          updated_at: card.updatedAt || card.createdAt || Date.now(),
-          deleted_at: card.deletedAt || null,
-          purged_at: null
-        };
-        store.put(snippet);
-      }
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-    });
-
-    await this.setSetting('snippets_migrated', true);
-  }
-
-  async checkAndMigrate() {
-    // Check if migration has already been done
-    const migrationDone = await this.getSetting('db_migration_to_isnips_done', false);
-    if (migrationDone) return;
-
-    // Check if old database exists
-    const databases = await indexedDB.databases();
-    const oldDbExists = databases.some(db => db.name === this.oldDbName);
-    if (!oldDbExists) {
-      await this.setSetting('db_migration_to_isnips_done', true);
-      return;
-    }
-
-    console.log(`Starting migration from ${this.oldDbName} to ${this.dbName}...`);
-    this.isMigrating = true;
-
-    try {
-      const oldDb = await new Promise((resolve, reject) => {
-        const req = indexedDB.open(this.oldDbName);
-        req.onerror = () => reject(req.error);
-        req.onsuccess = () => resolve(req.result);
-      });
-
-      // Ensure new DB is initialized with schema before migration
-      const newDb = await new Promise((resolve, reject) => {
-        const req = indexedDB.open(this.dbName, this.dbVersion);
-        req.onupgradeneeded = (e) => this.handleUpgrade(e);
-        req.onerror = () => reject(req.error);
-        req.onsuccess = () => resolve(req.result);
-      });
-
-      const stores = ['indexCards', 'highlights', 'snippets', 'settings'];
-      for (const storeName of stores) {
-        if (!oldDb.objectStoreNames.contains(storeName)) continue;
-
-        console.log(`Migrating store: ${storeName}...`);
-        const data = await new Promise((resolve, reject) => {
-          const tx = oldDb.transaction([storeName], 'readonly');
-          const store = tx.objectStore(storeName);
-          const req = store.getAll();
-          req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => reject(req.error);
-        });
-
-        if (data.length > 0) {
-          await new Promise((resolve, reject) => {
-            const tx = newDb.transaction([storeName], 'readwrite');
-            const store = tx.objectStore(storeName);
-            data.forEach(item => store.put(item));
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
-          });
+        // Highlights store
+        if (!db.objectStoreNames.contains('highlights')) {
+          const highlightsStore = db.createObjectStore('highlights', { keyPath: 'id' });
+          highlightsStore.createIndex('url', 'url', { unique: false });
+          highlightsStore.createIndex('timestamp', 'timestamp', { unique: false });
         }
-      }
 
-      oldDb.close();
-      newDb.close();
+        // Snippets store
+        if (!db.objectStoreNames.contains('snippets')) {
+          const snippetsStore = db.createObjectStore('snippets', { keyPath: 'id' });
+          snippetsStore.createIndex('created_at', 'created_at', { unique: false });
+          snippetsStore.createIndex('updated_at', 'updated_at', { unique: false });
+          snippetsStore.createIndex('deleted_at', 'deleted_at', { unique: false });
+          snippetsStore.createIndex('purged_at', 'purged_at', { unique: false });
+          snippetsStore.createIndex('domain', 'domain', { unique: false });
+        }
 
-      await this.setSetting('db_migration_to_isnips_done', true);
-      console.log('Database migration completed successfully');
+        // Settings store
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings', { keyPath: 'key' });
+        }
 
-      // Optionally delete old database? Let's keep it for safety for now.
-      // indexedDB.deleteDatabase(this.oldDbName);
-    } catch (error) {
-      console.error('Database migration failed:', error);
-    } finally {
-      this.isMigrating = false;
-    }
-  }
-
-  // Refactored upgrade logic for reuse
-  handleUpgrade(event) {
-    const db = event.target.result;
-    const oldVersion = event.oldVersion;
-    console.log('Upgrading IndexedDB from version', oldVersion, 'to', this.dbVersion);
-
-    // Index Cards store
-    if (!db.objectStoreNames.contains('indexCards')) {
-      const cardsStore = db.createObjectStore('indexCards', { keyPath: 'id' });
-      cardsStore.createIndex('url', 'url', { unique: false });
-      cardsStore.createIndex('domain', 'domain', { unique: false });
-      cardsStore.createIndex('createdAt', 'createdAt', { unique: false });
-      cardsStore.createIndex('category', 'category', { unique: false });
-      cardsStore.createIndex('deletedAt', 'deletedAt', { unique: false });
-    } else if (oldVersion < 2) {
-      const cardsStore = event.target.transaction.objectStore('indexCards');
-      if (!cardsStore.indexNames.contains('category')) {
-        cardsStore.createIndex('category', 'category', { unique: false });
-      }
-      if (!cardsStore.indexNames.contains('deletedAt')) {
-        cardsStore.createIndex('deletedAt', 'deletedAt', { unique: false });
-      }
-    }
-
-    // Highlights store
-    if (!db.objectStoreNames.contains('highlights')) {
-      const highlightsStore = db.createObjectStore('highlights', { keyPath: 'id' });
-      highlightsStore.createIndex('url', 'url', { unique: false });
-      highlightsStore.createIndex('timestamp', 'timestamp', { unique: false });
-    }
-
-    // Snippets store
-    if (!db.objectStoreNames.contains('snippets')) {
-      const snippetsStore = db.createObjectStore('snippets', { keyPath: 'id' });
-      snippetsStore.createIndex('created_at', 'created_at', { unique: false });
-      snippetsStore.createIndex('updated_at', 'updated_at', { unique: false });
-      snippetsStore.createIndex('deleted_at', 'deleted_at', { unique: false });
-      snippetsStore.createIndex('purged_at', 'purged_at', { unique: false });
-      snippetsStore.createIndex('domain', 'domain', { unique: false });
-    }
-
-    // Settings store
-    if (!db.objectStoreNames.contains('settings')) {
-      db.createObjectStore('settings', { keyPath: 'key' });
-    }
-
-    console.log('IndexedDB schema updated');
+        console.log('IndexedDB schema initialized');
+      };
+    });
   }
 
   // Snippets operations
