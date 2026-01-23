@@ -4,21 +4,24 @@
 <head>
   <meta charset="utf-8">
   <title data-i18n="library_title">iSnips - 片段库</title>
+  <link rel="stylesheet" href="theme.css">
   <link rel="stylesheet" href="library.css">
   <style>
     /* Additional styles for the pure JavaScript version */
     .app-container {
       min-height: 100vh;
-      background: #f8fafc;
+      background: var(--bg-primary);
     }
 
     .header {
-      background: #ffffff;
+      background: var(--bg-tertiary);
+      backdrop-filter: var(--blur-bg);
+      -webkit-backdrop-filter: var(--blur-bg);
       padding: 0;
       position: sticky;
       top: 0;
       z-index: 10;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border-bottom: 1px solid var(--border-color);
     }
 
     .header-content {
@@ -35,7 +38,7 @@
       margin: 0;
       font-size: 24px;
       font-weight: 600;
-      color: #1e293b;
+      color: var(--text-primary);
     }
 
     .header-controls {
@@ -46,19 +49,19 @@
 
     .language-select {
       padding: 8px 12px;
-      border: none;
+      border: 1px solid var(--border-color);
       border-radius: 6px;
-      background: #f8fafc;
+      background: var(--bg-secondary);
       font-size: 14px;
-      color: #374151;
+      color: var(--text-primary);
       cursor: pointer;
       min-width: 120px;
     }
 
     .language-select:focus {
       outline: none;
-      background: #ffffff;
-      box-shadow: 0 0 0 2px #3b82f6;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
     }
 
     .btn {
@@ -76,8 +79,9 @@
     }
 
     .btn-secondary {
-      background: #f8fafc;
-      color: #475569;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
     }
 
     .btn-secondary:hover {
@@ -104,16 +108,17 @@
       width: 100%;
       max-width: 400px;
       padding: 12px 16px;
-      border: none;
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       font-size: 16px;
-      background: #f8fafc;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
     }
 
     .search-input:focus {
       outline: none;
-      background: #ffffff;
-      box-shadow: 0 0 0 2px #3b82f6;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
     }
 
     #cardsContainer {
@@ -164,32 +169,32 @@
     .date-group-title {
       font-size: 16px;
       font-weight: 600;
-      color: #374151;
+      color: var(--text-primary);
       margin-bottom: 16px;
-      padding-left: 8px;
-      border-left: 4px solid #3b82f6;
+      padding-left: 12px;
+      border-left: 4px solid var(--accent-color);
       column-span: all;
     }
 
     .clip-card {
-      background: #ffffff;
-      border-radius: 6px;
-      padding: 12px;
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius-lg);
+      padding: 16px;
       cursor: pointer;
       position: relative;
-      border: none;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
       width: 100%;
       margin-bottom: 12px;
       display: block;
       break-inside: avoid;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .clip-card:hover {
-      background: #fafafa;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      transform: none;
+      background: var(--bg-secondary);
+      box-shadow: var(--card-shadow-hover);
+      transform: translateY(-2px);
     }
 
     .clip-card.editing {
@@ -212,8 +217,10 @@
       align-items: flex-start;
       gap: 4px;
       padding: 8px 8px 0;
-      background: linear-gradient(to bottom, rgba(219, 234, 254, 0.95), rgba(219, 234, 254, 0.5) 40%, transparent 100%);
-      border-radius: 6px 6px 0 0;
+      background: linear-gradient(to bottom, var(--bg-tertiary), transparent);
+      backdrop-filter: var(--blur-bg);
+      -webkit-backdrop-filter: var(--blur-bg);
+      border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
       opacity: 0;
       transition: opacity 0.2s ease;
       z-index: 1;
@@ -284,16 +291,16 @@
       border-radius: 6px;
       font-size: 14px;
       line-height: 1.6;
-      color: #374151;
+      color: var(--text-primary);
       resize: vertical;
       margin-bottom: 12px;
-      background: #f8fafc;
+      background: var(--bg-primary);
     }
 
     .edit-textarea:focus {
       outline: none;
-      background: #ffffff;
-      box-shadow: 0 0 0 2px #3b82f6;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
     }
 
     .edit-actions {
@@ -322,8 +329,8 @@
     }
 
     .btn-cancel {
-      background: #f3f4f6;
-      color: #374151;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
     }
 
     .btn-cancel:hover {
@@ -332,8 +339,8 @@
 
     .clip-text {
       font-size: 14px;
-      line-height: 1.5;
-      color: #374151;
+      line-height: 1.6;
+      color: var(--text-primary);
       margin-bottom: 8px;
       word-break: break-word;
     }
@@ -343,13 +350,13 @@
       justify-content: space-between;
       align-items: center;
       font-size: 11px;
-      color: #94a3b8;
-      padding-top: 4px;
+      color: var(--text-muted);
+      padding-top: 8px;
     }
 
     .clip-domain {
       font-weight: 500;
-      color: #64748b;
+      color: var(--text-secondary);
       transition: all 0.2s ease;
       cursor: pointer;
     }
@@ -378,7 +385,7 @@
       margin: 0 0 8px 0;
       font-size: 20px;
       font-weight: 600;
-      color: #374151;
+      color: var(--text-primary);
     }
 
     .empty-state p {
@@ -397,13 +404,13 @@
     /* Sidebar styles */
     .sidebar {
       width: 250px;
-      background: #ffffff;
+      background: var(--bg-secondary);
       padding: 0;
       position: fixed;
       height: 100vh;
       overflow-y: auto;
       z-index: 5;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+      border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
     }
@@ -430,7 +437,7 @@
       margin: 0 0 12px 0;
       font-size: 16px;
       font-weight: 600;
-      color: #374151;
+      color: var(--text-primary);
     }
 
     .category-list {
@@ -440,23 +447,25 @@
     }
 
     .category-btn {
-      padding: 8px 12px;
+      padding: 10px 16px;
       border: none;
-      border-radius: 6px;
-      background: #f3f4f6;
-      color: #374151;
+      border-radius: var(--border-radius-md);
+      background: transparent;
+      color: var(--text-secondary);
       text-align: left;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       font-size: 14px;
+      font-weight: 500;
     }
 
     .category-btn:hover {
-      background: #e5e7eb;
+      background: var(--bg-primary);
+      color: var(--text-primary);
     }
 
     .category-btn.active {
-      background: #3b82f6;
+      background: var(--accent-color);
       color: #ffffff;
     }
 
@@ -501,13 +510,14 @@
     }
 
     .modal-content {
-      background: #ffffff;
-      border-radius: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-lg);
       width: 90%;
       max-width: 600px;
       max-height: 80vh;
       overflow: hidden;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--card-shadow-hover);
     }
 
     .modal-header {
@@ -522,7 +532,7 @@
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #374151;
+      color: var(--text-primary);
     }
 
     .modal-close {
@@ -551,17 +561,18 @@
       width: 100%;
       min-height: 200px;
       padding: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-md);
       font-size: 14px;
       line-height: 1.6;
-      color: #374151;
+      color: var(--text-primary);
       resize: vertical;
+      background: var(--bg-primary);
     }
 
     .modal-body textarea:focus {
       outline: none;
-      border-color: #3b82f6;
+      border-color: var(--accent-color);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
@@ -622,7 +633,7 @@
     <div class="sidebar-content">
       <div class="sidebar-section">
         <h3
-          style="margin-bottom: 12px; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">
+          style="margin-bottom: 12px; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
           分类</h3>
         <div class="category-list">
           <button class="category-btn active" data-category="all" data-i18n="all_categories">全部</button>
@@ -702,6 +713,7 @@
     </div>
   </div>
 
+  <script src="theme-manager.js"></script>
   <script src="library.js"></script>
 </body>
 

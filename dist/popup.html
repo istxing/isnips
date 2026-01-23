@@ -3,40 +3,44 @@
 
 <head>
   <meta charset="utf-8">
-  <title>iSnips 侧边栏</title>
+  <link rel="stylesheet" href="theme.css">
   <style>
     body {
       width: 320px;
       height: 100vh;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f8fafc;
-      color: #334155;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
       overflow: hidden;
+      transition: background-color 0.3s, color 0.3s;
     }
 
     .sidebar {
       display: flex;
       flex-direction: column;
       height: 100vh;
+      background: var(--bg-primary);
     }
 
     .header {
-      background: #ffffff;
+      background: var(--bg-tertiary);
+      backdrop-filter: var(--blur-bg);
+      -webkit-backdrop-filter: var(--blur-bg);
       padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .header-info h1 {
       margin: 0;
       font-size: 18px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--text-primary);
       letter-spacing: -0.01em;
     }
 
@@ -55,15 +59,15 @@
       background: transparent;
       border: none;
       border-radius: 8px;
-      color: #64748b;
+      color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.2s ease;
       font-size: 16px;
     }
 
     .icon-btn:hover {
-      background: #f1f5f9;
-      color: #0f172a;
+      background: var(--border-color);
+      color: var(--text-primary);
     }
 
     .settings-btn {
@@ -82,7 +86,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      background: #f8fafc;
+      background: var(--bg-primary);
     }
 
     .recent-container {
@@ -103,7 +107,7 @@
     .section-title {
       font-size: 12px;
       font-weight: 600;
-      color: #94a3b8;
+      color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -121,29 +125,28 @@
     }
 
     .btn-link:hover {
-      background: #eff6ff;
+      background: var(--border-color);
     }
 
     .recent-items-scroll {
       flex: 1;
       overflow-y: auto;
       padding: 0;
-      background: #ffffff;
+      background: var(--bg-primary);
     }
 
     .stats,
     .recent-items,
     .note-section {
-      background: #ffffff;
+      background: var(--bg-secondary);
       border-radius: 12px;
       padding: 16px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--card-shadow);
     }
 
     .recent-items {
       padding: 12px 16px;
-      border-radius: 0;
-      box-shadow: none;
+      background: var(--bg-primary);
     }
 
     .stat-item {
@@ -158,29 +161,29 @@
     }
 
     .stat-label {
-      color: #64748b;
+      color: var(--text-secondary);
       font-size: 14px;
     }
 
     .stat-value {
       font-weight: 600;
-      color: #1e293b;
+      color: var(--text-primary);
     }
 
     .recent-item {
-      padding: 12px 16px;
-      background: #ffffff;
-      border-radius: 8px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius-md);
       margin-bottom: 12px;
       position: relative;
       cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      transition: all 0.2s ease;
+      box-shadow: var(--card-shadow);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .recent-item:hover {
-      background: #fdfdfd;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      transform: scale(1.02);
+      box-shadow: var(--card-shadow-hover);
     }
 
     .recent-item:last-child {
@@ -189,7 +192,7 @@
 
     .recent-text {
       font-size: 14px;
-      color: #334155;
+      color: var(--text-primary);
       line-height: 1.5;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -200,14 +203,14 @@
 
     .recent-meta {
       font-size: 11px;
-      color: #94a3b8;
+      color: var(--text-muted);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .source-link {
-      color: #64748b;
+      color: var(--text-secondary);
       text-decoration: none;
       cursor: pointer;
       transition: color 0.2s ease;
@@ -229,8 +232,10 @@
       align-items: flex-start;
       gap: 4px;
       padding: 8px 12px 0;
-      background: linear-gradient(to bottom, rgba(219, 234, 254, 0.95), rgba(219, 234, 254, 0.5) 40%, transparent 100%);
-      border-radius: 8px 8px 0 0;
+      background: linear-gradient(to bottom, var(--bg-tertiary), transparent);
+      backdrop-filter: var(--blur-bg);
+      -webkit-backdrop-filter: var(--blur-bg);
+      border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
       opacity: 0;
       transition: opacity 0.2s ease;
       z-index: 1;
@@ -251,7 +256,7 @@
       background: transparent;
       border: none;
       border-radius: 4px;
-      color: #94a3b8;
+      color: var(--text-muted);
       cursor: pointer;
       transition: all 0.2s ease;
       font-size: 12px;
@@ -318,10 +323,10 @@
 
     .note-section {
       padding: 16px;
-      background: #ffffff;
-      border-top: 1px solid #f1f5f9;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
       border-radius: 0;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.02);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
       flex-shrink: 0;
     }
 
@@ -336,7 +341,7 @@
       margin: 0;
       font-size: 14px;
       font-weight: 600;
-      color: #334155;
+      color: var(--text-primary);
     }
 
     /* Toggle Switch */
@@ -360,7 +365,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #cbd5e1;
+      background-color: var(--text-muted);
       transition: .2s;
       border-radius: 20px;
     }
@@ -390,7 +395,7 @@
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      color: #64748b;
+      color: var(--text-secondary);
     }
 
     .note-input-container {
@@ -408,9 +413,9 @@
       border-radius: 8px;
       font-size: 14px;
       line-height: 1.5;
-      color: #334155;
+      color: var(--text-primary);
       resize: none;
-      background: #f8fafc;
+      background: var(--bg-primary);
       font-family: inherit;
       transition: all 0.2s ease;
       display: block;
@@ -458,8 +463,8 @@
     }
 
     .btn-secondary {
-      background: #f8fafc;
-      color: #475569;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
@@ -558,6 +563,7 @@
     </div>
   </div>
 
+  <script src="theme-manager.js"></script>
   <script src="popup.js"></script>
 </body>
 

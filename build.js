@@ -21,7 +21,9 @@ function build() {
     'merge.js',
     'content.js',
     'popup.html',
-    'popup.js'
+    'popup.js',
+    'theme-manager.js',
+    'theme.css'
   ];
 
   filesToCopy.forEach(file => {

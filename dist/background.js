@@ -796,6 +796,20 @@ async function handleMessage(db, message) {
 
         return { success: true };
 
+      case 'themeChanged':
+        // Broadcast theme change to all extension pages
+        chrome.tabs.query({}, (tabs) => {
+          tabs.forEach(tab => {
+            if (tab.url && tab.url.includes('chrome-extension://')) {
+              chrome.tabs.sendMessage(tab.id, {
+                action: 'themeChanged',
+                theme: message.theme
+              }).catch(() => { });
+            }
+          });
+        });
+        return { success: true };
+
       case 'syncWebDAV':
         const webdavConfig = await db.getSetting('syncConfig', {});
         if (webdavConfig.type !== 'webdav') return { success: false, error: 'WebDAV not configured' };

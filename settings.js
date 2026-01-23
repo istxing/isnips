@@ -71,6 +71,14 @@ class iSnipsSettings {
       });
       console.log('Settings: Runtime message listener added');
     }
+
+    // Appearance (Theme) selector
+    const appearanceRadios = document.querySelectorAll('input[name="appearance"]');
+    appearanceRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        this.setAppearance(e.target.value);
+      });
+    });
   }
 
   bindModalEvents() {
@@ -102,6 +110,11 @@ class iSnipsSettings {
       // Load column count setting
       const columnCount = await this.getSetting('columnCount', 5);
       document.getElementById('columnCountSelect').value = columnCount;
+
+      // Load appearance setting
+      const appearance = await this.getSetting('appearance', 'auto');
+      const appearanceRadio = document.querySelector(`input[name="appearance"][value="${appearance}"]`);
+      if (appearanceRadio) appearanceRadio.checked = true;
     } catch (error) {
       console.error('Failed to load settings:', error);
       this.showMessage('load_error', 'error');
@@ -180,6 +193,12 @@ class iSnipsSettings {
         clear_label: '清除所有记录',
         clear_desc: '彻底删除所有数据。一旦执行，您的所有记录将无法找回',
         clear_btn: '彻底清除',
+        appearance_section: '外观显示',
+        appearance_label: '外观模式',
+        appearance_desc: '切换浅色、深色或随系统自动切换',
+        appearance_light: '浅色',
+        appearance_dark: '深色',
+        appearance_auto: '跟随系统',
 
         about_section: '关于插件',
         version_label: '插件版本',
@@ -264,6 +283,12 @@ class iSnipsSettings {
         clear_label: 'Clear All Data',
         clear_desc: 'Delete all clip data and settings. This action cannot be undone',
         clear_btn: 'Clear Data',
+        appearance_section: 'Appearance',
+        appearance_label: 'Appearance Mode',
+        appearance_desc: 'Switch between Light, Dark, or System mode',
+        appearance_light: 'Light',
+        appearance_dark: 'Dark',
+        appearance_auto: 'Auto',
 
         about_section: 'About',
         version_label: 'Version',
@@ -346,6 +371,12 @@ class iSnipsSettings {
         clear_label: 'すべてのデータをクリア',
         clear_desc: 'すべてのクリップデータと設定を削除。この操作は元に戻せません',
         clear_btn: 'データをクリア',
+        appearance_section: '外観',
+        appearance_label: '外観モード',
+        appearance_desc: 'ライト、ダーク、またはシステム設定に従うかを選択します',
+        appearance_light: 'ライト',
+        appearance_dark: 'ダーク',
+        appearance_auto: 'システムに従う',
 
         about_section: 'について',
         version_label: 'バージョン',
@@ -435,6 +466,31 @@ class iSnipsSettings {
       if (el.dataset.i18n === 'gdrive_connected') return; // Handled by i18n loop
       if (t.local_storage) el.textContent = t.local_storage;
     });
+  }
+
+
+  async setAppearance(mode) {
+    console.log('Settings: Setting appearance to', mode);
+    try {
+      await chrome.runtime.sendMessage({
+        action: 'setSetting',
+        key: 'appearance',
+        value: mode
+      });
+
+      // Broadcast theme change
+      chrome.runtime.sendMessage({
+        action: 'themeChanged',
+        theme: mode
+      });
+
+      this.showMessage('save_success', 'success');
+      // Apply theme to current page as well
+      if (window.applyTheme) window.applyTheme(mode);
+    } catch (error) {
+      console.error('Failed to save appearance:', error);
+      this.showMessage('save_error', 'error');
+    }
   }
 
 

@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title data-i18n="settings_title">iSnips - 设置</title>
+  <link rel="stylesheet" href="theme.css">
   <style>
     * {
       box-sizing: border-box;
@@ -12,10 +13,11 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f8fafc;
-      color: #1f2937;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
       line-height: 1.5;
+      transition: all 0.3s ease;
     }
 
     .settings-page {
@@ -28,20 +30,20 @@
       text-align: center;
       margin-bottom: 40px;
       padding-bottom: 20px;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .settings-header h1 {
       margin: 0 0 8px 0;
       font-size: 28px;
       font-weight: 700;
-      color: #111827;
+      color: var(--text-primary);
     }
 
     .settings-header p {
       margin: 0;
       font-size: 16px;
-      color: #6b7280;
+      color: var(--text-secondary);
     }
 
     .settings-content {
@@ -51,20 +53,20 @@
     }
 
     .settings-section {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
+      background: var(--bg-secondary);
+      border: 0;
+      border-radius: var(--border-radius-lg);
       padding: 24px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--card-shadow);
     }
 
     .settings-section h2 {
       margin: 0 0 20px 0;
       font-size: 20px;
       font-weight: 600;
-      color: #111827;
+      color: var(--text-primary);
       padding-bottom: 8px;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .setting-item {
@@ -72,7 +74,7 @@
       justify-content: space-between;
       align-items: flex-start;
       padding: 16px 0;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .setting-item:last-child {
@@ -80,8 +82,8 @@
     }
 
     .setting-item.danger {
-      border-color: #fecaca;
-      background: #fef2f2;
+      border-color: var(--border-strong);
+      background: var(--bg-danger);
       margin: -16px;
       padding: 16px;
       border-radius: 8px;
@@ -96,13 +98,13 @@
       margin: 0 0 4px 0;
       font-size: 16px;
       font-weight: 600;
-      color: #111827;
+      color: var(--text-primary);
     }
 
     .setting-info p {
       margin: 0;
       font-size: 14px;
-      color: #6b7280;
+      color: var(--text-secondary);
       line-height: 1.5;
     }
 
@@ -126,24 +128,25 @@
     }
 
     .status-local {
-      background: #dbeafe;
-      color: #1e40af;
+      background: var(--accent-color);
+      color: white;
+      opacity: 0.9;
     }
 
     .language-select {
       padding: 8px 12px;
-      border: 1px solid #d1d5db;
+      border: 1px solid var(--border-color);
       border-radius: 8px;
-      background: #ffffff;
+      background: var(--bg-secondary);
       font-size: 14px;
-      color: #374151;
+      color: var(--text-primary);
       cursor: pointer;
       min-width: 120px;
     }
 
     .language-select:focus {
       outline: none;
-      border-color: #3b82f6;
+      border-color: var(--accent-color);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
@@ -171,13 +174,14 @@
     }
 
     .btn-secondary {
-      background: #f3f4f6;
-      color: #374151;
-      border: 1px solid #d1d5db;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
     }
 
     .btn-secondary:hover {
-      background: #e5e7eb;
+      background: var(--bg-primary);
+      opacity: 0.8;
     }
 
     .btn-danger {
@@ -208,11 +212,12 @@
     }
 
     .modal-content {
-      background: #ffffff;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--card-shadow);
     }
 
     .modal-header {
@@ -226,7 +231,7 @@
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #111827;
+      color: var(--text-primary);
     }
 
     .modal-close {
@@ -234,7 +239,7 @@
       border: none;
       font-size: 24px;
       cursor: pointer;
-      color: #6b7280;
+      color: var(--text-secondary);
       padding: 0;
       width: 30px;
       height: 30px;
@@ -246,7 +251,7 @@
     }
 
     .modal-close:hover {
-      background: #f3f4f6;
+      background: var(--bg-primary);
     }
 
     .modal-body {
@@ -269,14 +274,14 @@
       justify-content: space-between;
       align-items: center;
       padding: 8px 12px;
-      background: #f9fafb;
+      background: var(--bg-primary);
       border-radius: 6px;
       margin-bottom: 8px;
     }
 
     .blocked-site-domain {
       font-size: 14px;
-      color: #374151;
+      color: var(--text-primary);
     }
 
     .blocked-site-remove {
@@ -295,30 +300,31 @@
     }
 
     .shortcut-display {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-strong);
       border-radius: 4px;
       padding: 4px 8px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 14px;
       font-weight: 600;
-      color: #475569;
+      color: var(--text-primary);
       box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
     }
 
     .loading {
       text-align: center;
       padding: 20px;
-      color: #6b7280;
+      color: var(--text-secondary);
     }
 
     .error {
-      background: #fef2f2;
-      color: #dc2626;
+      background: var(--bg-danger);
+      color: var(--danger-color);
       padding: 8px 12px;
       border-radius: 4px;
       font-size: 12px;
       margin-bottom: 12px;
+      border: 1px solid var(--danger-color);
     }
 
     @media (max-width: 640px) {
@@ -352,31 +358,31 @@
       align-items: center;
       gap: 8px;
       padding: 12px 20px;
-      background: #f8fafc;
-      border: 2px solid #e2e8f0;
+      background: var(--bg-primary);
+      border: 2px solid var(--border-color);
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.2s ease;
       font-size: 14px;
       font-weight: 500;
-      color: #475569;
+      color: var(--text-secondary);
     }
 
     .sync-method-option:hover {
-      border-color: #cbd5e1;
-      background: #f1f5f9;
+      border-color: var(--text-muted);
+      background: var(--bg-secondary);
     }
 
     .sync-method-option:has(input:checked) {
-      border-color: #3b82f6;
-      background: #eff6ff;
-      color: #1d4ed8;
+      border-color: var(--accent-color);
+      background: rgba(0, 122, 255, 0.05);
+      color: var(--accent-color);
     }
 
     .sync-method-option input[type="radio"] {
       width: 18px;
       height: 18px;
-      accent-color: #3b82f6;
+      accent-color: var(--accent-color);
       cursor: pointer;
     }
   </style>
@@ -420,6 +426,33 @@
           </div>
           <div class="setting-control">
             <button id="openShortcutsBtn" class="btn btn-secondary" data-i18n="manage_shortcuts_btn">管理快捷键</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Appearance Settings -->
+      <section class="settings-section">
+        <h2 data-i18n="appearance_section">外观显示</h2>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="appearance_label">外观模式</h3>
+            <p data-i18n="appearance_desc">切换浅色、深色或随系统自动切换</p>
+          </div>
+          <div class="setting-control">
+            <div class="sync-method-group" id="appearanceGroup">
+              <label class="sync-method-option">
+                <input type="radio" name="appearance" value="light">
+                <span data-i18n="appearance_light">浅色</span>
+              </label>
+              <label class="sync-method-option">
+                <input type="radio" name="appearance" value="dark">
+                <span data-i18n="appearance_dark">深色</span>
+              </label>
+              <label class="sync-method-option">
+                <input type="radio" name="appearance" value="auto">
+                <span data-i18n="appearance_auto">跟随系统</span>
+              </label>
+            </div>
           </div>
         </div>
       </section>
@@ -511,14 +544,16 @@
             <button id="gdriveLoginBtn" class="btn btn-primary" data-i18n="gdrive_login">登录 Google Drive</button>
           </div>
           <div id="gdriveLoggedIn" style="display: none; gap: 12px; align-items: center;">
-            <span class="status-indicator" style="background: #d1fae5; color: #065f46;" data-i18n="gdrive_connected">✓
+            <span class="status-indicator"
+              style="background: var(--bg-primary); color: var(--accent-color); border: 1px solid var(--accent-color);"
+              data-i18n="gdrive_connected">✓
               已连接 Google Drive</span>
             <button id="gdriveLogoutBtn" class="btn btn-secondary" style="margin-left: 12px;"
               data-i18n="gdrive_logout">断开连接</button>
           </div>
         </div>
 
-        <div class="setting-item" style="margin-top: 16px; border-top: 1px solid #f3f4f6;">
+        <div class="setting-item" style="margin-top: 16px; border-top: 1px solid var(--border-color);">
           <div class="setting-info">
             <h3 data-i18n="sync_now_label">立即同步</h3>
             <p id="lastSyncTime" data-i18n="last_sync_desc">尚未同步</p>
@@ -610,6 +645,7 @@
     </div>
   </div>
 
+  <script src="theme-manager.js"></script>
   <script src="settings.js"></script>
 </body>
 
