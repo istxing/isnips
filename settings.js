@@ -289,7 +289,6 @@ class iSnipsSettings {
         appearance_light: 'Light',
         appearance_dark: 'Dark',
         appearance_auto: 'Auto',
-        appearance_auto: 'Auto',
 
         about_section: 'About',
         version_label: 'Version',
@@ -377,8 +376,7 @@ class iSnipsSettings {
         appearance_desc: 'ライト、ダーク、またはシステム設定に従うかを選択します',
         appearance_light: 'ライト',
         appearance_dark: 'ダーク',
-        appearance_auto: '系统に従う',
-        appearance_auto: '系统に従う',
+        appearance_auto: 'システムに従う',
 
         about_section: 'について',
         version_label: 'バージョン',
