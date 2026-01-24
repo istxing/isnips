@@ -32,6 +32,7 @@ function build() {
     'settings.js',
     'settings.css',
     'manifest.json',
+    'icons',
     'background.js',
     'sync.js',
     'merge.js',
