@@ -79,7 +79,7 @@ class iSnipsDatabase {
         {
           url: null,
           type: 'note',
-          text: '这是您的第一条“闪记”。您可以随时点击右下角的 + 号，记录脑海中闪现的灵感。',
+          text: '这是您的第一条“闪记”。您可以随时在下方记录脑海中闪现的灵感。',
           domain: null,
           created_at: now - 3600000,
           updated_at: now - 3600000
@@ -98,7 +98,7 @@ class iSnipsDatabase {
         {
           url: null,
           type: 'note',
-          text: 'This is your first "Flash Note". Click the + button to capture your quick thoughts and inspirations anytime.',
+          text: 'This is your first "Flash Note". You can record your quick thoughts and inspirations below anytime.',
           domain: null,
           created_at: now - 3600000,
           updated_at: now - 3600000
@@ -117,7 +117,7 @@ class iSnipsDatabase {
         {
           url: null,
           type: 'note',
-          text: 'これは最初の「閃記」です。右下の + ボタンから、いつでもアイデアを素早くメモできます。',
+          text: 'これは最初の「閃記」です。下の入力欄から、いつでもアイデアを素早くメモできます。',
           domain: null,
           created_at: now - 3600000,
           updated_at: now - 3600000
