@@ -135,7 +135,7 @@ class SyncService {
         await this._updateSyncConfig({ last_remote_etag: remoteEtag });
       }
 
-      const currentConfig = await this.db.getSetting('syncConfig', {});
+      let currentConfig = await this.db.getSetting('syncConfig', {});
       const latestEtag = await this._getWebDAVETag(fullUrl, headers);
       if (latestEtag && currentConfig.last_remote_etag && latestEtag !== currentConfig.last_remote_etag) {
         const refreshResponse = await fetch(fullUrl, { headers });
@@ -221,7 +221,7 @@ class SyncService {
         await this._updateSyncConfig({ last_remote_etag: remoteTag });
       }
 
-      const currentConfig = await this.db.getSetting('syncConfig', {});
+      let currentConfig = await this.db.getSetting('syncConfig', {});
       if (fileId) {
         const latestMeta = await this._getGoogleDriveFileMeta(token, fileId);
         const latestTag = latestMeta ? (latestMeta.headRevisionId || latestMeta.modifiedTime) : null;
