@@ -635,7 +635,6 @@ async function getDatabase() {
   if (!dbInstance) {
     dbInstance = new iSnipsDatabase();
     await dbInstance.initialize();
-    await dbInstance.migrateIndexCardsToSnippets();
     syncService.setDatabase(dbInstance);
   }
 
