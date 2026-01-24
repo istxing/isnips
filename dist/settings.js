@@ -289,9 +289,7 @@ class iSnipsSettings {
         appearance_light: 'Light',
         appearance_dark: 'Dark',
         appearance_auto: 'Auto',
-        support_section: 'Support',
-        support_desc: 'If you love iSnips, consider buying me a coffee to support future development!',
-        support_btn_label: 'Buy Me a Coffee',
+        appearance_auto: 'Auto',
 
         about_section: 'About',
         version_label: 'Version',
@@ -380,9 +378,7 @@ class iSnipsSettings {
         appearance_light: 'ライト',
         appearance_dark: 'ダーク',
         appearance_auto: '系统に従う',
-        support_section: 'サポート',
-        support_desc: 'iSnipsがお役に立ったら、作者にコーヒーをご馳走して開発を応援してください！',
-        support_btn_label: 'Buy Me a Coffee',
+        appearance_auto: '系统に従う',
 
         about_section: 'について',
         version_label: 'バージョン',
