@@ -42,22 +42,30 @@ class SyncService {
     const localSnippets = await this.db.getAllSnippetsIncludingDeleted();
     const mergedSnippets = mergeSnippets(localSnippets, remoteData.snippets, { preferRemoteOnTie: true });
 
-    for (const snippet of mergedSnippets) {
-      await this._upsertSnippet(snippet);
-    }
+    // Perform batch upsert in a single transaction
+    await this._upsertSnippetsBatch(mergedSnippets);
 
     return { success: true, updatedCount: mergedSnippets.length };
   }
 
-  async _upsertSnippet(snippet) {
+  async _upsertSnippetsBatch(snippets) {
+    if (snippets.length === 0) return;
     const db = await this.db.initialize();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(['snippets'], 'readwrite');
       const store = transaction.objectStore('snippets');
-      const request = store.put(snippet);
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+
+      for (const snippet of snippets) {
+        store.put(snippet);
+      }
     });
+  }
+
+  async _upsertSnippet(snippet) {
+    return this._upsertSnippetsBatch([snippet]);
   }
 
   async _updateSyncConfig(patch) {
@@ -101,7 +109,7 @@ class SyncService {
     const { url, username, password } = config;
     const folderUrl = this._normalizeFolderUrl(url);
     const fullUrl = `${folderUrl}${this.syncFileName}`;
-    
+
     const headers = new Headers();
     headers.set('Authorization', 'Basic ' + btoa(username + ':' + password));
 
@@ -140,14 +148,26 @@ class SyncService {
 
       // 3. Upload merged data
       const mergedBundle = await this.bundleData();
+      currentConfig = await this.db.getSetting('syncConfig', {});
+      const uploadHeaders = {
+        ...Object.fromEntries(headers),
+        'Content-Type': 'application/json'
+      };
+
+      // Add If-Match if we have a known ETag to prevent lost updates
+      if (currentConfig.last_remote_etag) {
+        uploadHeaders['If-Match'] = currentConfig.last_remote_etag;
+      }
+
       const uploadResponse = await fetch(fullUrl, {
         method: 'PUT',
-        headers: {
-          ...Object.fromEntries(headers),
-          'Content-Type': 'application/json'
-        },
+        headers: uploadHeaders,
         body: JSON.stringify(mergedBundle)
       });
+
+      if (uploadResponse.status === 412) {
+        throw new Error('Sync Conflict: Remote data was modified by another device. Please try again.');
+      }
 
       if (!uploadResponse.ok) {
         throw new Error(`WebDAV Upload Failed: ${uploadResponse.statusText}`);
@@ -219,16 +239,33 @@ class SyncService {
 
       // 5. Upload merged data
       const mergedBundle = await this.bundleData();
+      const currentSyncConf = await this.db.getSetting('syncConfig', {});
+
       if (fileId) {
         // Update existing file
-        await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+        const updateHeaders = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+
+        // Add If-Match to prevent lost updates in Google Drive
+        if (currentSyncConf.last_remote_etag) {
+          updateHeaders['If-Match'] = currentSyncConf.last_remote_etag;
+        }
+
+        const updateResponse = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
           method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
+          headers: updateHeaders,
           body: JSON.stringify(mergedBundle)
         });
+
+        if (updateResponse.status === 412) {
+          throw new Error('Sync Conflict (Google Drive): Remote data was modified by another device. Please try again.');
+        }
+
+        if (!updateResponse.ok) {
+          throw new Error(`Google Drive Update Failed: ${updateResponse.statusText}`);
+        }
       } else {
         // Create new file
         const metadata = {

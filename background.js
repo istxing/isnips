@@ -7,7 +7,7 @@ class iSnipsDatabase {
   constructor() {
     this.db = null;
     this.dbName = 'iSnipsIndexDB';
-    this.dbVersion = 1;
+    this.dbVersion = 3;
     this.initialized = false;
   }
 
