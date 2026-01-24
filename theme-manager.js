@@ -56,7 +56,6 @@
             document.body.classList.remove('theme-light', 'theme-dark');
             document.body.classList.add(`theme-${effectiveTheme}`);
 
-            console.log(`ThemeManager: Applied ${effectiveTheme} theme (original: ${theme})`);
         }
     };
 

@@ -27,13 +27,11 @@ class iSnipsDatabase {
       request.onsuccess = () => {
         this.db = request.result;
         this.initialized = true;
-        console.log('IndexedDB initialized successfully');
         resolve(this.db);
       };
 
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
-        console.log('Initializing IndexedDB schema version', this.dbVersion);
 
         // Highlights store
         if (!db.objectStoreNames.contains('highlights')) {
@@ -57,7 +55,6 @@ class iSnipsDatabase {
           db.createObjectStore('settings', { keyPath: 'key' });
         }
 
-        console.log('IndexedDB schema initialized');
       };
     });
   }
@@ -609,7 +606,6 @@ class iSnipsDatabase {
   // Recent tags management
   async getRecentTags() {
     const tags = await this.getSetting('recentTags', []);
-    console.log('ClipIndex: getRecentTags called, returning:', tags.slice(0, 8));
     return tags.slice(0, 8); // Return up to 8 tags
   }
 
@@ -873,7 +869,6 @@ async function scheduleAutoCleanup() {
     const db = await getDatabase();
     const result = await db.autoDeleteOldTrash();
     if (result.deletedCount > 0) {
-      console.log(`ClipIndex: Auto-deleted ${result.deletedCount} old trash items`);
     }
   } catch (error) {
     console.error('Auto cleanup error:', error);
@@ -896,7 +891,6 @@ if (chrome.alarms) {
 // Initialize default data on install
 chrome.runtime.onInstalled.addListener(async () => {
   try {
-    console.log('iSnips v2.0.2 installed successfully');
 
     // Add some sample data for testing
     const db = await getDatabase();
@@ -911,7 +905,6 @@ chrome.runtime.onInstalled.addListener(async () => {
       } else if (uiLang.startsWith('ja')) {
         defaultLang = 'ja';
       }
-      console.log(`Detected browser language: ${uiLang}, setting default to: ${defaultLang}`);
       await db.setSetting('language', defaultLang);
     }
 
@@ -922,13 +915,11 @@ chrome.runtime.onInstalled.addListener(async () => {
         title: chrome.i18n.getMessage('context_menu_save'),
         contexts: ['selection']
       });
-      console.log('Context menu created');
     });
 
     // Check if we already have data
     const existingCards = await db.getAllSnippetsIncludingDeleted();
     if (existingCards.length === 0) {
-      console.log('Adding localized sample data...');
 
       const currentLang = await db.getSetting('language', 'en');
       const sampleCards = db.getSampleData(currentLang);
@@ -937,7 +928,6 @@ chrome.runtime.onInstalled.addListener(async () => {
         await db.saveSnippet(card);
       }
 
-      console.log(`Sample data (${currentLang}) added successfully`);
     }
 
     // Run initial cleanup

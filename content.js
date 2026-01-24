@@ -10,15 +10,12 @@ class iSnipsContent {
   }
 
   async init() {
-    console.log('iSnips: Content script initializing...');
 
     try {
       // Check if site is blocked
       const isBlocked = await this.checkIfSiteBlocked();
-      console.log('iSnips: Site blocked check result:', isBlocked);
 
       if (isBlocked) {
-        console.log('iSnips: Site is blocked, not initializing');
         return;
       }
 
@@ -40,7 +37,6 @@ class iSnipsContent {
       // Clean up on page unload
       window.addEventListener('beforeunload', this.cleanup.bind(this));
 
-      console.log('iSnips: Content script initialization complete');
     } catch (error) {
       console.error('iSnips: Failed to initialize content script:', error);
     }
@@ -100,16 +96,13 @@ class iSnipsContent {
   }
 
   async handleCapture() {
-    console.log('iSnips: Capture command detected');
     const selectedText = this.getSelectedText();
 
     if (selectedText && selectedText.trim().length > 0) {
-      console.log('iSnips: Selected text found, saving snippet');
       const text = selectedText.trim().substring(0, 144);
       await this.saveClip(text);
       this.highlightSelection(text);
     } else {
-      console.log('iSnips: No text selected, ignoring');
       const t = this.translations[this.currentLanguage] || this.translations['en'];
       this.showToast(t.no_text_selected || 'No text selected', false);
     }
@@ -141,10 +134,8 @@ class iSnipsContent {
 
       const t = this.translations[this.currentLanguage] || this.translations['en'];
       if (result.success) {
-        console.log('iSnips: Clip saved successfully');
         this.showToast(t.clip_saved || 'Snippet saved', true);
       } else {
-        console.log('iSnips: Failed to save clip');
         this.showToast(t.save_error || 'Failed to save snippet', false);
       }
     } catch (error) {
@@ -160,7 +151,6 @@ class iSnipsContent {
 
     // Check if CSS Custom Highlight API is supported
     if (!CSS.highlights) {
-      console.log('iSnips: CSS Custom Highlight API not supported, skipping highlight');
       selection.removeAllRanges();
       return;
     }
@@ -244,7 +234,6 @@ class iSnipsContent {
   restoreHighlight(highlight) {
     // Check if CSS Custom Highlight API is supported
     if (!CSS.highlights) {
-      console.log('iSnips: CSS Custom Highlight API not supported, skipping restore');
       return;
     }
 
@@ -334,20 +323,15 @@ class iSnipsContent {
   }
 
   async showPopupCard(text, isPageIndex) {
-    console.log('iSnips: showPopupCard called with text length:', text.length, 'isPageIndex:', isPageIndex);
 
     // Remove existing popup if any - ensure complete cleanup
     this.removePopupCard();
 
     try {
-      console.log('iSnips: Creating new PopupCard...');
       // Create new popup card
       this.popupCard = new PopupCard(text, isPageIndex, this);
-      console.log('iSnips: PopupCard created, calling init...');
       await this.popupCard.init();
-      console.log('iSnips: PopupCard init complete, calling show...');
       this.popupCard.show();
-      console.log('iSnips: PopupCard show called');
     } catch (error) {
       console.error('iSnips: Failed to create popup card:', error);
     }

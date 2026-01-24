@@ -77,17 +77,14 @@ class iSnipsPopup {
     if (chrome && chrome.runtime) {
       chrome.runtime.onMessage.addListener((message) => {
         if (message.action === 'languageChanged') {
-          console.log('Popup: Language changed via runtime message:', message.language);
           this.currentLanguage = message.language;
           this.loadTranslations();
           this.updateUI();
         } else if (message.action === 'cardSaved') {
-          console.log('Popup: New card saved, refreshing list');
           this.loadRecentItems();
         }
         return false;
       });
-      console.log('Popup: Runtime message listener added');
     }
   }
 
@@ -273,9 +270,7 @@ class iSnipsPopup {
 
   async loadStats() {
     try {
-      console.log('iSnips: Loading stats...');
       const cardsResult = await chrome.runtime.sendMessage({ action: 'getSnippets' });
-      console.log('iSnips: Stats result:', cardsResult);
 
       if (cardsResult && cardsResult.success) {
         const cards = cardsResult.cards || [];
@@ -305,7 +300,6 @@ class iSnipsPopup {
 
   async loadRecentItems() {
     try {
-      console.log('iSnips: Loading recent items...');
       const result = await chrome.runtime.sendMessage({
         action: 'getSnippets',
         filters: {}

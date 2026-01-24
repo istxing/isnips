@@ -85,17 +85,14 @@ class iSnipsSidebar {
         if (chrome && chrome.runtime) {
             chrome.runtime.onMessage.addListener((message) => {
                 if (message.action === 'languageChanged') {
-                    console.log('Library: Language changed via runtime message:', message.language);
                     this.currentLanguage = message.language;
                     this.loadTranslations();
                     this.updateUI();
                 } else if (message.action === 'cardSaved') {
-                    console.log('Library: New card saved, refreshing data');
                     this.loadData();
                 }
                 return false;
             });
-            console.log('Library: Runtime message listener added');
         }
     }
 
@@ -296,24 +293,19 @@ class iSnipsSidebar {
 
     async loadData() {
         try {
-            console.log('Library: Loading data for category:', this.currentFilters.category);
             let result;
 
             if (this.currentFilters.category === 'scrap') {
                 result = await chrome.runtime.sendMessage({ action: 'getDeletedSnippets' });
-                console.log('Library: getDeletedSnippets result:', result);
             } else {
                 result = await chrome.runtime.sendMessage({ action: 'getSnippets' });
-                console.log('Library: getSnippets result:', result);
             }
 
             if (result && result.success) {
                 this.cards = result.cards || [];
-                console.log('Library: cards loaded:', this.cards.length, 'cards');
 
                 // Log first card structure for debugging
                 if (this.cards.length > 0) {
-                    console.log('Library: First card structure:', this.cards[0]);
                 }
             } else {
                 console.error('Library: Failed to load cards:', result ? result.error : 'Unknown error');
