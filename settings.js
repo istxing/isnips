@@ -264,7 +264,11 @@ class iSnipsSettings {
         sync_success: '同步成功',
         sync_error: '同步失败：{0}',
         config_save_success: '配置已保存',
-        not_synced: '尚未同步'
+        not_synced: '尚未同步',
+        col_3: '3 栏',
+        col_4: '4 栏',
+        col_5: '5 栏',
+        col_6: '6 栏'
       },
       'en': {
         settings_title: 'iSnips · Preferences',
@@ -355,7 +359,11 @@ class iSnipsSettings {
         sync_success: 'Sync successful',
         sync_error: 'Sync failed: {0}',
         config_save_success: 'Configuration saved',
-        not_synced: 'Never synced'
+        not_synced: 'Never synced',
+        col_3: '3 Columns',
+        col_4: '4 Columns',
+        col_5: '5 Columns',
+        col_6: '6 Columns'
       },
       'ja': {
         settings_title: 'iSnips - 設定',
@@ -445,7 +453,11 @@ class iSnipsSettings {
         sync_success: '同期に成功しました',
         sync_error: '同期に失敗しました：{0}',
         config_save_success: '設定を保存しました',
-        not_synced: '未同期'
+        not_synced: '未同期',
+        col_3: '3 列',
+        col_4: '4 列',
+        col_5: '5 列',
+        col_6: '6 列'
       }
     };
   }
