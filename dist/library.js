@@ -167,7 +167,8 @@ class iSnipsSidebar {
                 edit: '编辑',
                 delete: '删除',
                 restore: '恢复',
-                copied: '已复制内容'
+                copied: '已复制内容',
+                support_btn_label: '赞助支持'
             },
             'en': {
                 sidebar_title: 'iSnips',
@@ -203,7 +204,8 @@ class iSnipsSidebar {
                 edit: 'Edit',
                 delete: 'Delete',
                 restore: 'Restore',
-                copied: 'Copied to clipboard'
+                copied: 'Copied to clipboard',
+                support_btn_label: 'Buy Me a Coffee'
             },
             'ja': {
                 sidebar_title: 'iSnips',
@@ -239,7 +241,8 @@ class iSnipsSidebar {
                 edit: '編集',
                 delete: '削除',
                 restore: '復元',
-                copied: 'コピーしました'
+                copied: 'コピーしました',
+                support_btn_label: 'Buy Me a Coffee'
             }
         };
     }
