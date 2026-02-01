@@ -42,6 +42,12 @@ The compiled assets will be generated in the `dist/` directory.
 *   **`activeTab` & `tabs`**: Allows capturing selected text from the active website.
 *   **`contextMenus`**: Provides right-click capture functionality.
 
+## ☕ Support
+
+If you find iSnips helpful, consider supporting its development!
+
+<a href="https://buymeacoffee.com/istxingv" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
 ## 🌐 Useful Links
 
 *   **Official Homepage**: [https://istxing.github.io/isnips/](https://istxing.github.io/isnips/)
