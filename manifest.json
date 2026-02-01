@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "default_locale": "en",
   "name": "__MSG_app_name__",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "__MSG_app_desc__",
   "icons": {
     "16": "icons/icon-16.png",
@@ -19,7 +19,7 @@
     "contextMenus"
   ],
   "oauth2": {
-    "client_id": "30003599100-7v7t6tkd26lsq1i3f9jo1977dt2hectt.apps.googleusercontent.com",
+    "client_id": "30003599100-psf5aqm5fh7s4n20sp7a9cqiilsf06us.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/drive.file"
     ]
