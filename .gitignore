@@ -29,3 +29,6 @@ coverage/
 # Chrome extension build artifacts
 *.crx
 *.pem
+
+# Documentation and non-project files
+docs/
