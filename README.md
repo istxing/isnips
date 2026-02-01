@@ -55,4 +55,4 @@ If you find iSnips helpful, consider supporting its development!
 *   **Privacy Policy**: [Read Privacy Policy](https://istxing.github.io/isnips/privacy.html)
 
 ---
-*Created with ❤️ by nicekate & Antigravity AI*
+*Created with ❤️ by istxing & Antigravity AI*
