@@ -205,7 +205,7 @@ class iSnipsSettings {
 
         about_section: '关于插件',
         version_label: '插件版本',
-        version_desc: 'iSnips v1.0.0',
+        version_desc: 'iSnips v{version}',
         features_label: '插件愿景',
         features_desc: '在网页浏览时快速记录片段或灵感瞬息，助您后期索源回顾，掌握自己的思维瞬间。',
         privacy_label: '隐私承诺',
@@ -302,7 +302,7 @@ class iSnipsSettings {
 
         about_section: 'About',
         version_label: 'Version',
-        version_desc: 'iSnips v1.0.0',
+        version_desc: 'iSnips v{version}',
         block_current_desc: 'Disable iSnips on the current website, no longer automatically save clips',
         features_label: 'Features',
         features_desc: 'Automatically save snippets when selecting text on web pages and pressing Alt+C, supports multi-language interface and waterfall layout',
@@ -397,7 +397,7 @@ class iSnipsSettings {
 
         about_section: 'について',
         version_label: 'バージョン',
-        version_desc: 'iSnips v1.0.0',
+        version_desc: 'iSnips v{version}',
         features_label: '機能説明',
         features_desc: 'ウェブページのテキストを選択してAlt+Cを押すと自動的に片段を保存、多言語インターフェースとウォーターフォールレイアウトをサポート',
         privacy_label: 'プライバシーポリシー',
@@ -472,10 +472,12 @@ class iSnipsSettings {
     document.title = t.settings_title;
 
     // Update elements with data-i18n attributes
+    const manifest = chrome.runtime.getManifest();
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.dataset.i18n;
       if (t[key]) {
-        el.textContent = t[key];
+        // 替换版本号占位符
+        el.textContent = t[key].replace('{version}', manifest.version);
       }
     });
 
@@ -616,7 +618,7 @@ class iSnipsSettings {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `clipindex-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `isnips-backup-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
