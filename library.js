@@ -21,6 +21,23 @@ class iSnipsSidebar {
         this.loadSettings();
         this.loadData();
         this.checkUrlHash();
+        void this.requestPersistentStorage();
+    }
+
+    async requestPersistentStorage() {
+        if (!navigator.storage || typeof navigator.storage.persist !== 'function') {
+            return;
+        }
+
+        try {
+            await navigator.storage.persist();
+            await chrome.runtime.sendMessage({
+                action: 'requestPersistentStorage',
+                source: 'library'
+            });
+        } catch (error) {
+            console.warn('Library: failed to request persistent storage:', error);
+        }
     }
 
     bindEvents() {
@@ -598,6 +615,11 @@ class iSnipsSidebar {
             });
         }
 
+        const clipText = cardDiv.querySelector('.clip-text');
+        if (clipText && card.text) {
+            clipText.title = card.text;
+        }
+
         // Click behavior
         const domainEl = cardDiv.querySelector('.clip-domain');
         if (domainEl && card.url && !isTrash) {
@@ -794,7 +816,7 @@ class iSnipsSidebar {
             const cardData = {
                 url: null,
                 type: 'note',
-                text: noteText.slice(0, 144),
+                text: noteText,
                 domain: null,
                 created_at: Date.now(),
                 updated_at: Date.now(),

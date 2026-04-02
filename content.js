@@ -99,7 +99,7 @@ class iSnipsContent {
     const selectedText = this.getSelectedText();
 
     if (selectedText && selectedText.trim().length > 0) {
-      const text = selectedText.trim().substring(0, 144);
+      const text = selectedText.trim();
       await this.saveClip(text);
       this.highlightSelection(text);
     } else {
@@ -117,7 +117,7 @@ class iSnipsContent {
     try {
       const cardData = {
         type: 'web',
-        text: text.slice(0, 144),
+        text,
         url: window.location.href,
         domain: this.extractDomain(window.location.href),
         title: document.title,

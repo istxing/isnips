@@ -14,6 +14,23 @@ class iSnipsSettings {
     this.loadSettings();
     this.loadShortcuts();
     this.loadSyncSettings();
+    void this.requestPersistentStorage();
+  }
+
+  async requestPersistentStorage() {
+    if (!navigator.storage || typeof navigator.storage.persist !== 'function') {
+      return;
+    }
+
+    try {
+      await navigator.storage.persist();
+      await chrome.runtime.sendMessage({
+        action: 'requestPersistentStorage',
+        source: 'settings-page'
+      });
+    } catch (error) {
+      console.warn('Settings: failed to request persistent storage:', error);
+    }
   }
 
   bindEvents() {
@@ -66,6 +83,14 @@ class iSnipsSettings {
           this.currentLanguage = message.language;
           this.loadTranslations();
           this.updateUI();
+          void this.loadBackupSnapshots();
+        } else if (message.action === 'syncCompleted') {
+          this.updateLastSyncDisplay(message.data?.lastSyncTime || null);
+        } else if (message.action === 'backupCompleted') {
+          this.updateLastBackupDisplay(message.data?.lastBackupTime || null);
+          void this.loadBackupSnapshots();
+        } else if (message.action === 'backupRestored') {
+          void this.loadBackupSnapshots();
         }
         return false;
       });
@@ -258,13 +283,40 @@ class iSnipsSettings {
         gdrive_logout: '断开连接',
         gdrive_connected: '✓ 已连接 Google Drive',
         gdrive_disconnected: '已断开 Google Drive 连接',
+        auto_sync_label: '自动同步',
+        auto_sync_desc: '选择后台自动同步频率。仅在已启用同步方式时生效。',
+        auto_sync_off: '关闭',
+        auto_sync_30m: '30 分钟',
+        auto_sync_1h: '1 小时',
+        auto_sync_1d: '1 天',
+        auto_backup_label: '自动备份',
+        auto_backup_desc: '定时生成本地快照备份，用于回滚或恢复最近数据。',
+        auto_backup_off: '关闭',
+        auto_backup_30m: '30 分钟',
+        auto_backup_1h: '1 小时',
+        auto_backup_1d: '1 天',
         sync_now_label: '立即同步',
         last_sync_desc: '上次同步时间：{0}',
         sync_now_btn: '立即同步',
         sync_success: '同步成功',
         sync_error: '同步失败：{0}',
+        backup_now_label: '立即备份',
+        last_backup_desc: '上次备份时间：{0}',
+        backup_now_btn: '立即备份',
+        backup_success: '备份成功',
+        backup_error: '备份失败：{0}',
+        restore_backup_label: '恢复自动备份',
+        restore_backup_desc: '从最近的本地快照中恢复片段、高亮和空间数据。',
+        restore_backup_btn: '恢复所选备份',
+        restore_backup_success: '备份恢复成功',
+        restore_backup_error: '备份恢复失败：{0}',
+        restore_backup_confirm: '确定要用所选自动备份覆盖当前片段、高亮和空间数据吗？',
+        backup_snapshot_empty: '暂无可用备份',
+        backup_snapshot_auto: '自动备份',
+        backup_snapshot_manual: '手动备份',
         config_save_success: '配置已保存',
         not_synced: '尚未同步',
+        not_backed_up: '尚未备份',
         col_3: '3 栏',
         col_4: '4 栏',
         col_5: '5 栏',
@@ -353,13 +405,40 @@ class iSnipsSettings {
         gdrive_logout: 'Disconnect',
         gdrive_connected: '✓ Connected to Google Drive',
         gdrive_disconnected: 'Disconnected from Google Drive',
+        auto_sync_label: 'Auto Sync',
+        auto_sync_desc: 'Choose how often background sync runs. It only works when a sync method is enabled.',
+        auto_sync_off: 'Off',
+        auto_sync_30m: 'Every 30 minutes',
+        auto_sync_1h: 'Every hour',
+        auto_sync_1d: 'Every day',
+        auto_backup_label: 'Auto Backup',
+        auto_backup_desc: 'Create local snapshot backups on a schedule so recent data can be restored.',
+        auto_backup_off: 'Off',
+        auto_backup_30m: 'Every 30 minutes',
+        auto_backup_1h: 'Every hour',
+        auto_backup_1d: 'Every day',
         sync_now_label: 'Sync Now',
         last_sync_desc: 'Last sync: {0}',
         sync_now_btn: 'Sync Now',
         sync_success: 'Sync successful',
         sync_error: 'Sync failed: {0}',
+        backup_now_label: 'Backup Now',
+        last_backup_desc: 'Last backup: {0}',
+        backup_now_btn: 'Backup Now',
+        backup_success: 'Backup successful',
+        backup_error: 'Backup failed: {0}',
+        restore_backup_label: 'Restore Backup',
+        restore_backup_desc: 'Restore snippets, highlights, and spaces from a recent local snapshot.',
+        restore_backup_btn: 'Restore Selected Backup',
+        restore_backup_success: 'Backup restored successfully',
+        restore_backup_error: 'Backup restore failed: {0}',
+        restore_backup_confirm: 'Restore the selected backup and overwrite the current snippets, highlights, and spaces?',
+        backup_snapshot_empty: 'No backups available',
+        backup_snapshot_auto: 'Auto Backup',
+        backup_snapshot_manual: 'Manual Backup',
         config_save_success: 'Configuration saved',
         not_synced: 'Never synced',
+        not_backed_up: 'Never backed up',
         col_3: '3 Columns',
         col_4: '4 Columns',
         col_5: '5 Columns',
@@ -447,13 +526,40 @@ class iSnipsSettings {
         gdrive_logout: '切断する',
         gdrive_connected: '✓ Google Drive に接続済み',
         gdrive_disconnected: 'Google Drive から切断しました',
+        auto_sync_label: '自動同期',
+        auto_sync_desc: 'バックグラウンド同期の頻度を選択します。同期方法が有効な場合のみ動作します。',
+        auto_sync_off: 'オフ',
+        auto_sync_30m: '30 分ごと',
+        auto_sync_1h: '1 時間ごと',
+        auto_sync_1d: '1 日ごと',
+        auto_backup_label: '自動バックアップ',
+        auto_backup_desc: '定期的にローカルのスナップショットを作成し、最近のデータを復元しやすくします。',
+        auto_backup_off: 'オフ',
+        auto_backup_30m: '30 分ごと',
+        auto_backup_1h: '1 時間ごと',
+        auto_backup_1d: '1 日ごと',
         sync_now_label: '今すぐ同期',
         last_sync_desc: '最終同期：{0}',
         sync_now_btn: '今すぐ同期',
         sync_success: '同期に成功しました',
         sync_error: '同期に失敗しました：{0}',
+        backup_now_label: '今すぐバックアップ',
+        last_backup_desc: '最終バックアップ：{0}',
+        backup_now_btn: '今すぐバックアップ',
+        backup_success: 'バックアップに成功しました',
+        backup_error: 'バックアップに失敗しました：{0}',
+        restore_backup_label: 'バックアップを復元',
+        restore_backup_desc: '最近のローカルスナップショットからスニペット、高亮、スペースを復元します。',
+        restore_backup_btn: '選択したバックアップを復元',
+        restore_backup_success: 'バックアップの復元に成功しました',
+        restore_backup_error: 'バックアップの復元に失敗しました：{0}',
+        restore_backup_confirm: '選択したバックアップで現在のスニペット、高亮、スペースを上書きしてもよろしいですか？',
+        backup_snapshot_empty: '利用可能なバックアップはありません',
+        backup_snapshot_auto: '自動バックアップ',
+        backup_snapshot_manual: '手動バックアップ',
         config_save_success: '設定を保存しました',
         not_synced: '未同期',
+        not_backed_up: '未バックアップ',
         col_3: '3 列',
         col_4: '4 列',
         col_5: '5 列',
@@ -546,6 +652,7 @@ class iSnipsSettings {
       this.currentLanguage = lang;
       this.loadTranslations();
       this.updateUI();
+      await this.loadBackupSnapshots();
 
       // Broadcast language change to other extension pages
       const broadcastResult = await chrome.runtime.sendMessage({
@@ -561,17 +668,31 @@ class iSnipsSettings {
     }
   }
 
-  async saveSetting(key, value) {
+  async saveSetting(key, value, options = {}) {
+    const {
+      showSuccess = true,
+      showError = true
+    } = options;
+
     try {
-      await chrome.runtime.sendMessage({
+      const result = await chrome.runtime.sendMessage({
         action: 'setSetting',
         key,
         value
       });
-      this.showMessage('save_success', 'success');
+      if (!result || !result.success) {
+        throw new Error(result?.error || `Failed to save setting: ${key}`);
+      }
+      if (showSuccess) {
+        this.showMessage('save_success', 'success');
+      }
+      return true;
     } catch (error) {
       console.error('Failed to save setting:', error);
-      this.showMessage('save_error', 'error');
+      if (showError) {
+        this.showMessage('save_error', 'error');
+      }
+      return false;
     }
   }
 
@@ -676,7 +797,7 @@ class iSnipsSettings {
           const normalized = card.text ? card : {
             id: card.id,
             type: card.url ? 'web' : 'note',
-            text: (card.clipText || card.title || '').slice(0, 144),
+            text: card.clipText || card.title || '',
             url: card.url || null,
             domain: card.domain || null,
             created_at: card.createdAt || Date.now(),
@@ -749,7 +870,8 @@ class iSnipsSettings {
     try {
       // Clear IndexedDB
       const db = await this.openDatabase();
-      const stores = ['snippets', 'indexCards', 'highlights', 'settings', 'spaces'];
+      const stores = ['snippets', 'indexCards', 'highlights', 'settings', 'spaces']
+        .filter(storeName => db.objectStoreNames.contains(storeName));
 
       for (const storeName of stores) {
         const transaction = db.transaction([storeName], 'readwrite');
@@ -762,6 +884,18 @@ class iSnipsSettings {
       }
 
       db.close();
+
+      if (chrome && chrome.storage && chrome.storage.local) {
+        await new Promise((resolve, reject) => {
+          chrome.storage.local.clear(() => {
+            if (chrome.runtime.lastError) {
+              reject(chrome.runtime.lastError);
+            } else {
+              resolve();
+            }
+          });
+        });
+      }
 
       this.showMessage('clear_success', 'success');
 
@@ -777,7 +911,33 @@ class iSnipsSettings {
 
   openDatabase() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('iSnipsIndexDB', 3);
+      const request = indexedDB.open('iSnipsIndexDB', 5);
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+
+        if (!db.objectStoreNames.contains('highlights')) {
+          const highlightsStore = db.createObjectStore('highlights', { keyPath: 'id' });
+          highlightsStore.createIndex('url', 'url', { unique: false });
+          highlightsStore.createIndex('timestamp', 'timestamp', { unique: false });
+        }
+
+        if (!db.objectStoreNames.contains('snippets')) {
+          const snippetsStore = db.createObjectStore('snippets', { keyPath: 'id' });
+          snippetsStore.createIndex('created_at', 'created_at', { unique: false });
+          snippetsStore.createIndex('updated_at', 'updated_at', { unique: false });
+          snippetsStore.createIndex('deleted_at', 'deleted_at', { unique: false });
+          snippetsStore.createIndex('purged_at', 'purged_at', { unique: false });
+          snippetsStore.createIndex('domain', 'domain', { unique: false });
+        }
+
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings', { keyPath: 'key' });
+        }
+
+        if (!db.objectStoreNames.contains('spaces')) {
+          db.createObjectStore('spaces', { keyPath: 'id' });
+        }
+      };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
@@ -824,6 +984,14 @@ class iSnipsSettings {
       this.saveSyncConfig(config);
     });
 
+    document.getElementById('autoSyncIntervalSelect').addEventListener('change', (e) => {
+      this.saveSyncConfig({ autoSyncInterval: e.target.value });
+    });
+
+    document.getElementById('autoBackupIntervalSelect').addEventListener('change', (e) => {
+      this.saveSyncConfig({ autoBackupInterval: e.target.value });
+    });
+
     document.getElementById('gdriveLoginBtn').addEventListener('click', async () => {
       await this.syncNow('googledrive');
       await this.checkGoogleDriveStatus();
@@ -839,12 +1007,27 @@ class iSnipsSettings {
       if (type === 'none') return;
       this.syncNow(type);
     });
+
+    document.getElementById('backupNowBtn').addEventListener('click', () => {
+      this.backupNow();
+    });
+
+    document.getElementById('restoreBackupBtn').addEventListener('click', () => {
+      this.confirmRestoreBackup();
+    });
   }
 
   toggleSyncArea(type) {
     document.querySelectorAll('.sync-config-area').forEach(el => el.style.display = 'none');
     const targetArea = document.getElementById(type + 'Config');
     if (targetArea) targetArea.style.display = 'block';
+    this.updateAutoSyncState(type);
+  }
+
+  updateAutoSyncState(type) {
+    const select = document.getElementById('autoSyncIntervalSelect');
+    if (!select) return;
+    select.disabled = type === 'none';
   }
 
   async loadSyncSettings() {
@@ -855,6 +1038,8 @@ class iSnipsSettings {
     if (radio) radio.checked = true;
 
     this.toggleSyncArea(config.type);
+    document.getElementById('autoSyncIntervalSelect').value = config.autoSyncInterval || 'off';
+    document.getElementById('autoBackupIntervalSelect').value = config.autoBackupInterval || 'off';
 
     if (config.type === 'webdav') {
       document.getElementById('webdavUrl').value = config.url || '';
@@ -868,6 +1053,9 @@ class iSnipsSettings {
 
     const lastSyncTime = await this.getSetting('lastSyncTime', null);
     this.updateLastSyncDisplay(lastSyncTime);
+    const lastBackupTime = await this.getSetting('lastBackupTime', null);
+    this.updateLastBackupDisplay(lastBackupTime);
+    await this.loadBackupSnapshots();
   }
 
   async checkGoogleDriveStatus() {
@@ -915,6 +1103,20 @@ class iSnipsSettings {
       document.getElementById('gdriveNotLoggedIn').style.display = 'flex';
       document.getElementById('gdriveLoggedIn').style.display = 'none';
 
+      const currentConfig = await this.getSetting('syncConfig', {});
+      if (currentConfig.type === 'googledrive') {
+        const nextConfig = { ...currentConfig, type: 'none' };
+        const ok = await this.saveSetting('syncConfig', nextConfig, {
+          showSuccess: false,
+          showError: false
+        });
+        if (ok) {
+          const noneRadio = document.querySelector('input[name="syncMethod"][value="none"]');
+          if (noneRadio) noneRadio.checked = true;
+          this.toggleSyncArea('none');
+        }
+      }
+
       this.showMessage('gdrive_disconnected', 'success');
     } catch (error) {
       console.error('Failed to logout from Google Drive:', error);
@@ -924,8 +1126,16 @@ class iSnipsSettings {
   async saveSyncConfig(config) {
     const currentConfig = await this.getSetting('syncConfig', {});
     const newConfig = { ...currentConfig, ...config };
-    await this.saveSetting('syncConfig', newConfig);
-    this.showMessage('config_save_success', 'success');
+    const ok = await this.saveSetting('syncConfig', newConfig, {
+      showSuccess: false,
+      showError: false
+    });
+    if (ok) {
+      this.showMessage('config_save_success', 'success');
+      return true;
+    }
+    this.showMessage('save_error', 'error');
+    return false;
   }
 
   async syncNow(type) {
@@ -938,9 +1148,7 @@ class iSnipsSettings {
       const action = type === 'webdav' ? 'syncWebDAV' : 'syncGoogleDrive';
       const result = await chrome.runtime.sendMessage({ action });
       if (result.success) {
-        const now = Date.now();
-        await this.saveSetting('lastSyncTime', now);
-        this.updateLastSyncDisplay(now);
+        this.updateLastSyncDisplay(result.lastSyncTime || Date.now());
         this.showMessage('sync_success', 'success');
       } else {
         this.showMessage('sync_error', 'error', result.error);
@@ -950,6 +1158,125 @@ class iSnipsSettings {
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
+    }
+  }
+
+  async backupNow() {
+    const btn = document.getElementById('backupNowBtn');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      const result = await chrome.runtime.sendMessage({
+        action: 'createBackup',
+        source: 'manual'
+      });
+      if (result.success) {
+        this.updateLastBackupDisplay(result.lastBackupTime || Date.now());
+        await this.loadBackupSnapshots();
+        this.showMessage('backup_success', 'success');
+      } else {
+        this.showMessage('backup_error', 'error', result.error);
+      }
+    } catch (error) {
+      this.showMessage('backup_error', 'error', error.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
+  async loadBackupSnapshots() {
+    const select = document.getElementById('backupSnapshotSelect');
+    const restoreBtn = document.getElementById('restoreBackupBtn');
+    if (!select || !restoreBtn) return;
+
+    try {
+      const result = await chrome.runtime.sendMessage({
+        action: 'listBackupSnapshots',
+        limit: 20
+      });
+      if (!result?.success) {
+        throw new Error(result?.error || 'Failed to load backup snapshots');
+      }
+
+      const t = this.translations[this.currentLanguage] || this.translations['en'] || {};
+      const snapshots = Array.isArray(result.snapshots) ? result.snapshots : [];
+      select.innerHTML = '';
+
+      if (snapshots.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = t.backup_snapshot_empty || 'No backups available';
+        select.appendChild(option);
+        select.disabled = true;
+        restoreBtn.disabled = true;
+        return;
+      }
+
+      for (const snapshot of snapshots) {
+        const option = document.createElement('option');
+        option.value = snapshot.id;
+        option.textContent = this.formatBackupSnapshotLabel(snapshot);
+        select.appendChild(option);
+      }
+
+      select.disabled = false;
+      restoreBtn.disabled = false;
+    } catch (error) {
+      console.error('Failed to load backup snapshots:', error);
+      select.innerHTML = '';
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = 'Backup snapshots unavailable';
+      select.appendChild(option);
+      select.disabled = true;
+      restoreBtn.disabled = true;
+    }
+  }
+
+  formatBackupSnapshotLabel(snapshot) {
+    const t = this.translations[this.currentLanguage] || this.translations['en'] || {};
+    const label = snapshot.source === 'auto'
+      ? (t.backup_snapshot_auto || 'Auto Backup')
+      : (t.backup_snapshot_manual || 'Manual Backup');
+    const dateLabel = snapshot.createdAt ? new Date(snapshot.createdAt).toLocaleString() : 'Unknown time';
+    const snippetCount = Number.isFinite(snapshot.snippetCount) ? snapshot.snippetCount : 0;
+    return `${dateLabel} · ${label} · ${snippetCount}`;
+  }
+
+  confirmRestoreBackup() {
+    const select = document.getElementById('backupSnapshotSelect');
+    const snapshotId = select?.value;
+    if (!snapshotId) return;
+
+    this.pendingAction = async () => {
+      await this.restoreBackupSnapshot(snapshotId);
+    };
+
+    const lang = this.currentLanguage;
+    const baseLang = lang.split('-')[0];
+    const t = this.translations[lang] || this.translations[baseLang] || this.translations['en'];
+    document.getElementById('confirmMessage').textContent = t.restore_backup_confirm || 'Restore the selected backup?';
+    this.showConfirmModal();
+  }
+
+  async restoreBackupSnapshot(snapshotId) {
+    try {
+      const result = await chrome.runtime.sendMessage({
+        action: 'restoreBackupSnapshot',
+        snapshotId
+      });
+      if (!result?.success) {
+        throw new Error(result?.error || 'Failed to restore backup');
+      }
+
+      await this.loadBackupSnapshots();
+      this.showMessage('restore_backup_success', 'success');
+    } catch (error) {
+      console.error('Failed to restore backup snapshot:', error);
+      this.showMessage('restore_backup_error', 'error', error.message);
     }
   }
 
@@ -963,6 +1290,19 @@ class iSnipsSettings {
       el.textContent = (t.last_sync_desc || 'Last synced: {0}').replace('{0}', dateStr);
     } else {
       el.textContent = t.not_synced || 'Not synced yet';
+    }
+  }
+
+  updateLastBackupDisplay(timestamp) {
+    const el = document.getElementById('lastBackupTime');
+    if (!el) return;
+
+    const t = this.translations[this.currentLanguage] || this.translations['en'] || {};
+    if (timestamp) {
+      const dateStr = new Date(timestamp).toLocaleString();
+      el.textContent = (t.last_backup_desc || 'Last backup: {0}').replace('{0}', dateStr);
+    } else {
+      el.textContent = t.not_backed_up || 'Not backed up yet';
     }
   }
 

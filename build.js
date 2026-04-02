@@ -1,7 +1,55 @@
 const fs = require('fs');
 const path = require('path');
 
+function applyManifestOverrides(manifest) {
+  const nextManifest = { ...manifest };
+  const overrides = [];
+
+  const manifestKey = (process.env.ISNIPS_MANIFEST_KEY || '').trim();
+  if (manifestKey) {
+    nextManifest.key = manifestKey;
+    overrides.push('key');
+  }
+
+  const oauthClientId = (process.env.ISNIPS_OAUTH_CLIENT_ID || '').trim();
+  if (oauthClientId) {
+    nextManifest.oauth2 = {
+      ...(nextManifest.oauth2 || {}),
+      client_id: oauthClientId
+    };
+    overrides.push('oauth2.client_id');
+  }
+
+  const nameSuffix = (process.env.ISNIPS_NAME_SUFFIX || '').trim();
+  if (nameSuffix) {
+    nextManifest.name = `${nextManifest.name} ${nameSuffix}`;
+    overrides.push('name');
+  }
+
+  return {
+    manifest: nextManifest,
+    overrides
+  };
+}
+
+function copyManifestWithOverrides(src, dest) {
+  const manifest = JSON.parse(fs.readFileSync(src, 'utf8'));
+  const { manifest: nextManifest, overrides } = applyManifestOverrides(manifest);
+  fs.writeFileSync(dest, JSON.stringify(nextManifest, null, 2) + '\n');
+
+  if (overrides.length > 0) {
+    console.log(`Copied manifest.json with overrides: ${overrides.join(', ')}`);
+  } else {
+    console.log('Copied manifest.json');
+  }
+}
+
 function copyRecursiveSync(src, dest) {
+  const basename = path.basename(src);
+  if (basename === '.DS_Store' || basename === 'Thumbs.db') {
+    return;
+  }
+
   const exists = fs.existsSync(src);
   const stats = exists && fs.statSync(src);
   const isDirectory = exists && stats.isDirectory();
@@ -31,7 +79,6 @@ function build() {
     'settings.html',
     'settings.js',
     'settings.css',
-    'manifest.json',
     'icons',
     'background.js',
     'sync.js',
@@ -52,6 +99,12 @@ function build() {
       console.warn(`Warning: ${item} not found, skipping`);
     }
   });
+
+  if (fs.existsSync('manifest.json')) {
+    copyManifestWithOverrides('manifest.json', 'dist/manifest.json');
+  } else {
+    console.warn('Warning: manifest.json not found, skipping');
+  }
 
   console.log('Build completed successfully');
 }

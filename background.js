@@ -3,11 +3,185 @@
 // Import sync service
 importScripts('sync.js');
 
+const AUTO_CLEANUP_ALARM = 'autoCleanup';
+const AUTO_SYNC_ALARM = 'autoSync';
+const AUTO_BACKUP_ALARM = 'autoBackup';
+const AUTO_SYNC_INTERVALS = {
+  off: 0,
+  '30m': 30,
+  '1h': 60,
+  '1d': 1440
+};
+const AUTO_BACKUP_RETENTION = {
+  off: 0,
+  '30m': 48,
+  '1h': 72,
+  '1d': 30
+};
+const SHADOW_SNIPPET_PREFIX = 'shadowSnippet:';
+const SHADOW_SNIPPET_IDS_KEY = 'shadowSnippetIds';
+const SHADOW_SNIPPET_META_KEY = 'shadowSnippetMeta';
+const BACKUP_SNAPSHOT_PREFIX = 'backupSnapshot:';
+const BACKUP_SNAPSHOT_IDS_KEY = 'backupSnapshotIds';
+const BACKUP_SNAPSHOT_META_KEY = 'backupSnapshotMeta';
+
+function normalizeTransactionError(error, fallback = 'Transaction failed') {
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  if (error && typeof error.message === 'string') {
+    return error.message;
+  }
+
+  return fallback;
+}
+
+function bindWriteTransaction(transaction, resolve, reject, getSuccessResult) {
+  let settled = false;
+
+  const resolveOnce = (value) => {
+    if (settled) return;
+    settled = true;
+    resolve(value);
+  };
+
+  const rejectOnce = (error, fallback) => {
+    if (settled) return;
+    settled = true;
+    reject({
+      success: false,
+      error: normalizeTransactionError(error || transaction.error, fallback)
+    });
+  };
+
+  transaction.oncomplete = () => {
+    resolveOnce(getSuccessResult());
+  };
+
+  transaction.onerror = () => {
+    rejectOnce(transaction.error);
+  };
+
+  transaction.onabort = () => {
+    rejectOnce(transaction.error, 'Transaction aborted');
+  };
+
+  return { rejectOnce };
+}
+
+function hasChromeStorageLocal() {
+  return typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local;
+}
+
+function chromeStorageLocalGet(keys) {
+  return new Promise((resolve, reject) => {
+    if (!hasChromeStorageLocal()) {
+      resolve({});
+      return;
+    }
+
+    chrome.storage.local.get(keys, (items) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(items || {});
+      }
+    });
+  });
+}
+
+function chromeStorageLocalSet(items) {
+  return new Promise((resolve, reject) => {
+    if (!hasChromeStorageLocal()) {
+      resolve();
+      return;
+    }
+
+    chrome.storage.local.set(items, () => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+function chromeStorageLocalRemove(keys) {
+  return new Promise((resolve, reject) => {
+    if (!hasChromeStorageLocal() || !keys || keys.length === 0) {
+      resolve();
+      return;
+    }
+
+    chrome.storage.local.remove(keys, () => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+async function requestPersistentStorage(reason = 'background') {
+  if (typeof navigator === 'undefined' || !navigator.storage || typeof navigator.storage.persist !== 'function') {
+    return { supported: false, persisted: null, granted: false };
+  }
+
+  let persisted = null;
+  let granted = false;
+
+  try {
+    if (typeof navigator.storage.persisted === 'function') {
+      persisted = await navigator.storage.persisted();
+    }
+  } catch (error) {
+    console.warn('Failed to query persistent storage status:', error);
+  }
+
+  if (!persisted) {
+    try {
+      granted = await navigator.storage.persist();
+    } catch (error) {
+      console.warn('Failed to request persistent storage:', error);
+    }
+  }
+
+  try {
+    if (typeof navigator.storage.persisted === 'function') {
+      persisted = await navigator.storage.persisted();
+    } else if (persisted == null) {
+      persisted = granted;
+    }
+  } catch (error) {
+    console.warn('Failed to re-check persistent storage status:', error);
+  }
+
+  const status = {
+    supported: true,
+    granted: Boolean(granted),
+    persisted: persisted == null ? null : Boolean(persisted),
+    checked_at: Date.now(),
+    source: reason
+  };
+
+  try {
+    const db = await getDatabase();
+    await db.setSetting('storagePersistenceStatus', status);
+  } catch (error) {
+    console.warn('Failed to store persistence status:', error);
+  }
+
+  return status;
+}
+
 class iSnipsDatabase {
   constructor() {
     this.db = null;
     this.dbName = 'iSnipsIndexDB';
-    this.dbVersion = 3;
+    this.dbVersion = 5;
     this.initialized = false;
   }
 
@@ -53,6 +227,11 @@ class iSnipsDatabase {
         // Settings store
         if (!db.objectStoreNames.contains('settings')) {
           db.createObjectStore('settings', { keyPath: 'key' });
+        }
+
+        // Spaces store
+        if (!db.objectStoreNames.contains('spaces')) {
+          db.createObjectStore('spaces', { keyPath: 'id' });
         }
 
       };
@@ -137,19 +316,19 @@ class iSnipsDatabase {
       purged_at: snippetData.purged_at ?? null
     };
 
-    return new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
       const transaction = db.transaction(['snippets'], 'readwrite');
       const store = transaction.objectStore('snippets');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({ success: true, snippet }));
       const request = store.add(snippet);
 
-      request.onsuccess = () => {
-        resolve({ success: true, snippet });
-      };
-
       request.onerror = () => {
-        reject({ success: false, error: request.error });
+        rejectOnce(request.error, 'Failed to save snippet');
       };
     });
+
+    await this.runShadowSnippetTask('saveSnippet', () => this.upsertShadowSnippets([result.snippet]));
+    return result;
   }
 
   async getSnippets(filters = {}) {
@@ -202,50 +381,57 @@ class iSnipsDatabase {
 
   async updateSnippet(snippetId, updates) {
     const db = await this.initialize();
-    return new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
       const transaction = db.transaction(['snippets'], 'readwrite');
       const store = transaction.objectStore('snippets');
+      let updatedSnippet = null;
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({
+        success: true,
+        snippet: updatedSnippet
+      }));
       const getRequest = store.get(snippetId);
 
       getRequest.onsuccess = () => {
         const snippet = getRequest.result;
         if (snippet) {
-          const updatedSnippet = { ...snippet, ...updates, updated_at: Date.now() };
+          updatedSnippet = { ...snippet, ...updates, updated_at: Date.now() };
           const putRequest = store.put(updatedSnippet);
 
-          putRequest.onsuccess = () => {
-            resolve({ success: true, snippet: updatedSnippet });
-          };
-
           putRequest.onerror = () => {
-            reject({ success: false, error: putRequest.error });
+            rejectOnce(putRequest.error, 'Failed to update snippet');
           };
         } else {
-          reject({ success: false, error: 'Snippet not found' });
+          rejectOnce('Snippet not found');
         }
       };
 
       getRequest.onerror = () => {
-        reject({ success: false, error: getRequest.error });
+        rejectOnce(getRequest.error, 'Failed to load snippet');
       };
     });
+
+    if (result?.snippet) {
+      await this.runShadowSnippetTask('updateSnippet', () => this.upsertShadowSnippets([result.snippet]));
+    }
+
+    return result;
   }
 
   async deleteSnippet(snippetId) {
     const db = await this.initialize();
-    return new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
       const transaction = db.transaction(['snippets'], 'readwrite');
       const store = transaction.objectStore('snippets');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({ success: true }));
       const request = store.delete(snippetId);
 
-      request.onsuccess = () => {
-        resolve({ success: true });
-      };
-
       request.onerror = () => {
-        reject({ success: false, error: request.error });
+        rejectOnce(request.error, 'Failed to delete snippet');
       };
     });
+
+    await this.runShadowSnippetTask('deleteSnippet', () => this.removeShadowSnippets([snippetId]));
+    return result;
   }
 
   async softDeleteSnippet(snippetId) {
@@ -311,10 +497,14 @@ class iSnipsDatabase {
 
   async emptyTrash() {
     const db = await this.initialize();
-    return new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
       const transaction = db.transaction(['snippets'], 'readwrite');
       const store = transaction.objectStore('snippets');
       const deletedIndex = store.index('deleted_at');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({
+        success: true,
+        purgedCount
+      }));
       const request = deletedIndex.openCursor(IDBKeyRange.lowerBound(1));
 
       let purgedCount = 0;
@@ -333,15 +523,19 @@ class iSnipsDatabase {
             purgedCount++;
           }
           cursor.continue();
-        } else {
-          resolve({ success: true, purgedCount });
         }
       };
 
       request.onerror = () => {
-        reject({ success: false, error: request.error });
+        rejectOnce(request.error, 'Failed to empty trash');
       };
     });
+
+    if (result?.success && result.purgedCount > 0) {
+      await this.runShadowSnippetTask('emptyTrash', () => this.syncShadowSnippets());
+    }
+
+    return result;
   }
 
   async autoDeleteOldTrash() {
@@ -353,10 +547,14 @@ class iSnipsDatabase {
     const db = await this.initialize();
     const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
 
-    return new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
       const transaction = db.transaction(['snippets'], 'readwrite');
       const store = transaction.objectStore('snippets');
       const purgedIndex = store.index('purged_at');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({
+        success: true,
+        deletedCount
+      }));
       const request = purgedIndex.openCursor(IDBKeyRange.upperBound(thirtyDaysAgo));
 
       let deletedCount = 0;
@@ -369,15 +567,19 @@ class iSnipsDatabase {
             deletedCount++;
           }
           cursor.continue();
-        } else {
-          resolve({ success: true, deletedCount });
         }
       };
 
       request.onerror = () => {
-        reject({ success: false, error: request.error });
+        rejectOnce(request.error, 'Failed to auto-delete old trash');
       };
     });
+
+    if (result?.success && result.deletedCount > 0) {
+      await this.runShadowSnippetTask('autoDeleteOldTrash', () => this.syncShadowSnippets());
+    }
+
+    return result;
   }
 
   // Spaces operations
@@ -436,6 +638,25 @@ class iSnipsDatabase {
     });
   }
 
+  async getStoredSpaces() {
+    const db = await this.initialize();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(['spaces'], 'readonly');
+      const store = transaction.objectStore('spaces');
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const spaces = request.result || [];
+        spaces.sort((a, b) => (a.order - b.order) || (a.createdAt - b.createdAt));
+        resolve(spaces);
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  }
+
   async updateSpace(spaceId, updates) {
     const db = await this.initialize();
     return new Promise((resolve, reject) => {
@@ -474,7 +695,7 @@ class iSnipsDatabase {
     }
 
     const db = await this.initialize();
-    return new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
       const transaction = db.transaction(['spaces', 'snippets'], 'readwrite');
       const spacesStore = transaction.objectStore('spaces');
       const snippetsStore = transaction.objectStore('snippets');
@@ -509,6 +730,12 @@ class iSnipsDatabase {
         reject({ success: false, error: cardsRequest.error });
       };
     });
+
+    if (result?.success && result.movedCards > 0) {
+      await this.runShadowSnippetTask('deleteSpace', () => this.syncShadowSnippets());
+    }
+
+    return result;
   }
 
   // Highlights operations
@@ -517,14 +744,11 @@ class iSnipsDatabase {
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(['highlights'], 'readwrite');
       const store = transaction.objectStore('highlights');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({ success: true }));
       const request = store.add(highlight);
 
-      request.onsuccess = () => {
-        resolve({ success: true });
-      };
-
       request.onerror = () => {
-        reject({ success: false, error: request.error });
+        rejectOnce(request.error, 'Failed to store highlight');
       };
     });
   }
@@ -539,6 +763,23 @@ class iSnipsDatabase {
 
       request.onsuccess = () => {
         resolve(request.result);
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  }
+
+  async getAllHighlights() {
+    const db = await this.initialize();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(['highlights'], 'readonly');
+      const store = transaction.objectStore('highlights');
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        resolve(request.result || []);
       };
 
       request.onerror = () => {
@@ -565,6 +806,80 @@ class iSnipsDatabase {
     });
   }
 
+  async getAllSettings() {
+    const db = await this.initialize();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(['settings'], 'readonly');
+      const store = transaction.objectStore('settings');
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const entries = request.result || [];
+        resolve(Object.fromEntries(entries.map(entry => [entry.key, entry.value])));
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  }
+
+  async replaceDataFromBackup(bundle) {
+    const db = await this.initialize();
+    const snippets = Array.isArray(bundle?.snippets) ? bundle.snippets : [];
+    const highlights = Array.isArray(bundle?.highlights) ? bundle.highlights : [];
+    const spaces = Array.isArray(bundle?.spaces) ? bundle.spaces : [];
+
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction(['snippets', 'highlights', 'spaces'], 'readwrite');
+      const snippetsStore = transaction.objectStore('snippets');
+      const highlightsStore = transaction.objectStore('highlights');
+      const spacesStore = transaction.objectStore('spaces');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({ success: true }));
+
+      const requests = [
+        snippetsStore.clear(),
+        highlightsStore.clear(),
+        spacesStore.clear()
+      ];
+
+      for (const request of requests) {
+        request.onerror = () => {
+          rejectOnce(request.error, 'Failed to clear data before restore');
+        };
+      }
+
+      for (const snippet of snippets) {
+        const request = snippetsStore.put(snippet);
+        request.onerror = () => {
+          rejectOnce(request.error, 'Failed to restore snippet');
+        };
+      }
+
+      for (const highlight of highlights) {
+        const request = highlightsStore.put(highlight);
+        request.onerror = () => {
+          rejectOnce(request.error, 'Failed to restore highlight');
+        };
+      }
+
+      for (const space of spaces) {
+        const request = spacesStore.put(space);
+        request.onerror = () => {
+          rejectOnce(request.error, 'Failed to restore space');
+        };
+      }
+    });
+
+    await this.runShadowSnippetTask('restoreBackupSnapshot', () => this.syncShadowSnippets());
+    return {
+      success: true,
+      snippetCount: snippets.length,
+      highlightCount: highlights.length,
+      spaceCount: spaces.length
+    };
+  }
+
   async setSetting(key, value) {
     const db = await this.initialize();
 
@@ -572,14 +887,11 @@ class iSnipsDatabase {
     const dbPromise = new Promise((resolve, reject) => {
       const transaction = db.transaction(['settings'], 'readwrite');
       const store = transaction.objectStore('settings');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({ success: true }));
       const request = store.put({ key, value });
 
-      request.onsuccess = () => {
-        resolve({ success: true });
-      };
-
       request.onerror = () => {
-        reject({ success: false, error: request.error });
+        rejectOnce(request.error, `Failed to save setting: ${key}`);
       };
     });
 
@@ -601,6 +913,100 @@ class iSnipsDatabase {
     // Wait for both operations to complete
     await Promise.all([dbPromise, storagePromise]);
     return { success: true };
+  }
+
+  async runShadowSnippetTask(label, executor) {
+    try {
+      return await executor();
+    } catch (error) {
+      console.warn(`Shadow snippet mirror failed during ${label}:`, error);
+      return { success: false, error: normalizeTransactionError(error, 'Shadow snippet mirror failed') };
+    }
+  }
+
+  async upsertShadowSnippets(snippets) {
+    const normalizedSnippets = (snippets || []).filter(snippet => snippet && snippet.id);
+    if (!hasChromeStorageLocal() || normalizedSnippets.length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    const current = await chromeStorageLocalGet([SHADOW_SNIPPET_IDS_KEY]);
+    const existingIds = Array.isArray(current[SHADOW_SNIPPET_IDS_KEY]) ? current[SHADOW_SNIPPET_IDS_KEY] : [];
+    const idSet = new Set(existingIds);
+    const payload = {};
+
+    for (const snippet of normalizedSnippets) {
+      idSet.add(snippet.id);
+      payload[`${SHADOW_SNIPPET_PREFIX}${snippet.id}`] = snippet;
+    }
+
+    payload[SHADOW_SNIPPET_IDS_KEY] = Array.from(idSet);
+    payload[SHADOW_SNIPPET_META_KEY] = {
+      updated_at: Date.now(),
+      count: payload[SHADOW_SNIPPET_IDS_KEY].length
+    };
+
+    await chromeStorageLocalSet(payload);
+    return { success: true, count: normalizedSnippets.length };
+  }
+
+  async removeShadowSnippets(snippetIds) {
+    const idsToRemove = (snippetIds || []).filter(Boolean);
+    if (!hasChromeStorageLocal() || idsToRemove.length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    const current = await chromeStorageLocalGet([SHADOW_SNIPPET_IDS_KEY]);
+    const existingIds = Array.isArray(current[SHADOW_SNIPPET_IDS_KEY]) ? current[SHADOW_SNIPPET_IDS_KEY] : [];
+    const removeSet = new Set(idsToRemove);
+    const nextIds = existingIds.filter(id => !removeSet.has(id));
+
+    await chromeStorageLocalRemove(idsToRemove.map(id => `${SHADOW_SNIPPET_PREFIX}${id}`));
+    await chromeStorageLocalSet({
+      [SHADOW_SNIPPET_IDS_KEY]: nextIds,
+      [SHADOW_SNIPPET_META_KEY]: {
+        updated_at: Date.now(),
+        count: nextIds.length
+      }
+    });
+
+    return { success: true, count: idsToRemove.length };
+  }
+
+  async syncShadowSnippets() {
+    if (!hasChromeStorageLocal()) {
+      return { success: true, count: 0 };
+    }
+
+    const snippets = await this.getAllSnippetsIncludingDeleted();
+    const current = await chromeStorageLocalGet([SHADOW_SNIPPET_IDS_KEY]);
+    const previousIds = Array.isArray(current[SHADOW_SNIPPET_IDS_KEY]) ? current[SHADOW_SNIPPET_IDS_KEY] : [];
+    const nextIds = snippets.map(snippet => snippet.id).filter(Boolean);
+    const nextIdSet = new Set(nextIds);
+    const staleKeys = previousIds
+      .filter(id => !nextIdSet.has(id))
+      .map(id => `${SHADOW_SNIPPET_PREFIX}${id}`);
+    const payload = {
+      [SHADOW_SNIPPET_IDS_KEY]: nextIds,
+      [SHADOW_SNIPPET_META_KEY]: {
+        updated_at: Date.now(),
+        count: nextIds.length
+      }
+    };
+
+    for (const snippet of snippets) {
+      if (snippet && snippet.id) {
+        payload[`${SHADOW_SNIPPET_PREFIX}${snippet.id}`] = snippet;
+      }
+    }
+
+    await chromeStorageLocalSet(payload);
+
+    if (staleKeys.length > 0) {
+      await chromeStorageLocalRemove(staleKeys);
+    }
+
+    return { success: true, count: nextIds.length };
   }
 
   // Recent tags management
@@ -626,6 +1032,46 @@ class iSnipsDatabase {
 
 // Database instance - initialize only when needed
 let dbInstance = null;
+let syncInFlight = null;
+let backupInFlight = null;
+
+function isSupportedSyncType(type) {
+  return type === 'webdav' || type === 'googledrive';
+}
+
+function getAutoSyncPeriod(config = {}) {
+  return AUTO_SYNC_INTERVALS[config.autoSyncInterval] || 0;
+}
+
+function getAutoBackupPeriod(config = {}) {
+  return AUTO_SYNC_INTERVALS[config.autoBackupInterval] || 0;
+}
+
+function getAutoBackupRetention(config = {}) {
+  return AUTO_BACKUP_RETENTION[config.autoBackupInterval] || 30;
+}
+
+function clearAlarm(name) {
+  return new Promise((resolve) => {
+    if (!chrome.alarms) {
+      resolve(false);
+      return;
+    }
+
+    chrome.alarms.clear(name, (wasCleared) => {
+      resolve(Boolean(wasCleared));
+    });
+  });
+}
+
+function ensureAutoCleanupAlarm() {
+  if (!chrome.alarms) {
+    console.warn('Chrome alarms API not available');
+    return;
+  }
+
+  chrome.alarms.create(AUTO_CLEANUP_ALARM, { delayInMinutes: 1, periodInMinutes: 1440 });
+}
 
 async function getDatabase() {
   if (!dbInstance) {
@@ -635,6 +1081,253 @@ async function getDatabase() {
   }
 
   return dbInstance;
+}
+
+async function scheduleAutoSyncAlarm(config = null) {
+  if (!chrome.alarms) {
+    console.warn('Chrome alarms API not available');
+    return false;
+  }
+
+  const db = await getDatabase();
+  const syncConfig = config || await db.getSetting('syncConfig', { type: 'none', autoSyncInterval: 'off' });
+  const periodInMinutes = getAutoSyncPeriod(syncConfig);
+
+  await clearAlarm(AUTO_SYNC_ALARM);
+
+  if (!isSupportedSyncType(syncConfig.type) || !periodInMinutes) {
+    return false;
+  }
+
+  chrome.alarms.create(AUTO_SYNC_ALARM, {
+    delayInMinutes: periodInMinutes,
+    periodInMinutes
+  });
+
+  return true;
+}
+
+async function scheduleAutoBackupAlarm(config = null) {
+  if (!chrome.alarms) {
+    console.warn('Chrome alarms API not available');
+    return false;
+  }
+
+  const db = await getDatabase();
+  const syncConfig = config || await db.getSetting('syncConfig', {
+    type: 'none',
+    autoSyncInterval: 'off',
+    autoBackupInterval: 'off'
+  });
+  const periodInMinutes = getAutoBackupPeriod(syncConfig);
+
+  await clearAlarm(AUTO_BACKUP_ALARM);
+
+  if (!periodInMinutes) {
+    return false;
+  }
+
+  chrome.alarms.create(AUTO_BACKUP_ALARM, {
+    delayInMinutes: periodInMinutes,
+    periodInMinutes
+  });
+
+  return true;
+}
+
+async function buildBackupBundle(db, source = 'manual') {
+  const [snippets, highlights, settings, spaces] = await Promise.all([
+    db.getAllSnippetsIncludingDeleted(),
+    db.getAllHighlights(),
+    db.getAllSettings(),
+    db.getStoredSpaces()
+  ]);
+
+  return {
+    version: '3.1.0',
+    createdAt: Date.now(),
+    source,
+    snippets,
+    highlights,
+    settings,
+    spaces
+  };
+}
+
+async function writeBackupSnapshot(bundle, config = {}) {
+  const snapshotId = `${bundle.createdAt}-${Math.random().toString(36).slice(2, 10)}`;
+  const retentionLimit = getAutoBackupRetention(config);
+  const current = await chromeStorageLocalGet([BACKUP_SNAPSHOT_IDS_KEY]);
+  const existingIds = Array.isArray(current[BACKUP_SNAPSHOT_IDS_KEY]) ? current[BACKUP_SNAPSHOT_IDS_KEY] : [];
+  const nextIds = [snapshotId, ...existingIds].slice(0, retentionLimit);
+  const retainedSet = new Set(nextIds);
+  const staleKeys = existingIds
+    .filter(id => !retainedSet.has(id))
+    .map(id => `${BACKUP_SNAPSHOT_PREFIX}${id}`);
+
+  await chromeStorageLocalSet({
+    [`${BACKUP_SNAPSHOT_PREFIX}${snapshotId}`]: bundle,
+    [BACKUP_SNAPSHOT_IDS_KEY]: nextIds,
+    [BACKUP_SNAPSHOT_META_KEY]: {
+      updated_at: bundle.createdAt,
+      last_snapshot_id: snapshotId,
+      count: nextIds.length
+    }
+  });
+
+  if (staleKeys.length > 0) {
+    await chromeStorageLocalRemove(staleKeys);
+  }
+
+  return {
+    snapshotId,
+    snapshotCount: nextIds.length
+  };
+}
+
+async function listBackupSnapshots(limit = 20) {
+  const current = await chromeStorageLocalGet([BACKUP_SNAPSHOT_IDS_KEY]);
+  const snapshotIds = Array.isArray(current[BACKUP_SNAPSHOT_IDS_KEY]) ? current[BACKUP_SNAPSHOT_IDS_KEY] : [];
+  const selectedIds = snapshotIds.slice(0, limit);
+
+  if (selectedIds.length === 0) {
+    return { success: true, snapshots: [] };
+  }
+
+  const snapshotKeys = selectedIds.map(id => `${BACKUP_SNAPSHOT_PREFIX}${id}`);
+  const snapshotItems = await chromeStorageLocalGet(snapshotKeys);
+  const snapshots = selectedIds.map(id => {
+    const bundle = snapshotItems[`${BACKUP_SNAPSHOT_PREFIX}${id}`] || {};
+    return {
+      id,
+      createdAt: bundle.createdAt || null,
+      source: bundle.source || 'unknown',
+      snippetCount: Array.isArray(bundle.snippets) ? bundle.snippets.length : 0,
+      highlightCount: Array.isArray(bundle.highlights) ? bundle.highlights.length : 0,
+      spaceCount: Array.isArray(bundle.spaces) ? bundle.spaces.length : 0
+    };
+  });
+
+  return { success: true, snapshots };
+}
+
+async function restoreBackupSnapshot(snapshotId) {
+  if (!snapshotId) {
+    return { success: false, error: 'Backup snapshot id is required' };
+  }
+
+  const snapshotItems = await chromeStorageLocalGet([`${BACKUP_SNAPSHOT_PREFIX}${snapshotId}`]);
+  const bundle = snapshotItems[`${BACKUP_SNAPSHOT_PREFIX}${snapshotId}`];
+  if (!bundle) {
+    return { success: false, error: 'Backup snapshot not found' };
+  }
+
+  const db = await getDatabase();
+  const restoreResult = await db.replaceDataFromBackup(bundle);
+  broadcastDataChange('backupRestored', {
+    snapshotId,
+    restoredAt: Date.now()
+  });
+  broadcastDataChange('cardSaved');
+
+  return {
+    success: true,
+    snapshotId,
+    restoredAt: Date.now(),
+    ...restoreResult
+  };
+}
+
+async function performSync(requestedType = null, source = 'manual') {
+  if (syncInFlight) {
+    return syncInFlight;
+  }
+
+  syncInFlight = (async () => {
+    const db = await getDatabase();
+    const syncConfig = await db.getSetting('syncConfig', { type: 'none', autoSyncInterval: 'off' });
+    const type = requestedType || syncConfig.type;
+
+    if (!isSupportedSyncType(type)) {
+      return { success: false, error: 'Sync not configured' };
+    }
+
+    if (type === 'webdav' && syncConfig.type !== 'webdav') {
+      return { success: false, error: 'WebDAV not configured' };
+    }
+
+    if (type === 'googledrive' && syncConfig.type !== 'googledrive') {
+      return { success: false, error: 'Google Drive not configured' };
+    }
+
+    const result = type === 'webdav'
+      ? await syncService.syncWebDAV(syncConfig)
+      : await syncService.syncGoogleDrive({ interactive: source !== 'auto' });
+
+    if (!result.success) {
+      return result;
+    }
+
+    const lastSyncTime = Date.now();
+    await db.setSetting('lastSyncTime', lastSyncTime);
+
+    broadcastDataChange('syncCompleted', {
+      lastSyncTime,
+      source,
+      type
+    });
+    broadcastDataChange('cardSaved');
+
+    return { ...result, lastSyncTime };
+  })().finally(() => {
+    syncInFlight = null;
+  });
+
+  return syncInFlight;
+}
+
+async function performBackup(source = 'manual') {
+  if (backupInFlight) {
+    return backupInFlight;
+  }
+
+  backupInFlight = (async () => {
+    const db = await getDatabase();
+    const syncConfig = await db.getSetting('syncConfig', {
+      type: 'none',
+      autoSyncInterval: 'off',
+      autoBackupInterval: 'off'
+    });
+    const bundle = await buildBackupBundle(db, source);
+    const snapshot = await writeBackupSnapshot(bundle, syncConfig);
+    const lastBackupTime = bundle.createdAt;
+
+    await db.setSetting('lastBackupTime', lastBackupTime);
+
+    broadcastDataChange('backupCompleted', {
+      lastBackupTime,
+      source,
+      snapshotId: snapshot.snapshotId,
+      snapshotCount: snapshot.snapshotCount
+    });
+
+    return {
+      success: true,
+      lastBackupTime,
+      snapshotId: snapshot.snapshotId,
+      snapshotCount: snapshot.snapshotCount
+    };
+  })().catch((error) => {
+    console.error('Auto backup error:', error);
+    return {
+      success: false,
+      error: normalizeTransactionError(error, 'Backup failed')
+    };
+  }).finally(() => {
+    backupInFlight = null;
+  });
+
+  return backupInFlight;
 }
 
 // Message handlers
@@ -778,7 +1471,12 @@ async function handleMessage(db, message) {
         return { success: true, value: settingValue };
 
       case 'setSetting':
-        return await db.setSetting(message.key, message.value);
+        const setResult = await db.setSetting(message.key, message.value);
+        if (setResult.success && message.key === 'syncConfig') {
+          await scheduleAutoSyncAlarm(message.value);
+          await scheduleAutoBackupAlarm(message.value);
+        }
+        return setResult;
 
       case 'languageChanged':
         // Broadcast language change to all extension pages
@@ -817,20 +1515,22 @@ async function handleMessage(db, message) {
         return { success: true };
 
       case 'syncWebDAV':
-        const webdavConfig = await db.getSetting('syncConfig', {});
-        if (webdavConfig.type !== 'webdav') return { success: false, error: 'WebDAV not configured' };
-        const webdavResult = await syncService.syncWebDAV(webdavConfig);
-        if (webdavResult.success) {
-          broadcastDataChange('cardSaved'); // Refresh UI
-        }
-        return webdavResult;
+        return await performSync('webdav');
 
       case 'syncGoogleDrive':
-        const gdResult = await syncService.syncGoogleDrive();
-        if (gdResult.success) {
-          broadcastDataChange('cardSaved'); // Refresh UI
-        }
-        return gdResult;
+        return await performSync('googledrive');
+
+      case 'createBackup':
+        return await performBackup(message.source || 'manual');
+
+      case 'listBackupSnapshots':
+        return await listBackupSnapshots(message.limit || 20);
+
+      case 'restoreBackupSnapshot':
+        return await restoreBackupSnapshot(message.snapshotId);
+
+      case 'requestPersistentStorage':
+        return await requestPersistentStorage(message.source || 'message');
 
       default:
         return { success: false, error: 'Unknown action' };
@@ -877,20 +1577,40 @@ async function scheduleAutoCleanup() {
 
 // Schedule daily cleanup - wait for alarms API to be available
 if (chrome.alarms) {
-  chrome.alarms.create('autoCleanup', { delayInMinutes: 1, periodInMinutes: 1440 });
+  ensureAutoCleanupAlarm();
+  void scheduleAutoSyncAlarm();
+  void scheduleAutoBackupAlarm();
+  void requestPersistentStorage('service-worker-init');
 
   chrome.alarms.onAlarm.addListener((alarm) => {
-    if (alarm.name === 'autoCleanup') {
+    if (alarm.name === AUTO_CLEANUP_ALARM) {
       scheduleAutoCleanup();
+    } else if (alarm.name === AUTO_SYNC_ALARM) {
+      performSync(null, 'auto').catch((error) => {
+        console.error('Auto sync error:', error);
+      });
+    } else if (alarm.name === AUTO_BACKUP_ALARM) {
+      performBackup('auto').catch((error) => {
+        console.error('Auto backup alarm error:', error);
+      });
     }
   });
 } else {
   console.warn('Chrome alarms API not available');
 }
 
+chrome.runtime.onStartup?.addListener(() => {
+  ensureAutoCleanupAlarm();
+  void scheduleAutoSyncAlarm();
+  void scheduleAutoBackupAlarm();
+  void requestPersistentStorage('runtime-startup');
+});
+
 // Initialize default data on install
 chrome.runtime.onInstalled.addListener(async () => {
   try {
+    ensureAutoCleanupAlarm();
+    void requestPersistentStorage('runtime-installed');
 
     // Add some sample data for testing
     const db = await getDatabase();
@@ -932,6 +1652,8 @@ chrome.runtime.onInstalled.addListener(async () => {
 
     // Run initial cleanup
     await scheduleAutoCleanup();
+    await scheduleAutoSyncAlarm();
+    await scheduleAutoBackupAlarm();
   } catch (error) {
     console.error('Error during installation:', error);
   }

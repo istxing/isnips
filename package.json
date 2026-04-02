@@ -4,7 +4,8 @@
   "description": "一键记下网页片段与想法，自动保留来源，随时可回顾。",
   "scripts": {
     "build": "bun run build.js",
-    "watch": "bun run build.js --watch"
+    "watch": "bun run build.js --watch",
+    "oauth:derive": "node scripts/dev-oauth.js"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.268"

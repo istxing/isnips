@@ -30,6 +30,8 @@ bun run build
 ```
 The compiled assets will be generated in the `dist/` directory.
 
+For local Google Drive OAuth testing with a separate dev extension ID, see [docs/dev-oauth.md](docs/dev-oauth.md).
+
 ### 3. Load into Browser
 1. Open Chrome and navigate to `chrome://extensions/`.
 2. Enable "Developer mode" in the top right corner.

@@ -1,9 +1,12 @@
 # Dependencies
 node_modules/
 bun.lock
+.pnpm-store/
 
 # Build outputs
 dist/
+output/
+recovery/
 
 # IDE
 .vscode/
@@ -30,5 +33,5 @@ coverage/
 *.crx
 *.pem
 
-# Documentation and non-project files
-docs/
+# Desktop app artifacts
+app/release/

@@ -44,6 +44,7 @@ class SyncService {
 
     // Perform batch upsert in a single transaction
     await this._upsertSnippetsBatch(mergedSnippets);
+    await this.db.runShadowSnippetTask('mergeData', () => this.db.syncShadowSnippets());
 
     return { success: true, updatedCount: mergedSnippets.length };
   }
@@ -188,9 +189,10 @@ class SyncService {
   /**
    * Google Drive Implementation
    */
-  async syncGoogleDrive() {
+  async syncGoogleDrive(options = {}) {
+    const { interactive = true } = options;
     try {
-      const token = await this._getGoogleToken();
+      const token = await this._getGoogleToken(interactive);
       if (!token) throw new Error('Failed to get Google Token');
 
       // 1. Ensure folder exists
@@ -300,9 +302,9 @@ class SyncService {
     }
   }
 
-  async _getGoogleToken() {
+  async _getGoogleToken(interactive = true) {
     return new Promise((resolve, reject) => {
-      chrome.identity.getAuthToken({ interactive: true }, (token) => {
+      chrome.identity.getAuthToken({ interactive }, (token) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {

@@ -559,6 +559,36 @@
           </div>
         </div>
 
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="auto_sync_label">自动同步</h3>
+            <p data-i18n="auto_sync_desc">选择后台自动同步频率。仅在已启用同步方式时生效。</p>
+          </div>
+          <div class="setting-control">
+            <select id="autoSyncIntervalSelect" class="language-select">
+              <option value="off" data-i18n="auto_sync_off">关闭</option>
+              <option value="30m" data-i18n="auto_sync_30m">30 分钟</option>
+              <option value="1h" data-i18n="auto_sync_1h">1 小时</option>
+              <option value="1d" data-i18n="auto_sync_1d">1 天</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="auto_backup_label">自动备份</h3>
+            <p data-i18n="auto_backup_desc">定时生成本地快照备份，用于回滚或恢复最近数据。</p>
+          </div>
+          <div class="setting-control">
+            <select id="autoBackupIntervalSelect" class="language-select">
+              <option value="off" data-i18n="auto_backup_off">关闭</option>
+              <option value="30m" data-i18n="auto_backup_30m">30 分钟</option>
+              <option value="1h" data-i18n="auto_backup_1h">1 小时</option>
+              <option value="1d" data-i18n="auto_backup_1d">1 天</option>
+            </select>
+          </div>
+        </div>
+
         <!-- WebDAV Config -->
         <div id="webdavConfig" class="sync-config-area" style="display: none; padding-top: 16px;">
           <div style="display: grid; gap: 12px;">
@@ -603,6 +633,27 @@
           </div>
           <div class="setting-control">
             <button id="syncNowBtn" class="btn btn-primary" data-i18n="sync_now_btn">立即同步</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="backup_now_label">立即备份</h3>
+            <p id="lastBackupTime" data-i18n="last_backup_desc">尚未备份</p>
+          </div>
+          <div class="setting-control">
+            <button id="backupNowBtn" class="btn btn-secondary" data-i18n="backup_now_btn">立即备份</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3 data-i18n="restore_backup_label">恢复自动备份</h3>
+            <p data-i18n="restore_backup_desc">从最近的本地快照中恢复片段、高亮和空间数据。</p>
+          </div>
+          <div class="setting-control" style="display: grid; gap: 8px; min-width: 240px;">
+            <select id="backupSnapshotSelect" class="language-select"></select>
+            <button id="restoreBackupBtn" class="btn btn-secondary" data-i18n="restore_backup_btn">恢复所选备份</button>
           </div>
         </div>
       </section>

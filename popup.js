@@ -13,6 +13,23 @@ class iSnipsPopup {
     this.loadLanguage();
     this.loadData();
     this.loadShortcutHint();
+    void this.requestPersistentStorage();
+  }
+
+  async requestPersistentStorage() {
+    if (!navigator.storage || typeof navigator.storage.persist !== 'function') {
+      return;
+    }
+
+    try {
+      await navigator.storage.persist();
+      await chrome.runtime.sendMessage({
+        action: 'requestPersistentStorage',
+        source: 'popup'
+      });
+    } catch (error) {
+      console.warn('Popup: failed to request persistent storage:', error);
+    }
   }
 
   bindEvents() {
@@ -40,7 +57,7 @@ class iSnipsPopup {
       noteTextarea.addEventListener('input', () => {
         const length = noteTextarea.value.length;
         charCount.textContent = length;
-        charCount.style.color = length >= 144 ? '#ef4444' : '#94a3b8';
+        charCount.style.color = '#94a3b8';
       });
     }
 
@@ -338,6 +355,15 @@ class iSnipsPopup {
 
         document.getElementById('recentItems').innerHTML = itemsHtml;
 
+        document.querySelectorAll('.recent-item').forEach(item => {
+          const cardId = item.dataset.cardId;
+          const card = recentCards.find(c => c.id == cardId);
+          const textEl = item.querySelector('.recent-text');
+          if (card?.text && textEl) {
+            textEl.title = card.text;
+          }
+        });
+
         // Bind link events
         document.querySelectorAll('.source-link[data-url]').forEach(link => {
           link.addEventListener('click', (e) => {
@@ -567,7 +593,7 @@ class iSnipsPopup {
 
       const cardData = {
         type: 'note',
-        text: noteText.slice(0, 144),
+        text: noteText,
         url,
         domain,
         created_at: Date.now(),
