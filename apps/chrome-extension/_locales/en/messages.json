@@ -1,0 +1,17 @@
+{
+    "app_name": {
+        "message": "iSnips"
+    },
+    "app_desc": {
+        "message": "Instantly capture web snippets and flash notes, preserve sources automatically."
+    },
+    "capture_command_desc": {
+        "message": "Capture this moment of thought"
+    },
+    "toggle_sidebar_command_desc": {
+        "message": "Open iSnips Sidebar"
+    },
+    "context_menu_save": {
+        "message": "Save to iSnips"
+    }
+}

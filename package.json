@@ -1,0 +1,13 @@
+{
+  "name": "isnips",
+  "version": "2.0.0",
+  "private": true,
+  "description": "iSnips - Personal Information Index (Capture → Index → AI Analysis → Report → Resurface)",
+  "scripts": {
+    "dev:web": "pnpm --filter isnips-web dev",
+    "dev:desktop": "pnpm --filter @isnips/desktop dev",
+    "build:chrome": "pnpm --filter isnips-chrome-extension build",
+    "build:web": "pnpm --filter isnips-web build",
+    "build:desktop": "pnpm --filter @isnips/desktop build"
+  }
+}

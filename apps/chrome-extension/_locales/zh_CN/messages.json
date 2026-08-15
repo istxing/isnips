@@ -1,0 +1,17 @@
+{
+    "app_name": {
+        "message": "iSnips · 片语"
+    },
+    "app_desc": {
+        "message": "一键记录网页片段与灵感闪记，自动保留来源，随时可回顾。"
+    },
+    "capture_command_desc": {
+        "message": "记录这个思维瞬间"
+    },
+    "toggle_sidebar_command_desc": {
+        "message": "打开片段库侧边栏"
+    },
+    "context_menu_save": {
+        "message": "记录到 iSnips"
+    }
+}
