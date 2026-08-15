@@ -1,0 +1,66 @@
+{
+    "name": "@isnips/desktop",
+    "version": "1.0.0",
+    "private": true,
+    "description": "iSnips Desktop Application",
+    "main": "dist/main/index.js",
+    "author": "istxing",
+    "license": "MIT",
+    "scripts": {
+        "dev": "concurrently -n \"vite,electron\" -c \"blue,green\" \"vite --port 3000\" \"wait-on http://localhost:3000 && tsup src/main/index.ts src/preload/index.ts --watch --onSuccess 'electron .'\"",
+        "build": "pnpm build:main && pnpm build:preload && pnpm build:renderer && electron-builder",
+        "build:main": "tsup src/main/index.ts --format cjs --minify --outDir dist/main",
+        "build:preload": "tsup src/preload/index.ts --format cjs --minify --outDir dist/preload",
+        "build:renderer": "vite build",
+        "test": "vitest run",
+        "test:e2e": "playwright test",
+        "type-check": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@tanstack/react-query": "^5.0.0",
+        "@unocss/reset": "^0.60.4",
+        "better-sqlite3": "^11.0.0",
+        "bindings": "^1.5.0",
+        "date-fns": "^3.6.0",
+        "electron-store": "^8.1.0",
+        "file-uri-to-path": "^1.0.0",
+        "nanoid": "^5.0.7",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "zustand": "^4.5.2"
+    },
+    "devDependencies": {
+        "@iconify-json/ph": "^1.1.13",
+        "@playwright/test": "^1.44.0",
+        "@types/better-sqlite3": "^7.6.10",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@vitejs/plugin-react": "^4.3.0",
+        "concurrently": "^8.2.2",
+        "electron": "^31.0.0",
+        "electron-builder": "^24.13.3",
+        "prebuild-install": "^7.1.2",
+        "tsup": "^8.1.0",
+        "typescript": "^5.4.5",
+        "unocss": "^0.60.4",
+        "vite": "^5.2.11",
+        "vitest": "^1.6.0",
+        "wait-on": "^7.2.0"
+    },
+    "build": {
+        "appId": "com.isnips.desktop",
+        "productName": "iSnips",
+        "directories": {
+            "output": "release"
+        },
+        "files": [
+            "dist/**/*"
+        ],
+        "mac": {
+            "target": "dmg"
+        },
+        "win": {
+            "target": "portable"
+        }
+    }
+}

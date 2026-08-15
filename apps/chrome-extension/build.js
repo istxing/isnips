@@ -66,9 +66,12 @@ function copyRecursiveSync(src, dest) {
 }
 
 function build() {
+  const baseDir = __dirname;
+  const distDir = path.resolve(baseDir, 'dist');
+
   // Create dist directory if it doesn't exist
-  if (!fs.existsSync('dist')) {
-    fs.mkdirSync('dist');
+  if (!fs.existsSync(distDir)) {
+    fs.mkdirSync(distDir, { recursive: true });
   }
 
   // Files and directories to copy
@@ -92,16 +95,19 @@ function build() {
   ];
 
   itemsToCopy.forEach(item => {
-    if (fs.existsSync(item)) {
-      copyRecursiveSync(item, `dist/${item}`);
+    const srcPath = path.resolve(baseDir, item);
+    const destPath = path.resolve(distDir, item);
+    if (fs.existsSync(srcPath)) {
+      copyRecursiveSync(srcPath, destPath);
       console.log(`Copied ${item}`);
     } else {
       console.warn(`Warning: ${item} not found, skipping`);
     }
   });
 
-  if (fs.existsSync('manifest.json')) {
-    copyManifestWithOverrides('manifest.json', 'dist/manifest.json');
+  const manifestPath = path.resolve(baseDir, 'manifest.json');
+  if (fs.existsSync(manifestPath)) {
+    copyManifestWithOverrides(manifestPath, path.resolve(distDir, 'manifest.json'));
   } else {
     console.warn('Warning: manifest.json not found, skipping');
   }

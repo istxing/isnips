@@ -1,60 +1,58 @@
 # iSnips
 
-> **A minimalist and efficient browser information collection tool.**
+> **把零散的信息记录，持续沉淀为可检索、可分析、可回看的个人报告。**
+> 
+> 核心链路：**Capture → Index → AI Analysis → Report → Resurface**
 
-iSnips is a browser extension designed for rapid information gathering. It supports quick text captures, snippet saving, and seamless cloud synchronization via Google Drive and WebDAV, ensuring your data is always available across devices.
+---
+
+## 1. 项目概览
+
+iSnips 定位为 **Personal Information Index（个人信息索引系统）**。它将用户日常在网页、剪贴板、随笔、RSS 中产生的碎片信息统一抽象为 `Record`，并允许用户指定数据范围，由 AI 生成长期保存、沉淀认知的阶段性 `Report`。
+
+项目采用 **多端完全解耦与独立工程** 架构，各个客户端应用均具备高度内聚性，可独立开发、构建与部署：
+
+```text
+iSnips/
+├── apps/
+│   ├── chrome-extension/   # 已上架 Chrome 商店的官方浏览器插件 (Capture Client)
+│   ├── web/                # Web 端主工作台 (Next.js 14+ / React / Tailwind CSS)
+│   └── desktop/            # 本地应用 (Local App / 剪贴板监听与离线检索)
+│
+├── docs/                   # 产品核心实施方案文档
+└── INSTALL_MANIFEST.md     # 项目生成与变更清单 (实时维护更新)
+```
 
 ---
 
-## 📂 Repository Structure
+## 2. 各端独立开发与构建
 
-To maintain a clean project structure and efficient hosting for GitHub Pages, this repository uses a dual-branch strategy:
-
-*   **`source` (Current Branch)**: Contains the full source code for the extension. This is where active development, feature updates, and bug fixes happen.
-*   **`master`**: Dedicated to hosting the [iSnips Landing Page](https://istxing.github.io/isnips/). It contains only static HTML files and domain verification assets required for the live site.
-
-## 🚀 Development & Building
-
-Follow these steps if you wish to build the extension from source:
-
-### 1. Install Dependencies
-This project uses [Bun](https://bun.sh/) as the package manager (though npm/yarn works as well):
+### 1. Chrome 浏览器插件 (`apps/chrome-extension`)
 ```bash
-bun install
+# 构建 Chrome 插件 (产物输出至 apps/chrome-extension/dist)
+node apps/chrome-extension/build.js
+# 或进入目录构建
+cd apps/chrome-extension && pnpm build
 ```
 
-### 2. Build the Extension
-Run the build script to generate the production-ready directory:
+### 2. Web 主工作台 (`apps/web`)
 ```bash
-bun run build
+# 进入目录独立运行
+cd apps/web
+pnpm install
+pnpm dev
 ```
-The compiled assets will be generated in the `dist/` directory.
 
-For local Google Drive OAuth testing with a separate dev extension ID, see [docs/dev-oauth.md](docs/dev-oauth.md).
-
-### 3. Load into Browser
-1. Open Chrome and navigate to `chrome://extensions/`.
-2. Enable "Developer mode" in the top right corner.
-3. Click "Load unpacked" and select the generated `dist/` folder.
-
-## 🔐 Permissions Overview
-
-*   **`storage`**: Used for local data persistence and settings.
-*   **`identity`**: Required for secure OAuth2 authentication with Google Drive sync.
-*   **`activeTab` & `tabs`**: Allows capturing selected text from the active website.
-*   **`contextMenus`**: Provides right-click capture functionality.
-
-## ☕ Support
-
-If you find iSnips helpful, consider supporting its development!
-
-<a href="https://buymeacoffee.com/istxingv" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-
-## 🌐 Useful Links
-
-*   **Official Homepage**: [https://istxing.github.io/isnips/](https://istxing.github.io/isnips/)
-*   **Chrome Web Store**: [Visit Store](https://chromewebstore.google.com/detail/isnips/bjemnabegidmkbkdepanilbcidpbnpmj)
-*   **Privacy Policy**: [Read Privacy Policy](https://istxing.github.io/isnips/privacy.html)
+### 3. 桌面端应用 (`apps/desktop`)
+```bash
+# 进入目录独立运行
+cd apps/desktop
+pnpm install
+pnpm dev
+```
 
 ---
-*Created with ❤️ by istxing & Antigravity AI*
+
+## 3. 核心文档
+- [产品实施方案](docs/iSnips_产品实施方案.md)
+- [安装与文件清单](INSTALL_MANIFEST.md)

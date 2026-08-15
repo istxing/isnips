@@ -1,13 +1,13 @@
 {
-  "name": "clipindex-extension",
+  "name": "isnips",
   "version": "2.0.0",
-  "description": "一键记下网页片段与想法，自动保留来源，随时可回顾。",
+  "private": true,
+  "description": "iSnips - Personal Information Index (Capture → Index → AI Analysis → Report → Resurface)",
   "scripts": {
-    "build": "bun run build.js",
-    "watch": "bun run build.js --watch",
-    "oauth:derive": "node scripts/dev-oauth.js"
-  },
-  "devDependencies": {
-    "@types/chrome": "^0.0.268"
+    "dev:web": "pnpm --filter isnips-web dev",
+    "dev:desktop": "pnpm --filter @isnips/desktop dev",
+    "build:chrome": "pnpm --filter isnips-chrome-extension build",
+    "build:web": "pnpm --filter isnips-web build",
+    "build:desktop": "pnpm --filter @isnips/desktop build"
   }
 }
