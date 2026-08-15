@@ -48,8 +48,14 @@
 - `apps/web/src/app/reports/page.tsx`: AI 报告中心
 - `apps/web/src/app/rss/page.tsx`: RSS 动态流
 - `apps/web/src/app/settings/page.tsx`: 会员与安全设置
+- `apps/web/public/`: 包含 `index.html`, `privacy.html`, `googleb1485b64a0aedf4f.html` 静态资源
 
-### 1.4 核心文档归档 (`docs/`)
+### 1.4 静态网站与验证文件 (GitHub Pages & Google OAuth)
+- `index.html`: 官方网站首页展示
+- `privacy.html`: 官方隐私政策 (Chrome 商店审核与 Google OAuth 必备)
+- `googleb1485b64a0aedf4f.html`: Google 站长所有权验证文件
+
+### 1.5 核心文档归档 (`docs/`)
 | 文件路径 | 说明 |
 | :--- | :--- |
 | `docs/iSnips_产品实施方案.md` | iSnips 核心产品实施方案总设计文档 |
