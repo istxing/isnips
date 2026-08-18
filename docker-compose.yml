@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: isnips-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: isnips
+      POSTGRES_PASSWORD: isnips_secret
+      POSTGRES_DB: isnips_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - isnips_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U isnips -d isnips_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  isnips_pgdata:
+    driver: local

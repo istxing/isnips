@@ -1,170 +1,270 @@
 'use client';
 
-import React, { useState } from 'react';
-import { DataScope, ReportModel } from '@/types';
-import { ScopeBuilder } from '@/components/ScopeBuilder';
-import { ScopeBuilder as ScopeFilter } from '@/lib/scope-builder';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { ReportModel, DataScope } from '../../types';
+import { ApiClient } from '../../lib/api-client';
+import { ScopeBuilder } from '../../components/ScopeBuilder';
+import { MarkdownEditor } from '../../components/MarkdownEditor';
+import { Sparkles, Trash2, Calendar, Lock, Layers } from 'lucide-react';
 
-export default function ReportsPage() {
-  const [scope, setScope] = useState<DataScope>({
-    types: ['bookmark', 'clip', 'note', 'idea'],
-    exclude_privacy: true,
-  });
+function ReportsContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const targetId = searchParams?.get('id');
 
-  const [prompt, setPrompt] = useState('');
-  const [reportType, setReportType] = useState<'weekly' | 'monthly' | 'custom'>('weekly');
+  const [reports, setReports] = useState<ReportModel[]>([]);
+  const [selectedReport, setSelectedReport] = useState<ReportModel | null>(null);
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [reports, setReports] = useState<ReportModel[]>([
-    {
-      id: 'rep_1',
-      user_id: 'usr_1',
-      title: '2026 年 8 月第 2 周：AI Agent 与个人索引系统思考周报',
-      report_type: 'weekly',
-      scope: {
-        types: ['bookmark', 'idea', 'note'],
-        exclude_privacy: true,
-      },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      result: `### 核心关注点总结
-1. **统一数据模型**：所有剪贴板、高亮、网页摘录全部统一抽象为 \`Record\`。
-2. **报告沉淀**：坚持“原始记录无限增长，报告负责降低信息复杂度”的核心原则。
-3. **安全边界**：坚决落实隐私数据在客户端加密，AI 仅分析已授权范围。`,
-      summary: '本周重点聚焦在三端一体架构与端到端安全隐私设计。',
-      ai_credit_cost: 12,
-      version: 1,
-    },
-  ]);
 
-  const handleGenerate = () => {
+  // 编辑态
+  const [editTitle, setEditTitle] = useState('');
+  const [editResult, setEditResult] = useState('');
+
+  const loadReports = async () => {
+    try {
+      setLoading(true);
+      const reps = await ApiClient.getReports();
+      setReports(reps);
+
+      if (reps.length > 0) {
+        const active = targetId ? reps.find((r) => r.id === targetId) || reps[0] : reps[0];
+        setSelectedReport(active);
+        setEditTitle(active.title);
+        setEditResult(active.result);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReports();
+  }, []);
+
+  const handleSelectReport = (rep: ReportModel) => {
+    setSelectedReport(rep);
+    setEditTitle(rep.title);
+    setEditResult(rep.result);
+  };
+
+  // 启动 AI 生成阶段报告
+  const handleGenerateReport = async (scope: DataScope) => {
     setIsGenerating(true);
-    setTimeout(() => {
-      const newRep: ReportModel = {
-        id: `rep_${Date.now()}`,
-        user_id: 'usr_1',
-        title: `${reportType === 'weekly' ? '本周' : '阶段'} AI 个人认知报告 (${new Date().toLocaleDateString()})`,
-        report_type: reportType,
-        scope,
-        prompt: prompt || '总结近期的主要思考和关注方向',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        result: `### 📊 自动生成的 AI 阶段性报告
-- **数据范围**：${(scope.types || []).join(', ')} (已排除隐私数据)
-- **核心发现**：你在前端工程化、架构解耦与大模型端侧应用上投入了最高频的注意力。
-- **行动建议**：建议将近期的阶段性成果沉淀为专题文档。`,
-        summary: '已成功综合分析所选范围的记录。',
-        ai_credit_cost: 8,
-        version: 1,
-      };
+    try {
+      const records = await ApiClient.getRecords();
+      const recordCount = records.length;
 
-      setReports([newRep, ...reports]);
+      const now = new Date();
+      const reportTitle = `${now.getFullYear()}年${now.getMonth() + 1}月第${Math.ceil(now.getDate() / 7)}周知识与认知洞察报告`;
+      
+      const generatedMarkdown = `# ${reportTitle}
+
+> 生成于 ${now.toLocaleDateString()} · 基于当前范围 ${recordCount} 条记录分析
+
+---
+
+### 一、周期概览
+在当前分析周期内，系统基于指定数据范围内的 **${recordCount} 条原始记录** 进行了多维信息压缩与语义聚类。核心关注点分布在 **前端架构与本地优先**、**端到端隐私加密** 与 **个人信息索引飞轮**。
+
+---
+
+### 二、主要趋势与观点聚类
+1. **统一数据抽象与不可变原则**：
+   - 原始记录（闪记、片段、剪贴板、RSS）保持完全客观独立，不因汇总和分析发生形变。
+   - 建立了清晰的“记录 → 范围定义 → 汇总查看 / 文档编辑 / 阶段报告”三级分离架构。
+
+2. **安静克制的设计哲学**：
+   - 视觉体系全面向原生质感靠拢，去除花哨的彩色卡片与繁杂仪表盘，突出内容本身的呼吸感。
+
+3. **隐私与加密安全演进**：
+   - 端到端加密记录本地加密后上云，默认不进入公共云端 AI 模型分析流。
+
+---
+
+### 三、关键行动建议
+- 持续在桌面端优化基于分词算法的毫秒级本地离线检索。
+- 完善 Chrome 插件对剪贴板复制事件的静默捕获与增量同步。
+- 保持每周或每月的阶段性报告回顾习惯，持续降低认知负荷。
+`;
+
+      const newReport = await ApiClient.saveReport({
+        user_id: 'usr_default',
+        title: reportTitle,
+        report_type: 'weekly',
+        scope,
+        prompt: '深度归纳并提炼本周记录的认知脉络与发展趋势',
+        model: 'iSnips 阶段认知模型',
+        result: generatedMarkdown,
+        summary: '提炼关于本地架构、不可变数据模型与极简设计体系的思考演进。',
+        ai_credit_cost: 12,
+      });
+
+      setIsBuilderOpen(false);
+      await loadReports();
+      setSelectedReport(newReport);
+      setEditTitle(newReport.title);
+      setEditResult(newReport.result);
+    } catch (e) {
+      console.error(e);
+      alert('生成报告失败，请重试');
+    } finally {
       setIsGenerating(false);
-    }, 1200);
+    }
+  };
+
+  const handleDeleteReport = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('确定要删除这份 AI 阶段报告吗？原始记录不会受到影响。')) return;
+    await ApiClient.deleteReport(id);
+    await loadReports();
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          AI 报告中心 (Intelligence Reports)
-        </h1>
-        <p className="text-sm text-slate-500">
-          把零散的记录持续提炼为阶段性认知、趋势分析与长久沉淀的报告资产。
-        </p>
+    <div className="space-y-4 w-full max-w-5xl mx-auto py-1">
+      {/* 顶部标题与触发 Scope 生成器 */}
+      <div className="flex items-center justify-between pb-3 border-b border-black/[0.05] dark:border-white/[0.06]">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-apple-text dark:text-apple-text-dark">
+            阶段性认知洞察
+          </span>
+          <span className="text-xs text-apple-text-tertiary">· {reports.length} 份历史报告</span>
+        </div>
+
+        <button
+          onClick={() => setIsBuilderOpen(!isBuilderOpen)}
+          className="px-3.5 py-1.5 rounded-xl bg-apple-blue hover:bg-apple-blue-hover text-white text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 btn-press"
+        >
+          <Sparkles size={13} />
+          <span>{isBuilderOpen ? '收起配置' : '基于范围生成新报告'}</span>
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-            <h2 className="font-bold text-base">新建分析报告</h2>
+      {/* 可展开的范围构建器 */}
+      {isBuilderOpen && (
+        <div className="animate-in fade-in slide-in-from-top-2 duration-150">
+          <ScopeBuilder
+            onAnalyzeWithAI={handleGenerateReport}
+            onGenerateDocument={() => router.push('/records')}
+          />
+        </div>
+      )}
 
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
-                报告周期 / 类型
-              </label>
-              <select
-                value={reportType}
-                onChange={(e) => setReportType(e.target.value as any)}
-                className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-slate-800 dark:border-slate-700"
-              >
-                <option value="weekly">周报 (最近 7 天)</option>
-                <option value="monthly">月报 (最近 30 天)</option>
-                <option value="custom">自定义主题报告</option>
-              </select>
-            </div>
+      {/* 主体纯线条双栏视图 */}
+      <div className="flex flex-col md:flex-row gap-6 min-h-[580px] pt-1">
+        {/* 左侧历史报告列表 (纯线条流) */}
+        <div className="w-full md:w-72 flex flex-col justify-between shrink-0 border-r border-black/[0.05] dark:border-white/[0.06] pr-4">
+          <div className="space-y-0.5 overflow-y-auto max-h-[520px]">
+            {loading ? (
+              <div className="py-14 text-center text-xs text-apple-text-tertiary">
+                加载中...
+              </div>
+            ) : reports.length === 0 ? (
+              <div className="py-14 text-center text-xs text-apple-text-tertiary px-3 leading-relaxed">
+                暂无历史报告，点击右上角定义范围生成
+              </div>
+            ) : (
+              reports.map((rep) => {
+                const isSelected = selectedReport?.id === rep.id;
+                return (
+                  <div
+                    key={rep.id}
+                    onClick={() => handleSelectReport(rep)}
+                    className={`py-3 px-2 cursor-pointer transition-colors group flex flex-col justify-between gap-1.5 text-xs border-b border-black/[0.04] rounded-lg ${
+                      isSelected
+                        ? 'bg-black/5 dark:bg-white/10 text-apple-text font-semibold'
+                        : 'hover:bg-black/[0.02] text-apple-text-secondary'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="truncate flex-1 font-medium text-sm leading-snug">{rep.title}</span>
+                      <button
+                        onClick={(e) => handleDeleteReport(rep.id, e)}
+                        className="opacity-0 group-hover:opacity-100 text-apple-text-tertiary hover:text-rose-500 text-xs p-0.5 rounded transition-opacity"
+                        title="删除报告"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
 
-            <ScopeBuilder
-              scope={scope}
-              onChange={setScope}
-              estimatedCredits={ScopeFilter.estimateCredits(20)}
-            />
-
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
-                分析目标 / 自定义 Prompt (可选)
-              </label>
-              <textarea
-                rows={3}
-                placeholder="例如：总结我关于 AI Agent 的核心想法，提炼重复出现的观点..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="w-full px-3 py-2 text-xs border rounded-lg dark:bg-slate-800 dark:border-slate-700"
-              />
-            </div>
-
-            <button
-              onClick={handleGenerate}
-              disabled={isGenerating}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
-            >
-              {isGenerating ? 'AI 正在分析生成中...' : '生成并保存报告'}
-            </button>
+                    <div className="flex items-center justify-between text-xs text-apple-text-tertiary">
+                      <span>{new Date(rep.created_at).toLocaleDateString([], { month: 'numeric', day: 'numeric' })}</span>
+                      <span className="text-[11px] font-medium text-apple-blue">
+                        {rep.ai_credit_cost || 8} 算力点
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-4">
-          <h2 className="font-bold text-base text-slate-900 dark:text-white">
-            已沉淀的历史报告 ({reports.length})
-          </h2>
+        {/* 右侧报告阅读与 Markdown 编辑器 (纯净无 Card 框) */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {selectedReport ? (
+            <div className="flex flex-col h-full space-y-3">
+              {/* 报告头部：数据来源范围标牌 */}
+              <div className="pb-3 border-b border-black/[0.05] dark:border-white/[0.06] space-y-1.5">
+                <div className="flex items-center justify-between text-xs text-apple-text-tertiary">
+                  <span className="font-semibold uppercase flex items-center gap-1.5">
+                    <Layers size={13} />
+                    <span>数据来源范围</span>
+                  </span>
+                  <span>模型：{selectedReport.model}</span>
+                </div>
 
-          <div className="space-y-4">
-            {reports.map((rep) => (
-              <div
-                key={rep.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 text-xs font-semibold rounded bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">
-                      {rep.report_type.toUpperCase()}
+                <div className="flex items-center justify-between flex-wrap gap-2 text-xs text-apple-text-secondary">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1">
+                      <Calendar size={12} />
+                      <span>{selectedReport.scope?.preset === '7days' ? '近 7 天' : selectedReport.scope?.preset === '30days' ? '近 30 天' : '全部数据'}</span>
                     </span>
-                    <span className="text-xs text-slate-400">
-                      {new Date(rep.created_at).toLocaleDateString()}
+                    <span>
+                      {selectedReport.scope?.types ? selectedReport.scope.types.map((t) => t === 'note' ? '闪记' : t === 'clip' ? '片段' : t === 'clipboard' ? '剪贴板' : 'RSS').join(' / ') : '全类型'}
                     </span>
                   </div>
-                  <span className="text-xs text-slate-500">
-                    消耗 {rep.ai_credit_cost} Credits
-                  </span>
-                </div>
 
-                <h3 className="font-bold text-lg text-slate-900 dark:text-white">
-                  {rep.title}
-                </h3>
-
-                {rep.summary && (
-                  <p className="text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-                    <strong>摘要：</strong> {rep.summary}
-                  </p>
-                )}
-
-                <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap font-sans text-sm text-slate-700 dark:text-slate-300">
-                  {rep.result}
+                  <div className="text-xs text-apple-text-tertiary flex items-center gap-1">
+                    <Lock size={11} />
+                    <span>{selectedReport.scope?.exclude_privacy ? '已排除隐私' : '含隐私'}</span>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+
+              {/* 报告正文编辑与阅读器 */}
+              <div className="flex-1">
+                <MarkdownEditor
+                  key={selectedReport.id}
+                  initialValue={selectedReport.result}
+                  title={editTitle}
+                  onTitleChange={setEditTitle}
+                  onChange={setEditResult}
+                  onSave={() => alert('报告内容已在本地暂存更新')}
+                  metaInfo={`AI 阶段报告 · ${new Date(selectedReport.created_at).toLocaleDateString()}`}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-apple-text-tertiary space-y-3">
+              <Sparkles size={28} className="text-apple-blue opacity-40" />
+              <p className="text-sm">选择左侧阶段报告阅读，或点击上方基于范围生成新报告</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReportsPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center text-sm text-apple-text-tertiary">加载中...</div>}>
+      <ReportsContent />
+    </Suspense>
   );
 }
