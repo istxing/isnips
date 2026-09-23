@@ -359,6 +359,7 @@ body[data-page="panel"] {
   box-shadow: var(--shadow);
 }
 .recent-item {
+  position: relative;
   padding: 13px 14px 10px;
 }
 .item-type {
@@ -397,7 +398,9 @@ body[data-page="panel"] {
   align-items: center;
   gap: 4px 8px;
   min-width: 0;
-  margin-top: 10px;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
 }
 .item-meta .item-source {
   min-width: 0;
@@ -415,31 +418,45 @@ body[data-page="panel"] {
 }
 .card-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 9px;
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  gap: 5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
 }
 .card-action {
-  min-height: 34px;
-  padding: 5px 9px;
-  background: transparent;
-  border: 0;
-  border-radius: 7px;
-  color: var(--accent);
-  font-size: 14px;
-  font-weight: 650;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 16px;
+  box-shadow: 0 3px 10px rgba(20, 32, 27, 0.12);
 }
 .card-action:hover {
   background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .card-action.danger {
-  margin-left: auto;
   color: var(--danger);
 }
 .card-action.danger:hover {
   background: var(--danger-soft);
+  border-color: var(--danger);
+}
+.recent-item:hover .card-actions,
+.recent-item:focus-within .card-actions,
+.snippet-card:hover .card-actions,
+.snippet-card:focus-within .card-actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 .panel-footer {
   margin-top: auto;
@@ -612,6 +629,7 @@ body[data-page="panel"] {
   gap: 13px;
 }
 .snippet-card {
+  position: relative;
   padding: 17px;
   min-width: 0;
 }
@@ -916,6 +934,13 @@ body[data-page="panel"] {
   }
   .settings-card {
     padding: 19px;
+  }
+}
+@media (hover: none) {
+  .recent-item .card-actions,
+  .snippet-card .card-actions {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 @media (max-width: 520px) {

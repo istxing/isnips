@@ -699,17 +699,19 @@
         meta.appendChild(make("time", "item-date", formatDate(cardDate(card))));
         item.appendChild(meta);
         const actions = make("div", "card-actions");
-        for (const [key, label] of [
-          ["copy", t("copy")],
-          ["edit", t("edit")],
-          ["delete", t("delete")],
+        for (const [key, label, glyph] of [
+          ["copy", t("copy"), "⧉"],
+          ["edit", t("edit"), "✎"],
+          ["delete", t("delete"), "×"],
         ]) {
           const button = make(
             "button",
             "card-action" + (key === "delete" ? " danger" : ""),
-            label,
+            glyph,
           );
           button.type = "button";
+          button.title = label;
+          button.setAttribute("aria-label", label);
           button.dataset.action = key;
           button.dataset.id = String(card.id);
           actions.appendChild(button);
@@ -828,18 +830,20 @@
       item.appendChild(meta);
       const actions = make("div", "card-actions");
       item.appendChild(actions);
-      function action(label, handler, danger = false) {
+      function action(label, glyph, handler, danger = false) {
         const button = make(
           "button",
           "card-action" + (danger ? " danger" : ""),
-          label,
+          glyph,
         );
         button.type = "button";
+        button.title = label;
+        button.setAttribute("aria-label", label);
         button.addEventListener("click", handler);
         actions.appendChild(button);
       }
       if (currentFilter === "trash") {
-        action(t("restore_action"), async () => {
+        action(t("restore_action"), "↶", async () => {
           try {
             await request("restoreSnippet", { cardId: card.id });
             toast(t("restored"));
@@ -849,7 +853,7 @@
           }
         });
       } else {
-        action(t("copy"), async () => {
+        action(t("copy"), "⧉", async () => {
           try {
             await navigator.clipboard.writeText(card.text || "");
             toast(t("copied"));
@@ -857,9 +861,10 @@
             captureError(error);
           }
         });
-        action(t("edit"), () => showEditor(card));
+        action(t("edit"), "✎", () => showEditor(card));
         action(
           t("delete"),
+          "×",
           async () => {
             if (!confirm(t("confirm_delete"))) return;
             try {
