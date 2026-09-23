@@ -69,28 +69,22 @@ function build() {
   const baseDir = __dirname;
   const distDir = path.resolve(baseDir, 'dist');
 
-  // Create dist directory if it doesn't exist
-  if (!fs.existsSync(distDir)) {
-    fs.mkdirSync(distDir, { recursive: true });
-  }
+  // A clean package prevents files removed from the source from shipping again.
+  fs.rmSync(distDir, { recursive: true, force: true });
+  fs.mkdirSync(distDir, { recursive: true });
 
   // Files and directories to copy
   const itemsToCopy = [
     'library.html',
-    'library.js',
-    'library.css',
     'settings.html',
-    'settings.js',
-    'settings.css',
+    'app.js',
+    'app.css',
     'icons',
     'background.js',
     'sync.js',
     'merge.js',
     'content.js',
     'popup.html',
-    'popup.js',
-    'theme-manager.js',
-    'theme.css',
     '_locales'
   ];
 

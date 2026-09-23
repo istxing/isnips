@@ -100,8 +100,11 @@ class iSnipsContent {
 
     if (selectedText && selectedText.trim().length > 0) {
       const text = selectedText.trim();
-      await this.saveClip(text);
-      this.highlightSelection(text);
+      const selection = window.getSelection();
+      const selectedRange = selection && selection.rangeCount ? selection.getRangeAt(0).cloneRange() : null;
+      if (await this.saveClip(text)) {
+        this.highlightSelection(text, selectedRange);
+      }
     } else {
       const t = this.translations[this.currentLanguage] || this.translations['en'];
       this.showToast(t.no_text_selected || 'No text selected', false);
@@ -135,19 +138,22 @@ class iSnipsContent {
       const t = this.translations[this.currentLanguage] || this.translations['en'];
       if (result.success) {
         this.showToast(t.clip_saved || 'Snippet saved', true);
+        return true;
       } else {
         this.showToast(t.save_error || 'Failed to save snippet', false);
+        return false;
       }
     } catch (error) {
       console.error('iSnips: Failed to save clip:', error);
       const t = this.translations[this.currentLanguage] || this.translations['en'];
       this.showToast(t.save_error || 'Failed to save snippet', false);
+      return false;
     }
   }
 
-  highlightSelection(text) {
+  highlightSelection(text, savedRange = null) {
     const selection = window.getSelection();
-    if (!selection.rangeCount) return;
+    if (!savedRange && !selection.rangeCount) return;
 
     // Check if CSS Custom Highlight API is supported
     if (!CSS.highlights) {
@@ -156,8 +162,9 @@ class iSnipsContent {
     }
 
     // Clone the range to avoid modifying the original
-    const range = selection.getRangeAt(0).cloneRange();
-    const highlightId = Date.now().toString();
+    const range = savedRange || selection.getRangeAt(0).cloneRange();
+    const highlightId = crypto.randomUUID();
+    const anchor = this.getTextAnchor(range);
 
     // Inject highlight styles if not already present
     this.injectHighlightStyles();
@@ -174,7 +181,8 @@ class iSnipsContent {
       id: highlightId,
       text: text,
       url: window.location.href,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      ...anchor
     });
 
     // Clear selection
@@ -185,8 +193,29 @@ class iSnipsContent {
       id: highlightId,
       text: text,
       url: window.location.href,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      ...anchor
     });
+  }
+
+  getTextAnchor(range) {
+    try {
+      const prefix = document.createRange();
+      prefix.setStart(document.body, 0);
+      prefix.setEnd(range.startContainer, range.startOffset);
+      const selected = document.createRange();
+      selected.setStart(document.body, 0);
+      selected.setEnd(range.endContainer, range.endOffset);
+      const rawText = range.toString();
+      const leadingWhitespace = rawText.length - rawText.trimStart().length;
+      const trailingWhitespace = rawText.length - rawText.trimEnd().length;
+      return {
+        textStart: prefix.toString().length + leadingWhitespace,
+        textEnd: selected.toString().length - trailingWhitespace
+      };
+    } catch {
+      return {};
+    }
   }
 
   injectHighlightStyles() {
@@ -240,7 +269,8 @@ class iSnipsContent {
     // Inject highlight styles if not already present
     this.injectHighlightStyles();
 
-    // Find text in document and highlight it using CSS Custom Highlight API
+    // Rebuild a range from text offsets. Older records have only a quote, so
+    // choose the matching occurrence closest to any saved start offset.
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT,
@@ -248,26 +278,42 @@ class iSnipsContent {
       false
     );
 
+    const nodes = [];
+    let text = '';
     let node;
-    while (node = walker.nextNode()) {
-      if (node.textContent.includes(highlight.text)) {
-        const index = node.textContent.indexOf(highlight.text);
-        if (index !== -1) {
-          const range = document.createRange();
-          range.setStart(node, index);
-          range.setEnd(node, index + highlight.text.length);
-
-          // Add style rule for this highlight
-          this.addHighlightStyleRule(highlight.id);
-
-          // Create a new Highlight object and register it
-          const cssHighlight = new Highlight(range);
-          CSS.highlights.set(`isnips-highlight-${highlight.id}`, cssHighlight);
-
-          break; // Only highlight first occurrence
-        }
-      }
+    while ((node = walker.nextNode())) {
+      nodes.push({ node, start: text.length, end: text.length + node.textContent.length });
+      text += node.textContent;
     }
+    if (!nodes.length || !highlight.text) return;
+
+    let start = -1;
+    let end = -1;
+    if (Number.isInteger(highlight.textStart) && Number.isInteger(highlight.textEnd) &&
+        highlight.textStart >= 0 && highlight.textEnd <= text.length &&
+        text.slice(highlight.textStart, highlight.textEnd) === highlight.text) {
+      start = highlight.textStart;
+      end = highlight.textEnd;
+    } else {
+      let candidate = text.indexOf(highlight.text);
+      while (candidate !== -1) {
+        if (start === -1 || (Number.isInteger(highlight.textStart) &&
+            Math.abs(candidate - highlight.textStart) < Math.abs(start - highlight.textStart))) {
+          start = candidate;
+        }
+        candidate = text.indexOf(highlight.text, candidate + 1);
+      }
+      end = start + highlight.text.length;
+    }
+    if (start < 0) return;
+    const first = nodes.find(part => part.end > start);
+    const last = nodes.find(part => part.end >= end);
+    if (!first || !last) return;
+    const range = document.createRange();
+    range.setStart(first.node, start - first.start);
+    range.setEnd(last.node, end - last.start);
+    this.addHighlightStyleRule(highlight.id);
+    CSS.highlights.set(`isnips-highlight-${highlight.id}`, new Highlight(range));
   }
 
   async storeHighlight(highlight) {

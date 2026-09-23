@@ -25,6 +25,12 @@ const BACKUP_SNAPSHOT_PREFIX = 'backupSnapshot:';
 const BACKUP_SNAPSHOT_IDS_KEY = 'backupSnapshotIds';
 const BACKUP_SNAPSHOT_META_KEY = 'backupSnapshotMeta';
 
+if (chrome.storage?.local?.setAccessLevel) {
+  chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' }).catch((error) => {
+    console.warn('Could not restrict local storage to extension pages:', error);
+  });
+}
+
 function normalizeTransactionError(error, fallback = 'Transaction failed') {
   if (typeof error === 'string') {
     return error;
@@ -880,6 +886,79 @@ class iSnipsDatabase {
     };
   }
 
+  async importData(bundle) {
+    const rawSnippets = Array.isArray(bundle?.snippets) ? bundle.snippets : (Array.isArray(bundle?.cards) ? bundle.cards : null);
+    if (!rawSnippets) throw new Error('Invalid backup: snippets array is required');
+    const snippets = rawSnippets.map((item) => {
+      if (!item || typeof item !== 'object') throw new Error('Invalid snippet in backup');
+      const text = item.text ?? item.clipText ?? item.title;
+      if (typeof text !== 'string') throw new Error('Invalid snippet text in backup');
+      const created = Number(item.created_at ?? item.createdAt) || Date.now();
+      return {
+        ...item,
+        id: typeof item.id === 'string' && item.id ? item.id : this.generateId(),
+        type: item.type || (item.url ? 'web' : 'note'),
+        text,
+        created_at: created,
+        updated_at: Number(item.updated_at ?? item.updatedAt) || created,
+        deleted_at: item.deleted_at ?? item.deletedAt ?? null,
+        purged_at: item.purged_at ?? null
+      };
+    });
+    const highlights = Array.isArray(bundle.highlights) ? bundle.highlights : [];
+    const spaces = Array.isArray(bundle.spaces) ? bundle.spaces : [];
+    const settings = bundle.settings && typeof bundle.settings === 'object' && !Array.isArray(bundle.settings)
+      ? Object.entries(bundle.settings).filter(([key]) => !['__proto__', 'constructor', 'prototype'].includes(key))
+      : [];
+    for (const highlight of highlights) {
+      if (!highlight || !highlight.id || typeof highlight.text !== 'string' || typeof highlight.url !== 'string') {
+        throw new Error('Invalid highlight in backup');
+      }
+    }
+    for (const space of spaces) {
+      if (!space || !space.id || typeof space.name !== 'string') throw new Error('Invalid space in backup');
+    }
+    const db = await this.initialize();
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction(['snippets', 'highlights', 'spaces', 'settings'], 'readwrite');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => undefined);
+      try {
+        snippets.forEach((item) => transaction.objectStore('snippets').put(item));
+        highlights.forEach((item) => transaction.objectStore('highlights').put(item));
+        spaces.forEach((item) => transaction.objectStore('spaces').put(item));
+        settings.forEach(([key, value]) => transaction.objectStore('settings').put({ key, value }));
+      } catch (error) {
+        transaction.abort();
+        rejectOnce(error, 'Invalid backup data');
+      }
+    });
+    if (settings.length) {
+      try {
+        await chromeStorageLocalSet(Object.fromEntries(settings));
+      } catch (error) {
+        console.warn('Imported settings mirror could not be updated:', error);
+      }
+    }
+    await this.runShadowSnippetTask('importData', () => this.syncShadowSnippets());
+    return { success: true, importedCount: snippets.length, highlightCount: highlights.length, spaceCount: spaces.length };
+  }
+
+  async clearAllData() {
+    const db = await this.initialize();
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction(['snippets', 'highlights', 'settings', 'spaces'], 'readwrite');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => undefined);
+      try {
+        ['snippets', 'highlights', 'settings', 'spaces'].forEach((name) => transaction.objectStore(name).clear());
+      } catch (error) {
+        transaction.abort();
+        rejectOnce(error, 'Failed to clear data');
+      }
+    });
+    await chrome.storage.local.clear();
+    return { success: true };
+  }
+
   async setSetting(key, value) {
     const db = await this.initialize();
 
@@ -1031,7 +1110,7 @@ class iSnipsDatabase {
 }
 
 // Database instance - initialize only when needed
-let dbInstance = null;
+let dbPromise = null;
 let syncInFlight = null;
 let backupInFlight = null;
 
@@ -1074,13 +1153,18 @@ function ensureAutoCleanupAlarm() {
 }
 
 async function getDatabase() {
-  if (!dbInstance) {
-    dbInstance = new iSnipsDatabase();
-    await dbInstance.initialize();
-    syncService.setDatabase(dbInstance);
+  if (!dbPromise) {
+    dbPromise = (async () => {
+      const db = new iSnipsDatabase();
+      await db.initialize();
+      syncService.setDatabase(db);
+      return db;
+    })().catch((error) => {
+      dbPromise = null;
+      throw error;
+    });
   }
-
-  return dbInstance;
+  return dbPromise;
 }
 
 async function scheduleAutoSyncAlarm(config = null) {
@@ -1335,6 +1419,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Handle message asynchronously
   (async () => {
     try {
+      if (!sender.url || !sender.url.startsWith(chrome.runtime.getURL(''))) {
+        const contentActions = new Set(['getSetting', 'saveSnippet', 'getHighlightsForUrl', 'storeHighlight']);
+        if (!contentActions.has(message.action) || (message.action === 'getSetting' && !['language', 'blockedSites'].includes(message.key))) {
+          sendResponse({ success: false, error: 'Action unavailable from a web page' });
+          return;
+        }
+      }
       const db = await getDatabase();
       const result = await handleMessage(db, message);
       sendResponse(result);
@@ -1389,6 +1480,26 @@ async function handleMessage(db, message) {
 
       case 'getAllSnippets':
         return { success: true, cards: await db.getAllSnippetsIncludingDeleted() };
+
+      case 'getExportData':
+        return { success: true, bundle: await buildBackupBundle(db, 'export') };
+
+      case 'importData': {
+        const result = await db.importData(message.bundle);
+        const config = await db.getSetting('syncConfig', { type: 'none' });
+        await scheduleAutoSyncAlarm(config);
+        await scheduleAutoBackupAlarm(config);
+        broadcastDataChange('cardSaved');
+        return result;
+      }
+
+      case 'clearAllData': {
+        const result = await db.clearAllData();
+        await scheduleAutoSyncAlarm({ type: 'none', autoSyncInterval: 'off' });
+        await scheduleAutoBackupAlarm({ autoBackupInterval: 'off' });
+        broadcastDataChange('cardSaved');
+        return result;
+      }
 
       case 'updateSnippet':
       case 'updateIndexCard':
@@ -1607,7 +1718,7 @@ chrome.runtime.onStartup?.addListener(() => {
 });
 
 // Initialize default data on install
-chrome.runtime.onInstalled.addListener(async () => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   try {
     ensureAutoCleanupAlarm();
     void requestPersistentStorage('runtime-installed');
@@ -1639,7 +1750,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
     // Check if we already have data
     const existingCards = await db.getAllSnippetsIncludingDeleted();
-    if (existingCards.length === 0) {
+    if (details.reason === 'install' && existingCards.length === 0) {
 
       const currentLang = await db.getSetting('language', 'en');
       const sampleCards = db.getSampleData(currentLang);

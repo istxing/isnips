@@ -7,7 +7,7 @@
     "build": "node build.js",
     "build:bun": "bun run build.js",
     "watch": "node build.js --watch",
-    "test": "node scripts/merge.test.js",
+    "test": "node scripts/merge.test.js && node scripts/sync.test.js",
     "oauth:derive": "node scripts/dev-oauth.js"
   },
   "devDependencies": {

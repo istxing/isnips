@@ -35,7 +35,9 @@ class SyncService {
    */
   async mergeData(remoteData) {
     if (!this.db) throw new Error('Database not initialized');
-    if (!remoteData || !Array.isArray(remoteData.snippets)) {
+    if (!remoteData || !Array.isArray(remoteData.snippets) || remoteData.snippets.some((item) =>
+      !item || typeof item.id !== 'string' || !item.id || typeof item.text !== 'string' || (item.updated_at != null && !Number.isFinite(Number(item.updated_at)))
+    )) {
       return { success: false, error: 'Invalid remote data' };
     }
 
@@ -108,6 +110,15 @@ class SyncService {
    */
   async syncWebDAV(config) {
     const { url, username, password } = config;
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(url);
+    } catch {
+      return { success: false, error: 'Enter a valid WebDAV URL.' };
+    }
+    if (parsedUrl.protocol !== 'https:' && !(parsedUrl.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(parsedUrl.hostname))) {
+      return { success: false, error: 'WebDAV requires HTTPS (except localhost).' };
+    }
     const folderUrl = this._normalizeFolderUrl(url);
     const fullUrl = `${folderUrl}${this.syncFileName}`;
 
@@ -129,7 +140,8 @@ class SyncService {
 
       // 2. Merge if remote data exists
       if (remoteData) {
-        await this.mergeData(remoteData);
+        const mergeResult = await this.mergeData(remoteData);
+        if (!mergeResult.success) throw new Error(mergeResult.error);
       }
 
       if (remoteEtag) {
@@ -142,8 +154,11 @@ class SyncService {
         const refreshResponse = await fetch(fullUrl, { headers });
         if (refreshResponse.ok) {
           const refreshedData = await refreshResponse.json();
-          await this.mergeData(refreshedData);
+          const refreshResult = await this.mergeData(refreshedData);
+          if (!refreshResult.success) throw new Error(refreshResult.error);
           await this._updateSyncConfig({ last_remote_etag: latestEtag });
+        } else {
+          throw new Error(`WebDAV refresh failed: ${refreshResponse.status}`);
         }
       }
 
@@ -202,6 +217,7 @@ class SyncService {
       let file = await this._findGoogleDriveFile(token, folderId);
       let fileId = file ? file.id : null;
       let remoteTag = file ? (file.headRevisionId || file.modifiedTime) : null;
+      let remoteHttpEtag = null;
 
       // 3. Download remote data
       let remoteData = null;
@@ -210,13 +226,17 @@ class SyncService {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
+          remoteHttpEtag = response.headers.get('ETag');
           remoteData = await response.json();
+        } else {
+          throw new Error(`Google Drive download failed: ${response.status}`);
         }
       }
 
       // 4. Merge if remote data exists
       if (remoteData) {
-        await this.mergeData(remoteData);
+        const mergeResult = await this.mergeData(remoteData);
+        if (!mergeResult.success) throw new Error(mergeResult.error);
       }
 
       if (remoteTag) {
@@ -232,16 +252,19 @@ class SyncService {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (refreshResponse.ok) {
+            remoteHttpEtag = refreshResponse.headers.get('ETag');
             const refreshedData = await refreshResponse.json();
-            await this.mergeData(refreshedData);
+            const refreshResult = await this.mergeData(refreshedData);
+            if (!refreshResult.success) throw new Error(refreshResult.error);
             await this._updateSyncConfig({ last_remote_etag: latestTag });
+          } else {
+            throw new Error(`Google Drive refresh failed: ${refreshResponse.status}`);
           }
         }
       }
 
       // 5. Upload merged data
       const mergedBundle = await this.bundleData();
-      const currentSyncConf = await this.db.getSetting('syncConfig', {});
 
       if (fileId) {
         // Update existing file
@@ -250,9 +273,9 @@ class SyncService {
           'Content-Type': 'application/json'
         };
 
-        // Add If-Match to prevent lost updates in Google Drive
-        if (currentSyncConf.last_remote_etag) {
-          updateHeaders['If-Match'] = currentSyncConf.last_remote_etag;
+        // A Drive revision ID is not an HTTP ETag. Use the response validator when provided.
+        if (remoteHttpEtag) {
+          updateHeaders['If-Match'] = remoteHttpEtag;
         }
 
         const updateResponse = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
@@ -279,11 +302,14 @@ class SyncService {
         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
         form.append('file', new Blob([JSON.stringify(mergedBundle)], { type: 'application/json' }));
 
-        await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        const createResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` },
           body: form
         });
+        if (!createResponse.ok) {
+          throw new Error(`Google Drive create failed: ${createResponse.status}`);
+        }
       }
 
       if (fileId) {
