@@ -11,6 +11,7 @@ function response(status, body = null, etag = null) {
     statusText: String(status),
     headers: { get: (key) => (key.toLowerCase() === "etag" ? etag : null) },
     json: async () => body,
+    text: async () => (body === null ? "" : typeof body === "string" ? body : JSON.stringify(body)),
   };
 }
 
@@ -57,6 +58,56 @@ async function run() {
       requests.some((item) => item.method === "PUT"),
       false,
     );
+
+    // An empty remote file must be treated as "no remote data" and be overwritten.
+    requests = [];
+    global.fetch = async (url, options = {}) => {
+      requests.push({ url, method: options.method || "GET" });
+      if (options.method === "PROPFIND") return response(207);
+      if (options.method === "PUT") return response(201, null, '"new"');
+      return response(200, null, '"empty"');
+    };
+    const emptyRemote = await syncService.syncWebDAV(config);
+    assert.equal(emptyRemote.success, true);
+    assert.equal(
+      requests.some((item) => item.method === "PUT"),
+      true,
+    );
+
+    // A missing remote file must clear a stale ETag, or the PUT carries a dead If-Match and
+    // every later sync fails with 412. Non-ASCII credentials must be sent UTF-8 encoded.
+    let stored = { ...config, username: "用户", password: "密码", last_remote_etag: '"stale"' };
+    syncService.setDatabase({
+      getAllSnippetsIncludingDeleted: async () => [
+        { id: "local", text: "local", updated_at: 1 },
+      ],
+      getSetting: async () => stored,
+      setSetting: async (_key, value) => {
+        stored = value;
+        return { success: true };
+      },
+    });
+    let putHeaders = null;
+    let authHeader = null;
+    global.fetch = async (url, options = {}) => {
+      if (options.method === "PROPFIND") {
+        authHeader = options.headers.get("Authorization");
+        return response(207);
+      }
+      if (options.method === "PUT") {
+        putHeaders = options.headers;
+        return response(201, null, '"fresh"');
+      }
+      return response(404);
+    };
+    const afterRemoteDeleted = await syncService.syncWebDAV(stored);
+    assert.equal(afterRemoteDeleted.success, true);
+    assert.equal(putHeaders["If-Match"], undefined);
+    assert.equal(
+      authHeader,
+      "Basic " + Buffer.from("用户:密码", "utf8").toString("base64"),
+    );
+    assert.equal(stored.last_remote_etag, '"fresh"');
 
     syncService._getGoogleToken = async () => "token";
     syncService._ensureGoogleDriveFolder = async () => "folder";

@@ -6,7 +6,7 @@ iSnips 2.0 is a Manifest V3 Chrome extension for saving web selections and quick
 
 Version 2.0 keeps the extension key and the iSnipsIndexDB database at schema version 5. Chrome therefore retains the existing extension ID, snippets, highlights, spaces, and settings when the published extension is updated in place. Existing records use the same id, type, text, url, domain, created_at, updated_at, deleted_at, and purged_at fields. The settings keys language, appearance, columnCount, blockedSites, and syncConfig are unchanged.
 
-The import tool also accepts older JSON files with cards, clipText, createdAt, and updatedAt. Import merges by record ID and keeps records not present in the file. Local snapshots restore the saved collection; the portable JSON export includes records, highlights, spaces, and settings. **Portable exports may contain WebDAV credentials.** Keep them private.
+The import tool also accepts older JSON files with cards, clipText, createdAt, and updatedAt. Import merges by record ID, keeps the newer copy when an ID exists on both sides, and keeps records not present in the file. Local snapshots restore the saved collection; the portable JSON export includes records, highlights, spaces, and preferences. Exports and snapshots leave out WebDAV credentials and sync state, and importing never changes sync settings or credentials; only language, appearance, column count, blocked sites, and recent tags are applied from a file.
 
 ## Build and test
 

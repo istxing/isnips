@@ -999,8 +999,16 @@
       $("driveStatus").textContent = t("drive_ready");
   }
   async function updateSync(patch) {
-    syncConfig = { ...syncConfig, ...patch };
-    await saveSetting("syncConfig", syncConfig);
+    // Merge into the stored config, not this page's copy: background syncs keep updating
+    // last_remote_etag while the page is open, and a stale copy would overwrite it.
+    const stored = await setting("syncConfig", { type: "none" });
+    const current = stored && typeof stored === "object" ? stored : {};
+    const next = { ...current, ...patch };
+    // A different backend or server means the stored remote ETag no longer applies.
+    if (["type", "url", "username"].some((key) => key in patch && patch[key] !== current[key]))
+      next.last_remote_etag = null;
+    syncConfig = next;
+    await saveSetting("syncConfig", next);
   }
   function renderBlocked() {
     const list = $("blockedList");
@@ -1212,6 +1220,19 @@
     });
     $("disconnectDrive").addEventListener("click", async () => {
       try {
+        // Revoke the grant at Google, not just the local cache, so "disconnect" really disconnects.
+        const token = await new Promise((resolve) => {
+          chrome.identity.getAuthToken({ interactive: false }, (value) =>
+            resolve(chrome.runtime.lastError ? null : value || null),
+          );
+        });
+        if (token) {
+          await fetch(
+            "https://oauth2.googleapis.com/revoke?token=" + encodeURIComponent(token),
+            { method: "POST" },
+          ).catch(() => {});
+          await chrome.identity.removeCachedAuthToken({ token });
+        }
         await chrome.identity.clearAllCachedAuthTokens();
         await updateSync({ type: "none" });
         $("syncMethod").value = "none";

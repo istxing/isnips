@@ -24,6 +24,11 @@ const SHADOW_SNIPPET_META_KEY = 'shadowSnippetMeta';
 const BACKUP_SNAPSHOT_PREFIX = 'backupSnapshot:';
 const BACKUP_SNAPSHOT_IDS_KEY = 'backupSnapshotIds';
 const BACKUP_SNAPSHOT_META_KEY = 'backupSnapshotMeta';
+const SAMPLE_SNIPPET_IDS = ['sample-welcome', 'sample-note'];
+const SAMPLE_SNIPPET_TIME = Date.UTC(2026, 0, 1);
+// Only plain preferences may come from an imported file. Sync settings (server URL,
+// credentials, ETag) and the extension's own storage keys must never be set from a file.
+const IMPORTABLE_SETTINGS = new Set(['language', 'appearance', 'columnCount', 'blockedSites', 'recentTags']);
 
 if (chrome.storage?.local?.setAccessLevel) {
   chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' }).catch((error) => {
@@ -307,7 +312,14 @@ class iSnipsDatabase {
       ]
     };
 
-    return samples[lang] || samples['en'];
+    // Fixed ids and an old fixed timestamp make the samples identical on every device, so
+    // syncing merges them into one copy and any real edit or delete always wins.
+    return (samples[lang] || samples['en']).map((sample, index) => ({
+      ...sample,
+      id: SAMPLE_SNIPPET_IDS[index],
+      created_at: SAMPLE_SNIPPET_TIME,
+      updated_at: SAMPLE_SNIPPET_TIME
+    }));
   }
 
   // Snippets operations
@@ -908,7 +920,7 @@ class iSnipsDatabase {
     const highlights = Array.isArray(bundle.highlights) ? bundle.highlights : [];
     const spaces = Array.isArray(bundle.spaces) ? bundle.spaces : [];
     const settings = bundle.settings && typeof bundle.settings === 'object' && !Array.isArray(bundle.settings)
-      ? Object.entries(bundle.settings).filter(([key]) => !['__proto__', 'constructor', 'prototype'].includes(key))
+      ? Object.entries(bundle.settings).filter(([key]) => IMPORTABLE_SETTINGS.has(key))
       : [];
     for (const highlight of highlights) {
       if (!highlight || !highlight.id || typeof highlight.text !== 'string' || typeof highlight.url !== 'string') {
@@ -919,11 +931,18 @@ class iSnipsDatabase {
       if (!space || !space.id || typeof space.name !== 'string') throw new Error('Invalid space in backup');
     }
     const db = await this.initialize();
+    // Keep the newer copy when an ID exists on both sides, like sync does, so importing an
+    // older backup cannot overwrite newer local edits or revive items trashed since.
+    const localById = new Map((await this.getAllSnippetsIncludingDeleted()).map((item) => [item.id, item]));
+    const snippetsToWrite = snippets.filter((item) => {
+      const local = localById.get(item.id);
+      return !local || (item.updated_at ?? 0) >= (local.updated_at ?? 0);
+    });
     await new Promise((resolve, reject) => {
       const transaction = db.transaction(['snippets', 'highlights', 'spaces', 'settings'], 'readwrite');
       const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => undefined);
       try {
-        snippets.forEach((item) => transaction.objectStore('snippets').put(item));
+        snippetsToWrite.forEach((item) => transaction.objectStore('snippets').put(item));
         highlights.forEach((item) => transaction.objectStore('highlights').put(item));
         spaces.forEach((item) => transaction.objectStore('spaces').put(item));
         settings.forEach(([key, value]) => transaction.objectStore('settings').put({ key, value }));
@@ -940,7 +959,7 @@ class iSnipsDatabase {
       }
     }
     await this.runShadowSnippetTask('importData', () => this.syncShadowSnippets());
-    return { success: true, importedCount: snippets.length, highlightCount: highlights.length, spaceCount: spaces.length };
+    return { success: true, importedCount: snippetsToWrite.length, highlightCount: highlights.length, spaceCount: spaces.length };
   }
 
   async clearAllData() {
@@ -1143,13 +1162,25 @@ function clearAlarm(name) {
   });
 }
 
+// Create the alarm only when it is missing or its period changed. Re-creating it on every
+// service-worker wake would restart the countdown, so long periods would never fire.
+async function ensureAlarm(name, delayInMinutes, periodInMinutes) {
+  const existing = await chrome.alarms.get(name);
+  if (existing && existing.periodInMinutes === periodInMinutes) {
+    return;
+  }
+  chrome.alarms.create(name, { delayInMinutes, periodInMinutes });
+}
+
 function ensureAutoCleanupAlarm() {
   if (!chrome.alarms) {
     console.warn('Chrome alarms API not available');
     return;
   }
 
-  chrome.alarms.create(AUTO_CLEANUP_ALARM, { delayInMinutes: 1, periodInMinutes: 1440 });
+  ensureAlarm(AUTO_CLEANUP_ALARM, 1, 1440).catch((error) => {
+    console.warn('Could not schedule auto cleanup:', error);
+  });
 }
 
 async function getDatabase() {
@@ -1177,16 +1208,12 @@ async function scheduleAutoSyncAlarm(config = null) {
   const syncConfig = config || await db.getSetting('syncConfig', { type: 'none', autoSyncInterval: 'off' });
   const periodInMinutes = getAutoSyncPeriod(syncConfig);
 
-  await clearAlarm(AUTO_SYNC_ALARM);
-
   if (!isSupportedSyncType(syncConfig.type) || !periodInMinutes) {
+    await clearAlarm(AUTO_SYNC_ALARM);
     return false;
   }
 
-  chrome.alarms.create(AUTO_SYNC_ALARM, {
-    delayInMinutes: periodInMinutes,
-    periodInMinutes
-  });
+  await ensureAlarm(AUTO_SYNC_ALARM, periodInMinutes, periodInMinutes);
 
   return true;
 }
@@ -1205,16 +1232,12 @@ async function scheduleAutoBackupAlarm(config = null) {
   });
   const periodInMinutes = getAutoBackupPeriod(syncConfig);
 
-  await clearAlarm(AUTO_BACKUP_ALARM);
-
   if (!periodInMinutes) {
+    await clearAlarm(AUTO_BACKUP_ALARM);
     return false;
   }
 
-  chrome.alarms.create(AUTO_BACKUP_ALARM, {
-    delayInMinutes: periodInMinutes,
-    periodInMinutes
-  });
+  await ensureAlarm(AUTO_BACKUP_ALARM, periodInMinutes, periodInMinutes);
 
   return true;
 }
@@ -1226,6 +1249,12 @@ async function buildBackupBundle(db, source = 'manual') {
     db.getAllSettings(),
     db.getStoredSpaces()
   ]);
+
+  // Credentials and sync state must not leak into snapshots or exported files.
+  if (settings.syncConfig && typeof settings.syncConfig === 'object') {
+    const { username, password, last_remote_etag, ...safeSyncConfig } = settings.syncConfig;
+    settings.syncConfig = safeSyncConfig;
+  }
 
   return {
     version: '3.1.0',
@@ -1508,14 +1537,6 @@ async function handleMessage(db, message) {
           broadcastDataChange('cardSaved');
         }
         return updateResult;
-
-      case 'deleteSnippet':
-      case 'deleteIndexCard':
-        const deleteResult = await db.deleteSnippet(message.cardId);
-        if (deleteResult.success) {
-          broadcastDataChange('cardSaved');
-        }
-        return deleteResult;
 
       case 'softDeleteSnippet':
       case 'softDeleteIndexCard':

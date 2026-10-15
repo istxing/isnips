@@ -99,6 +99,25 @@ class SyncService {
     }
   }
 
+  // btoa() only accepts Latin1, so encode the credentials as UTF-8 first (RFC 7617).
+  _basicAuth(username, password) {
+    const bytes = new TextEncoder().encode(`${username ?? ''}:${password ?? ''}`);
+    let binary = '';
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return 'Basic ' + btoa(binary);
+  }
+
+  // An empty remote file (e.g. an interrupted earlier upload) is treated as "no remote data".
+  async _readJsonBody(response) {
+    const text = await response.text();
+    if (!text.trim()) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error('WebDAV remote file is not valid JSON.');
+    }
+  }
+
   async _getWebDAVETag(fileUrl, headers) {
     const response = await fetch(fileUrl, { method: 'HEAD', headers });
     if (!response.ok) return null;
@@ -123,7 +142,7 @@ class SyncService {
     const fullUrl = `${folderUrl}${this.syncFileName}`;
 
     const headers = new Headers();
-    headers.set('Authorization', 'Basic ' + btoa(username + ':' + password));
+    headers.set('Authorization', this._basicAuth(username, password));
 
     try {
       await this._ensureWebDAVFolder(folderUrl, headers);
@@ -133,7 +152,7 @@ class SyncService {
       let remoteData = null;
       const remoteEtag = response.headers.get('ETag');
       if (response.ok) {
-        remoteData = await response.json();
+        remoteData = await this._readJsonBody(response);
       } else if (response.status !== 404) {
         throw new Error(`WebDAV Download Failed: ${response.statusText}`);
       }
@@ -144,18 +163,20 @@ class SyncService {
         if (!mergeResult.success) throw new Error(mergeResult.error);
       }
 
-      if (remoteEtag) {
-        await this._updateSyncConfig({ last_remote_etag: remoteEtag });
-      }
+      // Always track what the server has now. A missing file (404) or a server without
+      // ETags must clear the stored tag, otherwise the upload's If-Match is stale and 412s forever.
+      await this._updateSyncConfig({ last_remote_etag: remoteEtag || null });
 
       let currentConfig = await this.db.getSetting('syncConfig', {});
       const latestEtag = await this._getWebDAVETag(fullUrl, headers);
       if (latestEtag && currentConfig.last_remote_etag && latestEtag !== currentConfig.last_remote_etag) {
         const refreshResponse = await fetch(fullUrl, { headers });
         if (refreshResponse.ok) {
-          const refreshedData = await refreshResponse.json();
-          const refreshResult = await this.mergeData(refreshedData);
-          if (!refreshResult.success) throw new Error(refreshResult.error);
+          const refreshedData = await this._readJsonBody(refreshResponse);
+          if (refreshedData) {
+            const refreshResult = await this.mergeData(refreshedData);
+            if (!refreshResult.success) throw new Error(refreshResult.error);
+          }
           await this._updateSyncConfig({ last_remote_etag: latestEtag });
         } else {
           throw new Error(`WebDAV refresh failed: ${refreshResponse.status}`);
@@ -227,7 +248,7 @@ class SyncService {
         });
         if (response.ok) {
           remoteHttpEtag = response.headers.get('ETag');
-          remoteData = await response.json();
+          remoteData = await this._readJsonBody(response);
         } else {
           throw new Error(`Google Drive download failed: ${response.status}`);
         }
@@ -239,9 +260,8 @@ class SyncService {
         if (!mergeResult.success) throw new Error(mergeResult.error);
       }
 
-      if (remoteTag) {
-        await this._updateSyncConfig({ last_remote_etag: remoteTag });
-      }
+      // Clear the stored tag when the file is missing so it cannot leak into the next sync.
+      await this._updateSyncConfig({ last_remote_etag: remoteTag || null });
 
       let currentConfig = await this.db.getSetting('syncConfig', {});
       if (fileId) {
@@ -253,9 +273,11 @@ class SyncService {
           });
           if (refreshResponse.ok) {
             remoteHttpEtag = refreshResponse.headers.get('ETag');
-            const refreshedData = await refreshResponse.json();
-            const refreshResult = await this.mergeData(refreshedData);
-            if (!refreshResult.success) throw new Error(refreshResult.error);
+            const refreshedData = await this._readJsonBody(refreshResponse);
+            if (refreshedData) {
+              const refreshResult = await this.mergeData(refreshedData);
+              if (!refreshResult.success) throw new Error(refreshResult.error);
+            }
             await this._updateSyncConfig({ last_remote_etag: latestTag });
           } else {
             throw new Error(`Google Drive refresh failed: ${refreshResponse.status}`);
@@ -345,6 +367,7 @@ class SyncService {
     const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (!response.ok) throw new Error(`Google Drive folder lookup failed: ${response.status}`);
     const data = await response.json();
     if (data.files && data.files.length > 0) {
       return data.files[0].id;
@@ -361,7 +384,9 @@ class SyncService {
         mimeType: 'application/vnd.google-apps.folder'
       })
     });
+    if (!createResponse.ok) throw new Error(`Google Drive folder create failed: ${createResponse.status}`);
     const created = await createResponse.json();
+    if (!created.id) throw new Error('Google Drive folder create failed: no folder id returned');
     return created.id;
   }
 
@@ -370,6 +395,7 @@ class SyncService {
     const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,headRevisionId,modifiedTime)`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (!response.ok) throw new Error(`Google Drive file lookup failed: ${response.status}`);
     const data = await response.json();
     return data.files && data.files.length > 0 ? data.files[0] : null;
   }

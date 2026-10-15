@@ -19,23 +19,20 @@ class iSnipsContent {
         return;
       }
 
+      // Register first so capture still works if the settings lookups below fail
+      this.loadTranslations();
+      chrome.runtime.onMessage.addListener(this.handleMessage.bind(this));
+
       // Get language setting
       const langResult = await chrome.runtime.sendMessage({
         action: 'getSetting',
         key: 'language',
         defaultValue: 'en'
       });
-      this.currentLanguage = langResult.success ? langResult.value : 'zh-CN';
-      this.loadTranslations();
-
-      // Listen for messages from background (including captureSnippet command)
-      chrome.runtime.onMessage.addListener(this.handleMessage.bind(this));
+      this.currentLanguage = langResult && langResult.success && langResult.value ? langResult.value : 'en';
 
       // Load existing highlights for this page
       await this.loadHighlights();
-
-      // Clean up on page unload
-      window.addEventListener('beforeunload', this.cleanup.bind(this));
 
     } catch (error) {
       console.error('iSnips: Failed to initialize content script:', error);
@@ -211,7 +208,10 @@ class iSnipsContent {
       const trailingWhitespace = rawText.length - rawText.trimEnd().length;
       return {
         textStart: prefix.toString().length + leadingWhitespace,
-        textEnd: selected.toString().length - trailingWhitespace
+        textEnd: selected.toString().length - trailingWhitespace,
+        // Selection.toString() adds layout newlines between blocks, the DOM text does not;
+        // keep the raw DOM text so restoreHighlight can compare like with like.
+        quote: rawText.trim()
       };
     } catch {
       return {};
@@ -250,9 +250,11 @@ class iSnipsContent {
         url: window.location.href
       });
 
-      if (result.success && result.highlights) {
+      if (result && result.success && result.highlights && result.highlights.length) {
+        // Walk the document once for all highlights instead of once per highlight
+        const index = this.buildTextIndex();
         result.highlights.forEach(highlight => {
-          this.restoreHighlight(highlight);
+          this.restoreHighlight(highlight, index);
         });
       }
     } catch (error) {
@@ -260,17 +262,7 @@ class iSnipsContent {
     }
   }
 
-  restoreHighlight(highlight) {
-    // Check if CSS Custom Highlight API is supported
-    if (!CSS.highlights) {
-      return;
-    }
-
-    // Inject highlight styles if not already present
-    this.injectHighlightStyles();
-
-    // Rebuild a range from text offsets. Older records have only a quote, so
-    // choose the matching occurrence closest to any saved start offset.
+  buildTextIndex() {
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT,
@@ -285,25 +277,42 @@ class iSnipsContent {
       nodes.push({ node, start: text.length, end: text.length + node.textContent.length });
       text += node.textContent;
     }
-    if (!nodes.length || !highlight.text) return;
+    return { nodes, text };
+  }
+
+  restoreHighlight(highlight, index = this.buildTextIndex()) {
+    // Check if CSS Custom Highlight API is supported
+    if (!CSS.highlights) {
+      return;
+    }
+
+    // Inject highlight styles if not already present
+    this.injectHighlightStyles();
+
+    // Rebuild a range from text offsets. Older records have only a quote, so
+    // choose the matching occurrence closest to any saved start offset.
+    const { nodes, text } = index;
+    // Prefer the raw DOM quote: highlight.text may contain layout newlines from Selection.toString()
+    const needle = highlight.quote || highlight.text;
+    if (!nodes.length || !needle) return;
 
     let start = -1;
     let end = -1;
     if (Number.isInteger(highlight.textStart) && Number.isInteger(highlight.textEnd) &&
         highlight.textStart >= 0 && highlight.textEnd <= text.length &&
-        text.slice(highlight.textStart, highlight.textEnd) === highlight.text) {
+        text.slice(highlight.textStart, highlight.textEnd) === needle) {
       start = highlight.textStart;
       end = highlight.textEnd;
     } else {
-      let candidate = text.indexOf(highlight.text);
+      let candidate = text.indexOf(needle);
       while (candidate !== -1) {
         if (start === -1 || (Number.isInteger(highlight.textStart) &&
             Math.abs(candidate - highlight.textStart) < Math.abs(start - highlight.textStart))) {
           start = candidate;
         }
-        candidate = text.indexOf(highlight.text, candidate + 1);
+        candidate = text.indexOf(needle, candidate + 1);
       }
-      end = start + highlight.text.length;
+      end = start + needle.length;
     }
     if (start < 0) return;
     const first = nodes.find(part => part.end > start);
@@ -368,56 +377,9 @@ class iSnipsContent {
     }, 3000);
   }
 
-  async showPopupCard(text, isPageIndex) {
-
-    // Remove existing popup if any - ensure complete cleanup
-    this.removePopupCard();
-
-    try {
-      // Create new popup card
-      this.popupCard = new PopupCard(text, isPageIndex, this);
-      await this.popupCard.init();
-      this.popupCard.show();
-    } catch (error) {
-      console.error('iSnips: Failed to create popup card:', error);
-    }
-  }
-
-  removePopupCard() {
-    if (this.popupCard) {
-      this.popupCard.remove();
-      this.popupCard = null;
-    }
-  }
-
-  async saveSnippet(cardData) {
-    try {
-      const result = await chrome.runtime.sendMessage({
-        action: 'saveSnippet',
-        data: cardData
-      });
-      return result;
-    } catch (error) {
-      console.error('Failed to save snippet:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
   handleMessage(message, sender, sendResponse) {
     if (message.action === 'captureSnippet') {
       this.handleCapture();
-    }
-  }
-
-  cleanup() {
-    // Cleanup highlights if needed
-  }
-
-  extractDomain(url) {
-    try {
-      return new URL(url).hostname;
-    } catch {
-      return '';
     }
   }
 }
