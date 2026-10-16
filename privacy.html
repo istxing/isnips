@@ -1,97 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - iSnips</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #1d1d1f;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        h1 {
-            border-bottom: 1px solid #d2d2d7;
-            padding-bottom: 10px;
-        }
-
-        h2 {
-            margin-top: 30px;
-        }
-
-        footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #d2d2d7;
-            font-size: 14px;
-            color: #86868b;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>iSnips · Privacy</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 760px; margin: 64px auto; padding: 0 24px; line-height: 1.75; }
+    h1 { font-size: 34px; letter-spacing: -.04em; }
+    h2 { font-size: 20px; margin-top: 32px; }
+    a { color: inherit; } footer { margin-top: 48px; font-size: 14px; }
+  </style>
 </head>
-
 <body>
-    <h1>iSnips Privacy Policy</h1>
-    <p><strong>Effective Date:</strong> January 24, 2026</p>
-    <p>At iSnips, we value your privacy. This Privacy Policy describes how iSnips ("we", "our", or "the extension")
-        handles information when you use our browser extension.</p>
-
-    <h2>1. Data Collection</h2>
-    <p>iSnips is designed to be a "local-first" tool.</p>
-    <ul>
-        <li><strong>User-Generated Content:</strong> Captured text snippets, notes, and the source URLs of the pages
-            where those snippets were captured.</li>
-        <li><strong>Usage Data:</strong> The extension does <strong>not</strong> collect any analytics, tracking data,
-            or personal information about your browsing habits.</li>
-    </ul>
-
-    <h2>2. Data Storage</h2>
-    <ul>
-        <li><strong>Local Storage:</strong> All your captured snippets and settings are stored locally on your device
-            using browser-based storage (IndexedDB and Chrome Storage). We do not have access to this data.</li>
-        <li><strong>No Central Server:</strong> We do not operate any central servers that store your content or
-            personal information.</li>
-    </ul>
-
-    <h2>3. Data Synchronization (Optional)</h2>
-    <p>iSnips offers optional synchronization features via Google Drive and WebDAV:</p>
-    <ul>
-        <li><strong>Google Drive:</strong> If you enable Google Drive sync, the extension will store your data in its
-            own private folder on <strong>your</strong> Google Drive. This data is only accessible by you and the
-            extension.</li>
-        <li><strong>WebDAV:</strong> If you enable WebDAV sync, the extension will transmit your data to the server
-            address you provided. We do not have access to these credentials or the stored data.</li>
-    </ul>
-
-    <h2>4. Third-Party Access</h2>
-    <p>We do <strong>not</strong> sell, trade, or otherwise transfer your data to outside parties. Your data is only
-        shared with the specific sync providers (Google or your WebDAV host) that <strong>you</strong> explicitly
-        configure.</p>
-
-    <h2>5. Your Choices</h2>
-    <ul>
-        <li><strong>Encryption:</strong> You are responsible for the security of your device and your chosen sync
-            accounts.</li>
-        <li><strong>Data Deletion:</strong> You can delete all your data at any time through the "Clear All Data" button
-            in the extension settings.</li>
-        <li><strong>Export:</strong> You can export your data as a JSON file at any time.</li>
-    </ul>
-
-    <h2>6. Changes to This Policy</h2>
-    <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy
-        Policy on this page.</p>
-
-    <h2>7. Contact Us</h2>
-    <p>If you have any questions about this Privacy Policy, please contact us via the <a
-            href="https://github.com/nicekate/iSnips">GitHub repository</a>.</p>
-
-    <footer>
-        <p>&copy; 2026 iSnips · <a href="index.html">Home</a></p>
-    </footer>
+  <h1>iSnips Privacy Policy</h1>
+  <p>Updated October 16, 2026 · Chrome extension 2.0.0</p>
+  <p>iSnips saves text you choose to clip and notes you write. The extension works locally without an iSnips account. We do not run analytics, advertising, tracking, or a server that receives your extension records.</p>
+  <h2>What the extension accesses</h2>
+  <p>When you save a selection, iSnips stores the selected text, page URL, domain, page title and timestamps. Notes can include the current page URL when “Attach page” is checked. Saved highlights include their source URL and text positions so they can be restored when you revisit that page. Custom folder names and record assignments are stored locally using the existing spaces data. Folder definitions are included in JSON exports and local snapshots and, when you enable synchronization, sent to your selected cloud service. Existing space assignments and preferences are retained.</p>
+  <p>The content script accesses page text to capture your selection and restore saved highlights. It does not upload the pages you visit or maintain a separate browsing-history log. Site access allows these features to work on pages you visit. You can disable capture and highlights for a domain and its subdomains in Settings, or restrict site access using Chrome’s extension controls.</p>
+  <h2>Optional clipboard history</h2>
+  <p>On first use, or after an upgrade introduces clipboard capture, iSnips prominently explains this feature and asks you to choose Agree and enable or Not now. No copied text is recorded until you explicitly agree. Dismissing the notice does not give consent. An existing paused preference is retained. After agreeing, auto-save is enabled and can be paused in the Clipboard category. While it is on, iSnips records text you copy or cut with the browser’s normal copy controls on supported web pages, along with its source URL, domain, title and copy time. It keeps only the latest 99 unique text entries in this browser profile. Copying the same text again moves it to the front. It does not read the system clipboard, monitor other applications, capture password inputs, or save copies from incognito tabs or domains you disabled. Chrome-protected pages and embedded frames are not captured. Website copy buttons that use their own clipboard code may not be captured.</p>
+  <p>You can pause auto-save, remove an entry or clear this history in the Clipboard category. History is temporary and is excluded from synchronization, JSON exports and local backup snapshots. “Save as note” creates a regular note, then removes that entry from the history; that note follows your normal export, backup and optional sync settings. Clearing local data also removes history and resets preferences to their defaults, including the consent choice; capture stays off until you agree again.</p>
+  <h2>Local storage and credentials</h2>
+  <p>Records, highlights, spaces and preferences are stored in your browser profile using IndexedDB and Chrome storage. Local snapshots and a recovery copy of records also remain in that profile. An unfinished quick note is kept in browser session storage until saved, cleared or the browser session ends. Your versioned clipboard consent choice and decision time remain on this device; they are excluded from synchronization, exported backups and local record snapshots. A backup cannot authorize clipboard recording.</p>
+  <p>If you configure WebDAV, its address, username and password are stored locally to connect to that server. These credentials are available to trusted extension pages, not content scripts. They are not separately encrypted by iSnips. Chrome’s native Google authorization tokens are managed through its identity API. The optional Brave/web connection opens Google’s authorization page using the browser identity API and stores only a short-lived access token and expiry in trusted extension session storage. A local preference remembers the selected authorization method. The web connection does not collect your Google password, use a client secret, retain a refresh token or send authorization tokens to an iSnips server. Web tokens and authorization-method preferences are excluded from exports, synchronization and backup snapshots. Protect access to your device and browser profile.</p>
+  <h2>Optional synchronization</h2>
+  <p>Synchronization is off by default. When you enable a service and synchronize, iSnips sends records—including saved text, source information, timestamps and deletion markers—and folder definitions, names, ordering, record assignments and folder deletion markers to that service. Highlights, preferences, temporary clipboard history and local snapshots are not synchronized in this version. Automatic sync runs only when you configure it.</p>
+  <ul>
+    <li><strong>Google Drive:</strong> The extension requests the <code>drive.file</code> scope to access files it creates or that you authorize. It stores <code>iSnips/snippets.json</code> in an ordinary folder in your Drive, not a hidden application-data folder. Access is governed by your Google account, folder sharing and Google’s policies. iSnips does not change sharing permissions.</li>
+    <li><strong>WebDAV:</strong> The extension sends records, folder definitions and authentication credentials to the server you configure. Remote connections require HTTPS; HTTP is allowed for localhost development only. The server operator controls storage and access under its own policies.</li>
+  </ul>
+  <p>We do not sell data, use it for advertising, or transfer it to data brokers or credit services. Data received through Google APIs is used only to provide the synchronization you request and is handled in accordance with the Chrome Web Store User Data Policy and its Limited Use requirements.</p>
+  <h2>Export, deletion and your choices</h2>
+  <p>You can export a JSON file containing records, highlights, spaces and supported preferences. Export files and new local snapshots exclude sync configuration, connection credentials and tokens. Exported records may themselves contain personal information or secrets you saved; keep the file private.</p>
+  <p>Deleting a folder returns its records to Unfiled and removes the folder from the interface. Its last name and deletion timestamps remain locally and in synchronized files as a deletion marker, preventing old files or offline renames from restoring it. Folder deletion does not remove record text.</p>
+  <p>Moving a record to Trash is reversible. Emptying Trash removes it from the interface and retains deletion markers to propagate deletion during sync; underlying record content and earlier snapshots can remain in storage. “Clear local data” deletes the extension’s local records, folders and deletion markers, highlights, preferences, credentials, recovery copies, session drafts and snapshots, and stops local synchronization.</p>
+  <p>Clearing local data or disconnecting a service does not delete files already on Google Drive or a WebDAV server. Delete those remote files and any exported backups separately if you no longer want them. Reconnecting to an existing sync file can download its records again. Disconnecting the web connection clears its credentials on this browser and stops local synchronization; it does not revoke authorizations on other devices. The native Chrome disconnect also attempts Google authorization revocation. You can revoke iSnips access in your Google account, which may affect other devices using the same Google project.</p>
+  <h2>External links and contact</h2>
+  <p>Source links, feedback and support links open only when you choose them. Those websites receive your visit and apply their own privacy policies. Contact us through the <a href="https://github.com/istxing/iSnips/issues" rel="noopener noreferrer">iSnips issue tracker</a>; do not post private records or passwords in public issues.</p>
+  <footer>iSnips · This policy covers the browser extension. Material changes will be reflected in this page and the extension’s release information.</footer>
 </body>
-
 </html>
