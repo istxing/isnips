@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "images": [
+    {
+      "file": "store-icon-128.png",
+      "width": 128,
+      "height": 128,
+      "channels": 4,
+      "sha256": "7c78896bc11bbe6552eeb49aee04a6ab3a0191fbdeeee27f97b14cb339babfe5"
+    },
+    {
+      "file": "brand-icon-512.png",
+      "width": 512,
+      "height": 512,
+      "channels": 4,
+      "sha256": "d5520fe60c40a7cd75ff2fd0c77a30da22988466ca415ead3e31b39ec62dc439"
+    },
+    {
+      "file": "brand-icon-1024.png",
+      "width": 1024,
+      "height": 1024,
+      "channels": 4,
+      "sha256": "4bb91a4c1c78e4834ae8bd2687775cb7e38a856f2cf5909da9e10b603c0b4330"
+    },
+    {
+      "file": "promo-small-440x280.png",
+      "width": 440,
+      "height": 280,
+      "channels": 3,
+      "sha256": "f97c9da1157844c0af1f5b515527c1eddbcbbb4a52d96695c7a20cc450362c9c"
+    },
+    {
+      "file": "promo-marquee-1400x560.png",
+      "width": 1400,
+      "height": 560,
+      "channels": 3,
+      "sha256": "445eb0cd60bffc7c4584c5c0f96f9404fdac63562295c4aa9d45ba02f6cc4492"
+    }
+  ],
+  "screenshots": {
+    "status": "pending_real_browser_capture",
+    "files": []
+  }
+}

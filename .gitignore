@@ -14,9 +14,13 @@ out/
 .next/
 *.tsbuildinfo
 
-# Extension artifacts
+# Extension artifacts & Archives
 *.crx
 *.pem
+*.zip
+*.tar.gz
+*.psd
+package-lock.json
 
 # Desktop / Tauri / Electron
 apps/desktop/release/

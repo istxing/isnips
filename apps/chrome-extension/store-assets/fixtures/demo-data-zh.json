@@ -1,0 +1,361 @@
+{
+  "version": "3.0.0",
+  "exportDate": "2026-10-16T11:23:57.000Z",
+  "snippets": [
+    {
+      "id": "zh-CN-demo-001",
+      "type": "note",
+      "text": "把灵感先记下来，整理可以稍后再做。让记录成为一个自然的小动作，越轻量越好。",
+      "clipText": "把灵感先记下来，整理可以稍后再做。让记录成为一个自然的小动作，越轻量越好。",
+      "createdAt": 1792146237000,
+      "updatedAt": 1792146237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "zh-CN-demo-002",
+      "type": "web",
+      "text": "Manifest V3 代表了 Chrome 扩展平台的重要演进，使用后台 Service Worker 替代常驻后台页，在保护用户隐私与系统资源方面带来了质的提升。",
+      "clipText": "Manifest V3 代表了 Chrome 扩展平台的重要演进，使用后台 Service Worker 替代常驻后台页，在保护用户隐私与系统资源方面带来了质的提升。",
+      "createdAt": 1792140837000,
+      "updatedAt": 1792140837000,
+      "spaceId": "tech",
+      "url": "https://developer.chrome.com/docs/extensions/mv3/intro/",
+      "domain": "developer.chrome.com",
+      "title": "Chrome 扩展开发文档 Manifest V3 概览",
+      "pageTitle": "Chrome 扩展开发文档 Manifest V3 概览"
+    },
+    {
+      "id": "zh-CN-demo-003",
+      "type": "note",
+      "text": "2.0.0 发布清单：检查 1280x800 多语言截图、单用途声明、权限合规说明及 GitHub Pages 隐私政策。",
+      "clipText": "2.0.0 发布清单：检查 1280x800 多语言截图、单用途声明、权限合规说明及 GitHub Pages 隐私政策。",
+      "createdAt": 1792133637000,
+      "updatedAt": 1792133637000,
+      "spaceId": "work"
+    },
+    {
+      "id": "zh-CN-demo-004",
+      "type": "web",
+      "text": "好的设计是创新的、有用的、美观的。好的设计使产品易于理解，好的设计是克制的、诚实的、历久弥新的，并且关注每一个细节。好的设计尽可能少地设计。",
+      "clipText": "好的设计是创新的、有用的、美观的。好的设计使产品易于理解，好的设计是克制的、诚实的、历久弥新的，并且关注每一个细节。好的设计尽可能少地设计。",
+      "createdAt": 1792124637000,
+      "updatedAt": 1792124637000,
+      "spaceId": "reading",
+      "url": "https://vitsoe.com/us/about/good-design",
+      "domain": "vitsoe.com",
+      "title": "优秀设计的十条准则 - 迪特·拉姆斯 (Dieter Rams)",
+      "pageTitle": "优秀设计的十条准则 - 迪特·拉姆斯 (Dieter Rams)"
+    },
+    {
+      "id": "zh-CN-demo-005",
+      "type": "note",
+      "text": "产品设计思考：先明确用户在当前场景下最核心的目标，再决定界面上必须出现的元素。多一个按钮，就多一分认知负担。",
+      "clipText": "产品设计思考：先明确用户在当前场景下最核心的目标，再决定界面上必须出现的元素。多一个按钮，就多一分认知负担。",
+      "createdAt": 1792117437000,
+      "updatedAt": 1792117437000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "zh-CN-demo-006",
+      "type": "web",
+      "text": "IndexedDB 是一个事务型的客户端数据库系统，可以在用户浏览器中持久保存大量结构化数据。配合索引支持高效的数据游标遍历与范围查询。",
+      "clipText": "IndexedDB 是一个事务型的客户端数据库系统，可以在用户浏览器中持久保存大量结构化数据。配合索引支持高效的数据游标遍历与范围查询。",
+      "createdAt": 1792056237000,
+      "updatedAt": 1792056237000,
+      "spaceId": "tech",
+      "url": "https://developer.mozilla.org/zh-CN/docs/Web/API/IndexedDB_API",
+      "domain": "developer.mozilla.org",
+      "title": "MDN Web 文档：IndexedDB API 深入解析",
+      "pageTitle": "MDN Web 文档：IndexedDB API 深入解析"
+    },
+    {
+      "id": "zh-CN-demo-007",
+      "type": "note",
+      "text": "本地优先（Local-First）原则：数据完全归属用户设备，网络只充当同步与备份通道，断网与弱网环境下依然具备完整体验。",
+      "clipText": "本地优先（Local-First）原则：数据完全归属用户设备，网络只充当同步与备份通道，断网与弱网环境下依然具备完整体验。",
+      "createdAt": 1792045437000,
+      "updatedAt": 1792045437000,
+      "spaceId": "work"
+    },
+    {
+      "id": "zh-CN-demo-008",
+      "type": "web",
+      "text": "代码首先是写给人看、方便人理解的，计算机能够执行它仅仅是一件附带的事情。 -  Harold Abelson",
+      "clipText": "代码首先是写给人看、方便人理解的，计算机能够执行它仅仅是一件附带的事情。 -  Harold Abelson",
+      "createdAt": 1792034637000,
+      "updatedAt": 1792034637000,
+      "spaceId": "reading",
+      "url": "https://mitpress.mit.edu/sicp",
+      "domain": "mitpress.mit.edu",
+      "title": "计算机程序的构造和解释 (SICP)",
+      "pageTitle": "计算机程序的构造和解释 (SICP)"
+    },
+    {
+      "id": "zh-CN-demo-009",
+      "type": "note",
+      "text": "排版细节：浅灰绿背景（#e9eeea）与纯白卡片的搭配，在保持清爽的同时能有效减轻长时间阅读的视觉疲劳感。",
+      "clipText": "排版细节：浅灰绿背景（#e9eeea）与纯白卡片的搭配，在保持清爽的同时能有效减轻长时间阅读的视觉疲劳感。",
+      "createdAt": 1791966237000,
+      "updatedAt": 1791966237000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "zh-CN-demo-010",
+      "type": "web",
+      "text": "让每个程序做好一件事。尽量将程序组合起来完成复杂任务。统一采用文本流作为标准化接口。保持简单，避免不必要的复杂度。",
+      "clipText": "让每个程序做好一件事。尽量将程序组合起来完成复杂任务。统一采用文本流作为标准化接口。保持简单，避免不必要的复杂度。",
+      "createdAt": 1791951837000,
+      "updatedAt": 1791951837000,
+      "spaceId": "ideas",
+      "url": "https://zh.wikipedia.org/wiki/Unix%E5%93%B2%E5%AD%A6",
+      "domain": "wikipedia.org",
+      "title": "Unix 哲学与极简主义系统设计",
+      "pageTitle": "Unix 哲学与极简主义系统设计"
+    },
+    {
+      "id": "zh-CN-demo-011",
+      "type": "note",
+      "text": "卡片笔记法（Zettelkasten）：每张卡片专注于一个原子化观点。通过有意义的链接将零散碎片组织成能够自生长的网状知识库。",
+      "clipText": "卡片笔记法（Zettelkasten）：每张卡片专注于一个原子化观点。通过有意义的链接将零散碎片组织成能够自生长的网状知识库。",
+      "createdAt": 1791876237000,
+      "updatedAt": 1791876237000,
+      "spaceId": "reading"
+    },
+    {
+      "id": "zh-CN-demo-012",
+      "type": "web",
+      "text": "利用 If-None-Match 和 ETag 机制，可以在不依赖复杂中心服务器的前提下，实现精准的并发冲突检测与安全条件合并。",
+      "clipText": "利用 If-None-Match 和 ETag 机制，可以在不依赖复杂中心服务器的前提下，实现精准的并发冲突检测与安全条件合并。",
+      "createdAt": 1791786237000,
+      "updatedAt": 1791786237000,
+      "spaceId": "work",
+      "url": "https://datatracker.ietf.org/doc/html/rfc4918",
+      "domain": "datatracker.ietf.org",
+      "title": "WebDAV 协议与多端同步规范",
+      "pageTitle": "WebDAV 协议与多端同步规范"
+    },
+    {
+      "id": "zh-CN-demo-013",
+      "type": "note",
+      "text": "交互手感：卡片悬停 4px 上移与 1% 微幅放大，配合柔和的阴影加深，赋予界面轻盈且明确的物理触感。",
+      "clipText": "交互手感：卡片悬停 4px 上移与 1% 微幅放大，配合柔和的阴影加深，赋予界面轻盈且明确的物理触感。",
+      "createdAt": 1791696237000,
+      "updatedAt": 1791696237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "zh-CN-demo-014",
+      "type": "web",
+      "text": "优秀的工业与交互设计，其核心是提供清晰的示能（Affordance）与意符（Signifier）。用户不需要阅读繁琐的说明书，就能直觉地感知其操作方式。",
+      "clipText": "优秀的工业与交互设计，其核心是提供清晰的示能（Affordance）与意符（Signifier）。用户不需要阅读繁琐的说明书，就能直觉地感知其操作方式。",
+      "createdAt": 1791620637000,
+      "updatedAt": 1791620637000,
+      "spaceId": "reading",
+      "url": "https://zh.wikipedia.org/wiki/%E8%AE%BE%E8%AE%A1%E5%BF%83%E7%90%86%E5%AD%A6",
+      "domain": "wikipedia.org",
+      "title": "设计心理学 - 唐·诺曼",
+      "pageTitle": "设计心理学 - 唐·诺曼"
+    },
+    {
+      "id": "zh-CN-demo-015",
+      "type": "note",
+      "text": "隐私与安全底线：无广告、无行为跟踪、不读取系统剪贴板。网页端复制仅在用户确认同意后开启，且支持随时一键暂停。",
+      "clipText": "隐私与安全底线：无广告、无行为跟踪、不读取系统剪贴板。网页端复制仅在用户确认同意后开启，且支持随时一键暂停。",
+      "createdAt": 1791530637000,
+      "updatedAt": 1791530637000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "zh-CN-demo-016",
+      "type": "note",
+      "text": "把灵感先记下来，整理可以稍后再做。让记录成为一个自然的小动作，越轻量越好。",
+      "clipText": "把灵感先记下来，整理可以稍后再做。让记录成为一个自然的小动作，越轻量越好。",
+      "createdAt": 1791714237000,
+      "updatedAt": 1791714237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "zh-CN-demo-017",
+      "type": "web",
+      "text": "Manifest V3 代表了 Chrome 扩展平台的重要演进，使用后台 Service Worker 替代常驻后台页，在保护用户隐私与系统资源方面带来了质的提升。",
+      "clipText": "Manifest V3 代表了 Chrome 扩展平台的重要演进，使用后台 Service Worker 替代常驻后台页，在保护用户隐私与系统资源方面带来了质的提升。",
+      "createdAt": 1791708837000,
+      "updatedAt": 1791708837000,
+      "spaceId": "tech",
+      "url": "https://developer.chrome.com/docs/extensions/mv3/intro/",
+      "domain": "developer.chrome.com",
+      "title": "Chrome 扩展开发文档 Manifest V3 概览",
+      "pageTitle": "Chrome 扩展开发文档 Manifest V3 概览"
+    },
+    {
+      "id": "zh-CN-demo-018",
+      "type": "note",
+      "text": "2.0.0 发布清单：检查 1280x800 多语言截图、单用途声明、权限合规说明及 GitHub Pages 隐私政策。",
+      "clipText": "2.0.0 发布清单：检查 1280x800 多语言截图、单用途声明、权限合规说明及 GitHub Pages 隐私政策。",
+      "createdAt": 1791701637000,
+      "updatedAt": 1791701637000,
+      "spaceId": "work"
+    },
+    {
+      "id": "zh-CN-demo-019",
+      "type": "web",
+      "text": "好的设计是创新的、有用的、美观的。好的设计使产品易于理解，好的设计是克制的、诚实的、历久弥新的，并且关注每一个细节。好的设计尽可能少地设计。",
+      "clipText": "好的设计是创新的、有用的、美观的。好的设计使产品易于理解，好的设计是克制的、诚实的、历久弥新的，并且关注每一个细节。好的设计尽可能少地设计。",
+      "createdAt": 1791692637000,
+      "updatedAt": 1791692637000,
+      "spaceId": "reading",
+      "url": "https://vitsoe.com/us/about/good-design",
+      "domain": "vitsoe.com",
+      "title": "优秀设计的十条准则 - 迪特·拉姆斯 (Dieter Rams)",
+      "pageTitle": "优秀设计的十条准则 - 迪特·拉姆斯 (Dieter Rams)"
+    },
+    {
+      "id": "zh-CN-demo-020",
+      "type": "note",
+      "text": "产品设计思考：先明确用户在当前场景下最核心的目标，再决定界面上必须出现的元素。多一个按钮，就多一分认知负担。",
+      "clipText": "产品设计思考：先明确用户在当前场景下最核心的目标，再决定界面上必须出现的元素。多一个按钮，就多一分认知负担。",
+      "createdAt": 1791685437000,
+      "updatedAt": 1791685437000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "zh-CN-demo-021",
+      "type": "web",
+      "text": "IndexedDB 是一个事务型的客户端数据库系统，可以在用户浏览器中持久保存大量结构化数据。配合索引支持高效的数据游标遍历与范围查询。",
+      "clipText": "IndexedDB 是一个事务型的客户端数据库系统，可以在用户浏览器中持久保存大量结构化数据。配合索引支持高效的数据游标遍历与范围查询。",
+      "createdAt": 1791624237000,
+      "updatedAt": 1791624237000,
+      "spaceId": "tech",
+      "url": "https://developer.mozilla.org/zh-CN/docs/Web/API/IndexedDB_API",
+      "domain": "developer.mozilla.org",
+      "title": "MDN Web 文档：IndexedDB API 深入解析",
+      "pageTitle": "MDN Web 文档：IndexedDB API 深入解析"
+    },
+    {
+      "id": "zh-CN-demo-022",
+      "type": "note",
+      "text": "本地优先（Local-First）原则：数据完全归属用户设备，网络只充当同步与备份通道，断网与弱网环境下依然具备完整体验。",
+      "clipText": "本地优先（Local-First）原则：数据完全归属用户设备，网络只充当同步与备份通道，断网与弱网环境下依然具备完整体验。",
+      "createdAt": 1791613437000,
+      "updatedAt": 1791613437000,
+      "spaceId": "work"
+    },
+    {
+      "id": "zh-CN-demo-023",
+      "type": "web",
+      "text": "代码首先是写给人看、方便人理解的，计算机能够执行它仅仅是一件附带的事情。 -  Harold Abelson",
+      "clipText": "代码首先是写给人看、方便人理解的，计算机能够执行它仅仅是一件附带的事情。 -  Harold Abelson",
+      "createdAt": 1791602637000,
+      "updatedAt": 1791602637000,
+      "spaceId": "reading",
+      "url": "https://mitpress.mit.edu/sicp",
+      "domain": "mitpress.mit.edu",
+      "title": "计算机程序的构造和解释 (SICP)",
+      "pageTitle": "计算机程序的构造和解释 (SICP)"
+    },
+    {
+      "id": "zh-CN-demo-024",
+      "type": "note",
+      "text": "排版细节：浅灰绿背景（#e9eeea）与纯白卡片的搭配，在保持清爽的同时能有效减轻长时间阅读的视觉疲劳感。",
+      "clipText": "排版细节：浅灰绿背景（#e9eeea）与纯白卡片的搭配，在保持清爽的同时能有效减轻长时间阅读的视觉疲劳感。",
+      "createdAt": 1791534237000,
+      "updatedAt": 1791534237000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "zh-CN-demo-025",
+      "type": "web",
+      "text": "让每个程序做好一件事。尽量将程序组合起来完成复杂任务。统一采用文本流作为标准化接口。保持简单，避免不必要的复杂度。",
+      "clipText": "让每个程序做好一件事。尽量将程序组合起来完成复杂任务。统一采用文本流作为标准化接口。保持简单，避免不必要的复杂度。",
+      "createdAt": 1791519837000,
+      "updatedAt": 1791519837000,
+      "spaceId": "ideas",
+      "url": "https://zh.wikipedia.org/wiki/Unix%E5%93%B2%E5%AD%A6",
+      "domain": "wikipedia.org",
+      "title": "Unix 哲学与极简主义系统设计",
+      "pageTitle": "Unix 哲学与极简主义系统设计"
+    },
+    {
+      "id": "zh-CN-demo-026",
+      "type": "note",
+      "text": "卡片笔记法（Zettelkasten）：每张卡片专注于一个原子化观点。通过有意义的链接将零散碎片组织成能够自生长的网状知识库。",
+      "clipText": "卡片笔记法（Zettelkasten）：每张卡片专注于一个原子化观点。通过有意义的链接将零散碎片组织成能够自生长的网状知识库。",
+      "createdAt": 1791444237000,
+      "updatedAt": 1791444237000,
+      "spaceId": "reading"
+    },
+    {
+      "id": "zh-CN-demo-027",
+      "type": "web",
+      "text": "利用 If-None-Match 和 ETag 机制，可以在不依赖复杂中心服务器的前提下，实现精准的并发冲突检测与安全条件合并。",
+      "clipText": "利用 If-None-Match 和 ETag 机制，可以在不依赖复杂中心服务器的前提下，实现精准的并发冲突检测与安全条件合并。",
+      "createdAt": 1791354237000,
+      "updatedAt": 1791354237000,
+      "spaceId": "work",
+      "url": "https://datatracker.ietf.org/doc/html/rfc4918",
+      "domain": "datatracker.ietf.org",
+      "title": "WebDAV 协议与多端同步规范",
+      "pageTitle": "WebDAV 协议与多端同步规范"
+    },
+    {
+      "id": "zh-CN-demo-028",
+      "type": "note",
+      "text": "交互手感：卡片悬停 4px 上移与 1% 微幅放大，配合柔和的阴影加深，赋予界面轻盈且明确的物理触感。",
+      "clipText": "交互手感：卡片悬停 4px 上移与 1% 微幅放大，配合柔和的阴影加深，赋予界面轻盈且明确的物理触感。",
+      "createdAt": 1791264237000,
+      "updatedAt": 1791264237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "zh-CN-demo-029",
+      "type": "web",
+      "text": "优秀的工业与交互设计，其核心是提供清晰的示能（Affordance）与意符（Signifier）。用户不需要阅读繁琐的说明书，就能直觉地感知其操作方式。",
+      "clipText": "优秀的工业与交互设计，其核心是提供清晰的示能（Affordance）与意符（Signifier）。用户不需要阅读繁琐的说明书，就能直觉地感知其操作方式。",
+      "createdAt": 1791188637000,
+      "updatedAt": 1791188637000,
+      "spaceId": "reading",
+      "url": "https://zh.wikipedia.org/wiki/%E8%AE%BE%E8%AE%A1%E5%BF%83%E7%90%86%E5%AD%A6",
+      "domain": "wikipedia.org",
+      "title": "设计心理学 - 唐·诺曼",
+      "pageTitle": "设计心理学 - 唐·诺曼"
+    },
+    {
+      "id": "zh-CN-demo-030",
+      "type": "note",
+      "text": "隐私与安全底线：无广告、无行为跟踪、不读取系统剪贴板。网页端复制仅在用户确认同意后开启，且支持随时一键暂停。",
+      "clipText": "隐私与安全底线：无广告、无行为跟踪、不读取系统剪贴板。网页端复制仅在用户确认同意后开启，且支持随时一键暂停。",
+      "createdAt": 1791098637000,
+      "updatedAt": 1791098637000,
+      "spaceId": "tech"
+    }
+  ],
+  "highlights": [],
+  "settings": {
+    "language": "zh-CN",
+    "blockedSites": [],
+    "columnCount": 5,
+    "libraryGrouping": "all"
+  },
+  "spaces": [
+    {
+      "id": "work",
+      "name": "工作项目",
+      "updated_at": 1792149837000
+    },
+    {
+      "id": "reading",
+      "name": "阅读摘录",
+      "updated_at": 1792149837000
+    },
+    {
+      "id": "ideas",
+      "name": "灵感随记",
+      "updated_at": 1792149837000
+    },
+    {
+      "id": "tech",
+      "name": "技术沉淀",
+      "updated_at": 1792149837000
+    }
+  ]
+}

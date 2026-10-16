@@ -1,0 +1,361 @@
+{
+  "version": "3.0.0",
+  "exportDate": "2026-10-16T11:23:57.000Z",
+  "snippets": [
+    {
+      "id": "ja-demo-001",
+      "type": "note",
+      "text": "ひらめきはその場ですぐにメモする。整理や分類は後からで十分。記録の摩擦を極力なくすことが、良い習慣作りの第一歩。",
+      "clipText": "ひらめきはその場ですぐにメモする。整理や分類は後からで十分。記録の摩擦を極力なくすことが、良い習慣作りの第一歩。",
+      "createdAt": 1792146237000,
+      "updatedAt": 1792146237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "ja-demo-002",
+      "type": "web",
+      "text": "Manifest V3 は拡張機能のセキュリティ、プライバシー、パフォーマンスを向上させるための新しい仕様です。バックグラウンドページに代わり Service Worker が導入されました。",
+      "clipText": "Manifest V3 は拡張機能のセキュリティ、プライバシー、パフォーマンスを向上させるための新しい仕様です。バックグラウンドページに代わり Service Worker が導入されました。",
+      "createdAt": 1792140837000,
+      "updatedAt": 1792140837000,
+      "spaceId": "tech",
+      "url": "https://developer.chrome.com/docs/extensions/mv3/intro/",
+      "domain": "developer.chrome.com",
+      "title": "Chrome 拡張機能 Manifest V3 ガイド",
+      "pageTitle": "Chrome 拡張機能 Manifest V3 ガイド"
+    },
+    {
+      "id": "ja-demo-003",
+      "type": "note",
+      "text": "週次ふりかえり：リリース前の受け入れテスト完了。UIのレスポンシブ崩れなし、キーボードショートカット確認済み。",
+      "clipText": "週次ふりかえり：リリース前の受け入れテスト完了。UIのレスポンシブ崩れなし、キーボードショートカット確認済み。",
+      "createdAt": 1792133637000,
+      "updatedAt": 1792133637000,
+      "spaceId": "work"
+    },
+    {
+      "id": "ja-demo-004",
+      "type": "web",
+      "text": "良いデザインは革新的である。良いデザインは製品を有用にする。良いデザインは美しく、製品を分かりやすくする。良いデザインは主張せず、誠実である。",
+      "clipText": "良いデザインは革新的である。良いデザインは製品を有用にする。良いデザインは美しく、製品を分かりやすくする。良いデザインは主張せず、誠実である。",
+      "createdAt": 1792124637000,
+      "updatedAt": 1792124637000,
+      "spaceId": "reading",
+      "url": "https://vitsoe.com/jp/about/good-design",
+      "domain": "vitsoe.com",
+      "title": "良いデザインの10原則 - ディーター・ラムス",
+      "pageTitle": "良いデザインの10原則 - ディーター・ラムス"
+    },
+    {
+      "id": "ja-demo-005",
+      "type": "note",
+      "text": "ミニマリズムの本質：不要なものを削ぎ落とすことで、本当に大切な機能やテキストが自然と際立つようになる。",
+      "clipText": "ミニマリズムの本質：不要なものを削ぎ落とすことで、本当に大切な機能やテキストが自然と際立つようになる。",
+      "createdAt": 1792117437000,
+      "updatedAt": 1792117437000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "ja-demo-006",
+      "type": "web",
+      "text": "IndexedDB はブラウザー内に大量の構造化データを保存するための高機能なクライアントサイドストレージAPIです。インデックスを利用して高速な検索が可能です。",
+      "clipText": "IndexedDB はブラウザー内に大量の構造化データを保存するための高機能なクライアントサイドストレージAPIです。インデックスを利用して高速な検索が可能です。",
+      "createdAt": 1792056237000,
+      "updatedAt": 1792056237000,
+      "spaceId": "tech",
+      "url": "https://developer.mozilla.org/ja/docs/Web/API/IndexedDB_API",
+      "domain": "developer.mozilla.org",
+      "title": "IndexedDB API の基礎と実践 - MDN",
+      "pageTitle": "IndexedDB API の基礎と実践 - MDN"
+    },
+    {
+      "id": "ja-demo-007",
+      "type": "note",
+      "text": "設計方針：ローカルファースト。データはユーザーの手元に常に保管され、オフラインでも完全に動作することを最優先とする。",
+      "clipText": "設計方針：ローカルファースト。データはユーザーの手元に常に保管され、オフラインでも完全に動作することを最優先とする。",
+      "createdAt": 1792045437000,
+      "updatedAt": 1792045437000,
+      "spaceId": "work"
+    },
+    {
+      "id": "ja-demo-008",
+      "type": "web",
+      "text": "プログラムは人が読むために書かれるべきであり、計算機が実行することは副次的なものにすぎない。 - ハル・アベルソン",
+      "clipText": "プログラムは人が読むために書かれるべきであり、計算機が実行することは副次的なものにすぎない。 - ハル・アベルソン",
+      "createdAt": 1792034637000,
+      "updatedAt": 1792034637000,
+      "spaceId": "reading",
+      "url": "https://mitpress.mit.edu/sicp",
+      "domain": "mitpress.mit.edu",
+      "title": "計算機プログラムの構造と解釈 (SICP)",
+      "pageTitle": "計算機プログラムの構造と解釈 (SICP)"
+    },
+    {
+      "id": "ja-demo-009",
+      "type": "note",
+      "text": "CSS小技：文字サイズはremベースで統一し、ユーザーのブラウザフォント拡大設定を尊重する。幅による急激なフォント変更は避ける。",
+      "clipText": "CSS小技：文字サイズはremベースで統一し、ユーザーのブラウザフォント拡大設定を尊重する。幅による急激なフォント変更は避ける。",
+      "createdAt": 1791966237000,
+      "updatedAt": 1791966237000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "ja-demo-010",
+      "type": "web",
+      "text": "ひとつのことをうまくやるプログラムを書け。協調して動くプログラムを書け。テキスト形式を標準的なインターフェースとして扱え。",
+      "clipText": "ひとつのことをうまくやるプログラムを書け。協調して動くプログラムを書け。テキスト形式を標準的なインターフェースとして扱え。",
+      "createdAt": 1791951837000,
+      "updatedAt": 1791951837000,
+      "spaceId": "ideas",
+      "url": "https://ja.wikipedia.org/wiki/UNIX%E5%93%B2%E5%AD%A6",
+      "domain": "wikipedia.org",
+      "title": "Unix 哲学：シンプルで堅牢なソフトウェアの原則",
+      "pageTitle": "Unix 哲学：シンプルで堅牢なソフトウェアの原則"
+    },
+    {
+      "id": "ja-demo-011",
+      "type": "note",
+      "text": "ツェッテルカステンの真髄は「1つのノートに1つの思考（アトミック性）」を持たせること。自分の言葉で再構築して既存の知見と結びつける。",
+      "clipText": "ツェッテルカステンの真髄は「1つのノートに1つの思考（アトミック性）」を持たせること。自分の言葉で再構築して既存の知見と結びつける。",
+      "createdAt": 1791876237000,
+      "updatedAt": 1791876237000,
+      "spaceId": "reading"
+    },
+    {
+      "id": "ja-demo-012",
+      "type": "web",
+      "text": "ETag や If-None-Match ヘッダーを使用することで、複数端末間での競合を検知し、誤ったデータ上書きを防ぐことができます。",
+      "clipText": "ETag や If-None-Match ヘッダーを使用することで、複数端末間での競合を検知し、誤ったデータ上書きを防ぐことができます。",
+      "createdAt": 1791786237000,
+      "updatedAt": 1791786237000,
+      "spaceId": "work",
+      "url": "https://datatracker.ietf.org/doc/html/rfc4918",
+      "domain": "datatracker.ietf.org",
+      "title": "WebDAV 共有と条件付き更新 (RFC 4918)",
+      "pageTitle": "WebDAV 共有と条件付き更新 (RFC 4918)"
+    },
+    {
+      "id": "ja-demo-013",
+      "type": "note",
+      "text": "UIアニメーション：わずか4pxの浮き上がりとソフトな拡大（1〜2%）により、控えめでありながら操作に対する心地よい手応えが生まれる。",
+      "clipText": "UIアニメーション：わずか4pxの浮き上がりとソフトな拡大（1〜2%）により、控えめでありながら操作に対する心地よい手応えが生まれる。",
+      "createdAt": 1791696237000,
+      "updatedAt": 1791696237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "ja-demo-014",
+      "type": "web",
+      "text": "良いデザインの最も重要な性質は「発見可能性（アフォーダンス）」と「理解可能性」である。マニュアルを読まなくても使い方が直感的に伝わること。",
+      "clipText": "良いデザインの最も重要な性質は「発見可能性（アフォーダンス）」と「理解可能性」である。マニュアルを読まなくても使い方が直感的に伝わること。",
+      "createdAt": 1791620637000,
+      "updatedAt": 1791620637000,
+      "spaceId": "reading",
+      "url": "https://ja.wikipedia.org/wiki/%E8%AA%B0%E3%81%AE%E3%81%9f%E3%82%81%E3%81%AE%E3%83%87%E3%82%B6%E3%82%A4%E3%83%B3%EF%BC%9F",
+      "domain": "wikipedia.org",
+      "title": "誰のためのデザイン？ - ドナルド・ノーマン",
+      "pageTitle": "誰のためのデザイン？ - ドナルド・ノーマン"
+    },
+    {
+      "id": "ja-demo-015",
+      "type": "note",
+      "text": "セキュリティとプライバシー：不要な権限は要求しない。外部への通信はユーザーが明示的に設定した同期先（WebDAV / Google Drive）に限定する。",
+      "clipText": "セキュリティとプライバシー：不要な権限は要求しない。外部への通信はユーザーが明示的に設定した同期先（WebDAV / Google Drive）に限定する。",
+      "createdAt": 1791530637000,
+      "updatedAt": 1791530637000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "ja-demo-016",
+      "type": "note",
+      "text": "ひらめきはその場ですぐにメモする。整理や分類は後からで十分。記録の摩擦を極力なくすことが、良い習慣作りの第一歩。",
+      "clipText": "ひらめきはその場ですぐにメモする。整理や分類は後からで十分。記録の摩擦を極力なくすことが、良い習慣作りの第一歩。",
+      "createdAt": 1791714237000,
+      "updatedAt": 1791714237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "ja-demo-017",
+      "type": "web",
+      "text": "Manifest V3 は拡張機能のセキュリティ、プライバシー、パフォーマンスを向上させるための新しい仕様です。バックグラウンドページに代わり Service Worker が導入されました。",
+      "clipText": "Manifest V3 は拡張機能のセキュリティ、プライバシー、パフォーマンスを向上させるための新しい仕様です。バックグラウンドページに代わり Service Worker が導入されました。",
+      "createdAt": 1791708837000,
+      "updatedAt": 1791708837000,
+      "spaceId": "tech",
+      "url": "https://developer.chrome.com/docs/extensions/mv3/intro/",
+      "domain": "developer.chrome.com",
+      "title": "Chrome 拡張機能 Manifest V3 ガイド",
+      "pageTitle": "Chrome 拡張機能 Manifest V3 ガイド"
+    },
+    {
+      "id": "ja-demo-018",
+      "type": "note",
+      "text": "週次ふりかえり：リリース前の受け入れテスト完了。UIのレスポンシブ崩れなし、キーボードショートカット確認済み。",
+      "clipText": "週次ふりかえり：リリース前の受け入れテスト完了。UIのレスポンシブ崩れなし、キーボードショートカット確認済み。",
+      "createdAt": 1791701637000,
+      "updatedAt": 1791701637000,
+      "spaceId": "work"
+    },
+    {
+      "id": "ja-demo-019",
+      "type": "web",
+      "text": "良いデザインは革新的である。良いデザインは製品を有用にする。良いデザインは美しく、製品を分かりやすくする。良いデザインは主張せず、誠実である。",
+      "clipText": "良いデザインは革新的である。良いデザインは製品を有用にする。良いデザインは美しく、製品を分かりやすくする。良いデザインは主張せず、誠実である。",
+      "createdAt": 1791692637000,
+      "updatedAt": 1791692637000,
+      "spaceId": "reading",
+      "url": "https://vitsoe.com/jp/about/good-design",
+      "domain": "vitsoe.com",
+      "title": "良いデザインの10原則 - ディーター・ラムス",
+      "pageTitle": "良いデザインの10原則 - ディーター・ラムス"
+    },
+    {
+      "id": "ja-demo-020",
+      "type": "note",
+      "text": "ミニマリズムの本質：不要なものを削ぎ落とすことで、本当に大切な機能やテキストが自然と際立つようになる。",
+      "clipText": "ミニマリズムの本質：不要なものを削ぎ落とすことで、本当に大切な機能やテキストが自然と際立つようになる。",
+      "createdAt": 1791685437000,
+      "updatedAt": 1791685437000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "ja-demo-021",
+      "type": "web",
+      "text": "IndexedDB はブラウザー内に大量の構造化データを保存するための高機能なクライアントサイドストレージAPIです。インデックスを利用して高速な検索が可能です。",
+      "clipText": "IndexedDB はブラウザー内に大量の構造化データを保存するための高機能なクライアントサイドストレージAPIです。インデックスを利用して高速な検索が可能です。",
+      "createdAt": 1791624237000,
+      "updatedAt": 1791624237000,
+      "spaceId": "tech",
+      "url": "https://developer.mozilla.org/ja/docs/Web/API/IndexedDB_API",
+      "domain": "developer.mozilla.org",
+      "title": "IndexedDB API の基礎と実践 - MDN",
+      "pageTitle": "IndexedDB API の基礎と実践 - MDN"
+    },
+    {
+      "id": "ja-demo-022",
+      "type": "note",
+      "text": "設計方針：ローカルファースト。データはユーザーの手元に常に保管され、オフラインでも完全に動作することを最優先とする。",
+      "clipText": "設計方針：ローカルファースト。データはユーザーの手元に常に保管され、オフラインでも完全に動作することを最優先とする。",
+      "createdAt": 1791613437000,
+      "updatedAt": 1791613437000,
+      "spaceId": "work"
+    },
+    {
+      "id": "ja-demo-023",
+      "type": "web",
+      "text": "プログラムは人が読むために書かれるべきであり、計算機が実行することは副次的なものにすぎない。 - ハル・アベルソン",
+      "clipText": "プログラムは人が読むために書かれるべきであり、計算機が実行することは副次的なものにすぎない。 - ハル・アベルソン",
+      "createdAt": 1791602637000,
+      "updatedAt": 1791602637000,
+      "spaceId": "reading",
+      "url": "https://mitpress.mit.edu/sicp",
+      "domain": "mitpress.mit.edu",
+      "title": "計算機プログラムの構造と解釈 (SICP)",
+      "pageTitle": "計算機プログラムの構造と解釈 (SICP)"
+    },
+    {
+      "id": "ja-demo-024",
+      "type": "note",
+      "text": "CSS小技：文字サイズはremベースで統一し、ユーザーのブラウザフォント拡大設定を尊重する。幅による急激なフォント変更は避ける。",
+      "clipText": "CSS小技：文字サイズはremベースで統一し、ユーザーのブラウザフォント拡大設定を尊重する。幅による急激なフォント変更は避ける。",
+      "createdAt": 1791534237000,
+      "updatedAt": 1791534237000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "ja-demo-025",
+      "type": "web",
+      "text": "ひとつのことをうまくやるプログラムを書け。協調して動くプログラムを書け。テキスト形式を標準的なインターフェースとして扱え。",
+      "clipText": "ひとつのことをうまくやるプログラムを書け。協調して動くプログラムを書け。テキスト形式を標準的なインターフェースとして扱え。",
+      "createdAt": 1791519837000,
+      "updatedAt": 1791519837000,
+      "spaceId": "ideas",
+      "url": "https://ja.wikipedia.org/wiki/UNIX%E5%93%B2%E5%AD%A6",
+      "domain": "wikipedia.org",
+      "title": "Unix 哲学：シンプルで堅牢なソフトウェアの原則",
+      "pageTitle": "Unix 哲学：シンプルで堅牢なソフトウェアの原則"
+    },
+    {
+      "id": "ja-demo-026",
+      "type": "note",
+      "text": "ツェッテルカステンの真髄は「1つのノートに1つの思考（アトミック性）」を持たせること。自分の言葉で再構築して既存の知見と結びつける。",
+      "clipText": "ツェッテルカステンの真髄は「1つのノートに1つの思考（アトミック性）」を持たせること。自分の言葉で再構築して既存の知見と結びつける。",
+      "createdAt": 1791444237000,
+      "updatedAt": 1791444237000,
+      "spaceId": "reading"
+    },
+    {
+      "id": "ja-demo-027",
+      "type": "web",
+      "text": "ETag や If-None-Match ヘッダーを使用することで、複数端末間での競合を検知し、誤ったデータ上書きを防ぐことができます。",
+      "clipText": "ETag や If-None-Match ヘッダーを使用することで、複数端末間での競合を検知し、誤ったデータ上書きを防ぐことができます。",
+      "createdAt": 1791354237000,
+      "updatedAt": 1791354237000,
+      "spaceId": "work",
+      "url": "https://datatracker.ietf.org/doc/html/rfc4918",
+      "domain": "datatracker.ietf.org",
+      "title": "WebDAV 共有と条件付き更新 (RFC 4918)",
+      "pageTitle": "WebDAV 共有と条件付き更新 (RFC 4918)"
+    },
+    {
+      "id": "ja-demo-028",
+      "type": "note",
+      "text": "UIアニメーション：わずか4pxの浮き上がりとソフトな拡大（1〜2%）により、控えめでありながら操作に対する心地よい手応えが生まれる。",
+      "clipText": "UIアニメーション：わずか4pxの浮き上がりとソフトな拡大（1〜2%）により、控えめでありながら操作に対する心地よい手応えが生まれる。",
+      "createdAt": 1791264237000,
+      "updatedAt": 1791264237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "ja-demo-029",
+      "type": "web",
+      "text": "良いデザインの最も重要な性質は「発見可能性（アフォーダンス）」と「理解可能性」である。マニュアルを読まなくても使い方が直感的に伝わること。",
+      "clipText": "良いデザインの最も重要な性質は「発見可能性（アフォーダンス）」と「理解可能性」である。マニュアルを読まなくても使い方が直感的に伝わること。",
+      "createdAt": 1791188637000,
+      "updatedAt": 1791188637000,
+      "spaceId": "reading",
+      "url": "https://ja.wikipedia.org/wiki/%E8%AA%B0%E3%81%AE%E3%81%9f%E3%82%81%E3%81%AE%E3%83%87%E3%82%B6%E3%82%A4%E3%83%B3%EF%BC%9F",
+      "domain": "wikipedia.org",
+      "title": "誰のためのデザイン？ - ドナルド・ノーマン",
+      "pageTitle": "誰のためのデザイン？ - ドナルド・ノーマン"
+    },
+    {
+      "id": "ja-demo-030",
+      "type": "note",
+      "text": "セキュリティとプライバシー：不要な権限は要求しない。外部への通信はユーザーが明示的に設定した同期先（WebDAV / Google Drive）に限定する。",
+      "clipText": "セキュリティとプライバシー：不要な権限は要求しない。外部への通信はユーザーが明示的に設定した同期先（WebDAV / Google Drive）に限定する。",
+      "createdAt": 1791098637000,
+      "updatedAt": 1791098637000,
+      "spaceId": "tech"
+    }
+  ],
+  "highlights": [],
+  "settings": {
+    "language": "ja",
+    "blockedSites": [],
+    "columnCount": 5,
+    "libraryGrouping": "all"
+  },
+  "spaces": [
+    {
+      "id": "work",
+      "name": "仕事・開発",
+      "updated_at": 1792149837000
+    },
+    {
+      "id": "reading",
+      "name": "読書メモ",
+      "updated_at": 1792149837000
+    },
+    {
+      "id": "ideas",
+      "name": "アイデア・着想",
+      "updated_at": 1792149837000
+    },
+    {
+      "id": "tech",
+      "name": "技術ノート",
+      "updated_at": 1792149837000
+    }
+  ]
+}

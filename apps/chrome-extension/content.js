@@ -6,37 +6,49 @@ class iSnipsContent {
     this.highlights = [];
     this.currentLanguage = 'en';
     this.translations = {};
+    this.registeredHighlights = new Set();
+    this.capturing = false;
+    this.preferenceRevision = 0;
+    this.clipboardEnabled = false;
+    this.clipboardCapture = new ClipboardCapture({
+      document, window,
+      enabled: () => !this.blocked && this.clipboardEnabled,
+      onCapture: data => chrome.runtime.sendMessage({ action: 'captureClipboard', data })
+    });
+    this.clipboardCapture.start();
     this.init();
   }
 
   async init() {
+    this.loadTranslations();
+    // Keep listening on disabled sites so enabling capture takes effect without a reload.
+    chrome.runtime.onMessage.addListener(this.handleMessage.bind(this));
+    await this.refreshPreferences();
+  }
 
+  async refreshPreferences() {
+    const revision = ++this.preferenceRevision;
+    this.clipboardEnabled = false;
+    const blocked = await this.checkIfSiteBlocked();
+    if (revision !== this.preferenceRevision) return;
+    this.blocked = blocked;
+    this.clearHighlights();
+    if (blocked) return;
     try {
-      // Check if site is blocked
-      const isBlocked = await this.checkIfSiteBlocked();
+      const capture = await chrome.runtime.sendMessage({ action: 'getSetting', key: 'clipboardCaptureEnabled', defaultValue: false });
+      if (revision !== this.preferenceRevision) return;
+      this.clipboardEnabled = capture?.success && capture.value === true;
+      const result = await chrome.runtime.sendMessage({ action: 'getSetting', key: 'language', defaultValue: 'en' });
+      this.currentLanguage = result?.success ? result.value : 'en';
+      await this.loadHighlights(revision);
+    } catch { /* The next capture retries preferences. */ }
+  }
 
-      if (isBlocked) {
-        return;
-      }
-
-      // Register first so capture still works if the settings lookups below fail
-      this.loadTranslations();
-      chrome.runtime.onMessage.addListener(this.handleMessage.bind(this));
-
-      // Get language setting
-      const langResult = await chrome.runtime.sendMessage({
-        action: 'getSetting',
-        key: 'language',
-        defaultValue: 'en'
-      });
-      this.currentLanguage = langResult && langResult.success && langResult.value ? langResult.value : 'en';
-
-      // Load existing highlights for this page
-      await this.loadHighlights();
-
-    } catch (error) {
-      console.error('iSnips: Failed to initialize content script:', error);
-    }
+  clearHighlights() {
+    for (const name of this.registeredHighlights) CSS.highlights?.delete(name);
+    this.registeredHighlights.clear();
+    this.highlights = [];
+    document.getElementById('isnips-highlight-styles')?.remove();
   }
 
   async checkIfSiteBlocked() {
@@ -50,14 +62,15 @@ class iSnipsContent {
 
       if (!result || typeof result !== 'object') {
         console.warn('Invalid response from getSetting:', result);
-        return false;
+        return true;
       }
 
-      const blockedSites = result.success ? result.value : [];
-      return Array.isArray(blockedSites) && blockedSites.includes(domain);
+      if (!result.success) return true;
+      const blockedSites = result.value;
+      return Array.isArray(blockedSites) && blockedSites.some(site => typeof site === 'string' && (domain === site.toLowerCase() || domain.endsWith('.' + site.toLowerCase())));
     } catch (error) {
       console.error('Failed to check if site is blocked:', error);
-      return false;
+      return true;
     }
   }
 
@@ -93,19 +106,20 @@ class iSnipsContent {
   }
 
   async handleCapture() {
+    if (this.capturing) return;
+    this.capturing = true;
     const selectedText = this.getSelectedText();
-
-    if (selectedText && selectedText.trim().length > 0) {
-      const text = selectedText.trim();
-      const selection = window.getSelection();
-      const selectedRange = selection && selection.rangeCount ? selection.getRangeAt(0).cloneRange() : null;
-      if (await this.saveClip(text)) {
-        this.highlightSelection(text, selectedRange);
+    const selection = window.getSelection();
+    const selectedRange = selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : null;
+    try {
+      if (await this.checkIfSiteBlocked()) { this.clearHighlights(); return; }
+      if (selectedText) {
+        if (await this.saveClip(selectedText)) this.highlightSelection(selectedText, selectedRange);
+      } else {
+        const t = this.translations[this.currentLanguage] || this.translations.en;
+        this.showToast(t.no_text_selected, false);
       }
-    } else {
-      const t = this.translations[this.currentLanguage] || this.translations['en'];
-      this.showToast(t.no_text_selected || 'No text selected', false);
-    }
+    } finally { this.capturing = false; }
   }
 
   getSelectedText() {
@@ -150,7 +164,7 @@ class iSnipsContent {
 
   highlightSelection(text, savedRange = null) {
     const selection = window.getSelection();
-    if (!savedRange && !selection.rangeCount) return;
+    if (!savedRange && !selection?.rangeCount) return;
 
     // Check if CSS Custom Highlight API is supported
     if (!CSS.highlights) {
@@ -172,6 +186,7 @@ class iSnipsContent {
     // Create a new Highlight object and register it
     const highlight = new Highlight(range);
     CSS.highlights.set(`isnips-highlight-${highlightId}`, highlight);
+    this.registeredHighlights.add(`isnips-highlight-${highlightId}`);
 
     // Store highlight info for persistence (range info for potential restoration)
     this.highlights.push({
@@ -243,13 +258,14 @@ class iSnipsContent {
     }
   }
 
-  async loadHighlights() {
+  async loadHighlights(revision = this.preferenceRevision) {
     try {
       const result = await chrome.runtime.sendMessage({
         action: 'getHighlightsForUrl',
         url: window.location.href
       });
 
+      if (revision !== this.preferenceRevision || this.blocked) return;
       if (result && result.success && result.highlights && result.highlights.length) {
         // Walk the document once for all highlights instead of once per highlight
         const index = this.buildTextIndex();
@@ -282,7 +298,7 @@ class iSnipsContent {
 
   restoreHighlight(highlight, index = this.buildTextIndex()) {
     // Check if CSS Custom Highlight API is supported
-    if (!CSS.highlights) {
+    if (!CSS.highlights || typeof highlight.id !== 'string' || !/^[a-zA-Z0-9_-]{1,100}$/.test(highlight.id)) {
       return;
     }
 
@@ -323,6 +339,7 @@ class iSnipsContent {
     range.setEnd(last.node, end - last.start);
     this.addHighlightStyleRule(highlight.id);
     CSS.highlights.set(`isnips-highlight-${highlight.id}`, new Highlight(range));
+    this.registeredHighlights.add(`isnips-highlight-${highlight.id}`);
   }
 
   async storeHighlight(highlight) {
@@ -378,8 +395,11 @@ class iSnipsContent {
   }
 
   handleMessage(message, sender, sendResponse) {
+    if (sender.id !== chrome.runtime.id) return;
     if (message.action === 'captureSnippet') {
-      this.handleCapture();
+      void this.handleCapture();
+    } else if (message.action === 'capturePreferencesChanged') {
+      void this.refreshPreferences();
     }
   }
 }

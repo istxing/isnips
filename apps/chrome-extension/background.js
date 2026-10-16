@@ -1,7 +1,7 @@
 // Background service worker for iSnips extension
 // Handles data storage and message routing
 // Import sync service
-importScripts('sync.js');
+importScripts('google-auth-config.js', 'google-auth.js', 'sync.js', 'clipboard.js', 'library-data.js');
 
 const AUTO_CLEANUP_ALARM = 'autoCleanup';
 const AUTO_SYNC_ALARM = 'autoSync';
@@ -24,11 +24,30 @@ const SHADOW_SNIPPET_META_KEY = 'shadowSnippetMeta';
 const BACKUP_SNAPSHOT_PREFIX = 'backupSnapshot:';
 const BACKUP_SNAPSHOT_IDS_KEY = 'backupSnapshotIds';
 const BACKUP_SNAPSHOT_META_KEY = 'backupSnapshotMeta';
-const SAMPLE_SNIPPET_IDS = ['sample-welcome', 'sample-note'];
-const SAMPLE_SNIPPET_TIME = Date.UTC(2026, 0, 1);
 // Only plain preferences may come from an imported file. Sync settings (server URL,
 // credentials, ETag) and the extension's own storage keys must never be set from a file.
-const IMPORTABLE_SETTINGS = new Set(['language', 'appearance', 'columnCount', 'blockedSites', 'recentTags']);
+const IMPORTABLE_SETTINGS = new Set(['language', 'appearance', 'columnCount', 'libraryGrouping', 'blockedSites', 'recentTags']);
+const CLIPBOARD_CONSENT_VERSION = 1;
+
+async function clipboardConsentStatus(db) {
+  const consent = await db.getSetting('clipboardCaptureConsent', null);
+  const preference = await db.getSetting('clipboardCaptureEnabled', true);
+  const known = consent?.version === CLIPBOARD_CONSENT_VERSION && ['accepted', 'declined'].includes(consent.choice);
+  const accepted = known && consent.choice === 'accepted';
+  return {
+    success: true,
+    enabled: accepted && preference === true,
+    consentRequired: !accepted,
+    needsNotice: !known && preference !== false,
+  };
+}
+
+// Older backups may request two columns; adapt that preference to the new minimum.
+function normalizeColumnCountSetting(value) {
+  if (typeof value !== 'number' && !(typeof value === 'string' && value.trim())) return null;
+  const count = Number(value);
+  return Number.isInteger(count) && count >= 2 && count <= 7 ? Math.max(3, count) : null;
+}
 
 if (chrome.storage?.local?.setAccessLevel) {
   chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' }).catch((error) => {
@@ -136,6 +155,11 @@ function chromeStorageLocalRemove(keys) {
   });
 }
 
+const googleDriveAuth = new GoogleDriveAuth({ chrome, clientId: ISNIPS_GOOGLE_AUTH.webClientId });
+syncService.setGoogleAuth(googleDriveAuth);
+
+const clipboardHistory = new ClipboardHistory({ get: chromeStorageLocalGet, set: chromeStorageLocalSet });
+
 async function requestPersistentStorage(reason = 'background') {
   if (typeof navigator === 'undefined' || !navigator.storage || typeof navigator.storage.persist !== 'function') {
     return { supported: false, persisted: null, granted: false };
@@ -194,6 +218,7 @@ class iSnipsDatabase {
     this.dbName = 'iSnipsIndexDB';
     this.dbVersion = 5;
     this.initialized = false;
+    this.shadowQueue = Promise.resolve();
   }
 
   async initialize() {
@@ -249,81 +274,10 @@ class iSnipsDatabase {
     });
   }
 
-  // Generate localized sample data for first-time users
-  getSampleData(lang) {
-    const now = Date.now();
-    const samples = {
-      'zh-CN': [
-        {
-          url: 'https://isnips.app/welcome',
-          type: 'web',
-          text: '欢迎使用 iSnips！在网页上选中文字，右键或按 Alt+C 即可存为“摘录”。',
-          domain: 'isnips.app',
-          title: '入门指南',
-          created_at: now - 86400000,
-          updated_at: now - 86400000
-        },
-        {
-          url: null,
-          type: 'note',
-          text: '这是您的第一条“闪记”。您可以随时在下方记录脑海中闪现的灵感。',
-          domain: null,
-          created_at: now - 3600000,
-          updated_at: now - 3600000
-        }
-      ],
-      'en': [
-        {
-          url: 'https://isnips.app/welcome',
-          type: 'web',
-          text: 'Welcome to iSnips! Select text on any page, right-click or press Alt+C to save it as a "Clip".',
-          domain: 'isnips.app',
-          title: 'Getting Started',
-          created_at: now - 86400000,
-          updated_at: now - 86400000
-        },
-        {
-          url: null,
-          type: 'note',
-          text: 'This is your first "Flash Note". You can record your quick thoughts and inspirations below anytime.',
-          domain: null,
-          created_at: now - 3600000,
-          updated_at: now - 3600000
-        }
-      ],
-      'ja': [
-        {
-          url: 'https://isnips.app/welcome',
-          type: 'web',
-          text: 'iSnips へようこそ！テキストを選択して右クリック、または Alt+C で「摘録」として保存できます。',
-          domain: 'isnips.app',
-          title: 'スタートガイド',
-          created_at: now - 86400000,
-          updated_at: now - 86400000
-        },
-        {
-          url: null,
-          type: 'note',
-          text: 'これは最初の「閃記」です。下の入力欄から、いつでもアイデアを素早くメモできます。',
-          domain: null,
-          created_at: now - 3600000,
-          updated_at: now - 3600000
-        }
-      ]
-    };
-
-    // Fixed ids and an old fixed timestamp make the samples identical on every device, so
-    // syncing merges them into one copy and any real edit or delete always wins.
-    return (samples[lang] || samples['en']).map((sample, index) => ({
-      ...sample,
-      id: SAMPLE_SNIPPET_IDS[index],
-      created_at: SAMPLE_SNIPPET_TIME,
-      updated_at: SAMPLE_SNIPPET_TIME
-    }));
-  }
-
   // Snippets operations
   async saveSnippet(snippetData) {
+    if (snippetData?.spaceId != null) await this.validateSpace(snippetData.spaceId);
+    if (!snippetData || typeof snippetData.text !== 'string' || !snippetData.text.trim()) throw new Error('A record needs text');
     const db = await this.initialize();
     const snippet = {
       id: this.generateId(),
@@ -380,6 +334,18 @@ class iSnipsDatabase {
     });
   }
 
+  async getSyncData() {
+    const db = await this.initialize();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(['snippets', 'spaces'], 'readonly');
+      let snippets = [], spaces = [];
+      transaction.objectStore('snippets').getAll().onsuccess = event => { snippets = event.target.result || []; };
+      transaction.objectStore('spaces').getAll().onsuccess = event => { spaces = event.target.result || []; };
+      transaction.oncomplete = () => resolve({ snippets, spaces });
+      transaction.onerror = transaction.onabort = () => reject(transaction.error || new Error('Sync snapshot failed'));
+    });
+  }
+
   async getAllSnippetsIncludingDeleted() {
     const db = await this.initialize();
     return new Promise((resolve, reject) => {
@@ -398,6 +364,8 @@ class iSnipsDatabase {
   }
 
   async updateSnippet(snippetId, updates) {
+    if (updates?.spaceId != null) await this.validateSpace(updates.spaceId);
+    if (!updates || (updates.text !== undefined && (typeof updates.text !== 'string' || !updates.text.trim()))) throw new Error('A record needs text');
     const db = await this.initialize();
     const result = await new Promise((resolve, reject) => {
       const transaction = db.transaction(['snippets'], 'readwrite');
@@ -412,7 +380,7 @@ class iSnipsDatabase {
       getRequest.onsuccess = () => {
         const snippet = getRequest.result;
         if (snippet) {
-          updatedSnippet = { ...snippet, ...updates, updated_at: Date.now() };
+          updatedSnippet = { ...snippet, ...updates, id: snippet.id, created_at: snippet.created_at, updated_at: Math.max(Date.now(), (Number(snippet.updated_at) || 0) + 1) };
           const putRequest = store.put(updatedSnippet);
 
           putRequest.onerror = () => {
@@ -602,25 +570,28 @@ class iSnipsDatabase {
 
   // Spaces operations
   async createSpace(spaceData) {
-    const db = await this.initialize();
-    const space = {
-      id: spaceData.id || this.generateId(),
-      name: spaceData.name,
-      createdAt: Date.now(),
-      order: spaceData.order || 0
-    };
+    return this.writeSpace(spaceData?.id || this.generateId(), spaceData, true);
+  }
 
+  async writeSpace(spaceId, updates, create = false) {
+    const name = typeof updates?.name === 'string' ? updates.name.trim() : '';
+    if (!name || name.length > 40 || /[\u0000-\u001f\u007f]/.test(name)) throw new Error('Use a folder name of 1–40 characters');
+    if (spaceId === 'inbox') throw new Error('Cannot change Inbox');
+    const db = await this.initialize();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(['spaces'], 'readwrite');
       const store = transaction.objectStore('spaces');
-      const request = store.add(space);
-
+      let space;
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({ success: true, space }));
+      const request = store.getAll();
       request.onsuccess = () => {
-        resolve({ success: true, space });
-      };
-
-      request.onerror = () => {
-        reject({ success: false, error: request.error });
+        const all = request.result || [];
+        if (all.some(item => !item.deleted_at && item.id !== spaceId && String(item.name).trim().toLowerCase() === name.toLowerCase())) { rejectOnce('Folder name already exists'); transaction.abort(); return; }
+        const existing = all.find(item => item.id === spaceId);
+        if (create && existing) { rejectOnce('Folder already exists'); transaction.abort(); return; }
+        if (!create && (!existing || existing.deleted_at)) { rejectOnce('Folder not found'); transaction.abort(); return; }
+        space = { ...(existing || {}), id: spaceId, name, createdAt: existing?.createdAt ?? Date.now(), order: existing?.order ?? all.length, updated_at: Math.max(Date.now(), spaceRevision(existing) + 1), deleted_at: null };
+        store.put(space);
       };
     });
   }
@@ -633,7 +604,7 @@ class iSnipsDatabase {
       const request = store.getAll();
 
       request.onsuccess = () => {
-        let spaces = request.result;
+        let spaces = (request.result || []).filter(space => !space.deleted_at);
         // Sort by order, then by created date
         spaces.sort((a, b) => (a.order - b.order) || (a.createdAt - b.createdAt));
 
@@ -676,87 +647,51 @@ class iSnipsDatabase {
   }
 
   async updateSpace(spaceId, updates) {
-    const db = await this.initialize();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(['spaces'], 'readwrite');
-      const store = transaction.objectStore('spaces');
-      const getRequest = store.get(spaceId);
+    return this.writeSpace(spaceId, updates);
+  }
 
-      getRequest.onsuccess = () => {
-        const space = getRequest.result;
-        if (space) {
-          const updatedSpace = { ...space, ...updates };
-          const putRequest = store.put(updatedSpace);
+  async validateSpace(spaceId) {
+    if (typeof spaceId !== 'string' || (spaceId !== 'inbox' && !(await this.getStoredSpaces()).some(space => space.id === spaceId && !space.deleted_at))) throw new Error('Folder not found');
+  }
 
-          putRequest.onsuccess = () => {
-            resolve({ success: true, space: updatedSpace });
-          };
-
-          putRequest.onerror = () => {
-            reject({ success: false, error: putRequest.error });
-          };
-        } else {
-          reject({ success: false, error: 'Space not found' });
-        }
-      };
-
-      getRequest.onerror = () => {
-        reject({ success: false, error: getRequest.error });
-      };
-    });
+  async moveSnippet(snippetId, spaceId) {
+    if (typeof spaceId !== 'string') throw new Error('Invalid folder');
+    if (spaceId !== 'inbox' && !(await this.getStoredSpaces()).some(space => space.id === spaceId && !space.deleted_at)) throw new Error('Folder not found');
+    const snippet = await this.getSnippetById(snippetId);
+    if (!snippet || snippet.deleted_at || snippet.purged_at) throw new Error('Record not found');
+    return this.updateSnippet(snippetId, { spaceId });
   }
 
   async deleteSpace(spaceId) {
-    // Don't allow deleting inbox
-    if (spaceId === 'inbox') {
-      return Promise.reject({ success: false, error: 'Cannot delete Inbox' });
-    }
-
-    const db = await this.initialize();
+    if (spaceId === 'inbox') throw new Error('Cannot delete Inbox');
+    const db = await this.initialize(), movedIds = [];
     const result = await new Promise((resolve, reject) => {
       const transaction = db.transaction(['spaces', 'snippets'], 'readwrite');
-      const spacesStore = transaction.objectStore('spaces');
-      const snippetsStore = transaction.objectStore('snippets');
-      const cardsRequest = snippetsStore.getAll();
-
-      cardsRequest.onsuccess = () => {
-        const cards = cardsRequest.result || [];
-        const updatePromises = cards
-          .filter(card => card.spaceId === spaceId)
-          .map(card => {
-            return new Promise((res, rej) => {
-              const updateRequest = snippetsStore.put({ ...card, spaceId: 'inbox', updated_at: Date.now() });
-              updateRequest.onsuccess = () => res();
-              updateRequest.onerror = () => rej(updateRequest.error);
-            });
-          });
-
-        Promise.all(updatePromises).then(() => {
-          const deleteRequest = spacesStore.delete(spaceId);
-          deleteRequest.onsuccess = () => {
-            resolve({ success: true, movedCards: updatePromises.length });
-          };
-          deleteRequest.onerror = () => {
-            reject({ success: false, error: deleteRequest.error });
-          };
-        }).catch(error => {
-          reject({ success: false, error });
-        });
-      };
-
-      cardsRequest.onerror = () => {
-        reject({ success: false, error: cardsRequest.error });
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => ({ success: true, movedCards: movedIds.length }));
+      const spaces = transaction.objectStore('spaces');
+      const exists = spaces.get(spaceId);
+      exists.onsuccess = () => {
+        if (!exists.result || exists.result.deleted_at) { rejectOnce('Folder not found'); transaction.abort(); return; }
+        const request = transaction.objectStore('snippets').openCursor();
+        request.onsuccess = () => {
+          const cursor = request.result;
+          if (!cursor) { const deletedAt = Math.max(Date.now(), spaceRevision(exists.result) + 1); spaces.put({ ...exists.result, updated_at: deletedAt, deleted_at: deletedAt }); return; }
+          if (cursor.value.spaceId === spaceId) {
+            cursor.update({ ...cursor.value, spaceId: 'inbox' });
+            movedIds.push(cursor.primaryKey);
+          }
+          cursor.continue();
+        };
       };
     });
-
-    if (result?.success && result.movedCards > 0) {
-      await this.runShadowSnippetTask('deleteSpace', () => this.syncShadowSnippets());
+    // Mirror affected records in bounded batches rather than materializing every body.
+    for (let offset = 0; offset < movedIds.length; offset += 30) {
+      const cards = await Promise.all(movedIds.slice(offset, offset + 30).map(id => this.getSnippetById(id)));
+      await this.runShadowSnippetTask('deleteSpace', () => this.upsertShadowSnippets(cards.filter(Boolean)));
     }
-
     return result;
   }
 
-  // Highlights operations
   async storeHighlight(highlight) {
     const db = await this.initialize();
     return new Promise((resolve, reject) => {
@@ -906,6 +841,9 @@ class iSnipsDatabase {
       const text = item.text ?? item.clipText ?? item.title;
       if (typeof text !== 'string') throw new Error('Invalid snippet text in backup');
       const created = Number(item.created_at ?? item.createdAt) || Date.now();
+      for (const value of [created, item.updated_at ?? item.updatedAt, item.deleted_at ?? item.deletedAt, item.purged_at]) {
+        if (value != null && (!Number.isFinite(Number(value)) || Number(value) < 0)) throw new Error('Invalid record date in backup');
+      }
       return {
         ...item,
         id: typeof item.id === 'string' && item.id ? item.id : this.generateId(),
@@ -918,33 +856,36 @@ class iSnipsDatabase {
       };
     });
     const highlights = Array.isArray(bundle.highlights) ? bundle.highlights : [];
-    const spaces = Array.isArray(bundle.spaces) ? bundle.spaces : [];
+    const spaces = Array.isArray(bundle.spaces) ? bundle.spaces.map(normalizeSyncSpace) : [];
     const settings = bundle.settings && typeof bundle.settings === 'object' && !Array.isArray(bundle.settings)
-      ? Object.entries(bundle.settings).filter(([key]) => IMPORTABLE_SETTINGS.has(key))
+      // Legacy settings.js exported unset language/blockedSites as null. Treat
+      // absent preferences as omitted, preserving the current local preference.
+      ? Object.entries(bundle.settings).filter(([key, value]) => IMPORTABLE_SETTINGS.has(key) && value != null).map(([key, value]) => [key, key === 'columnCount' ? normalizeColumnCountSetting(value) : value])
       : [];
+    for (const [key, value] of settings) {
+      const valid = key === 'language' ? ['en', 'zh-CN', 'ja'].includes(value)
+        : key === 'appearance' ? ['auto', 'light', 'dark'].includes(value)
+        : key === 'columnCount' ? Number.isInteger(value) && value >= 3 && value <= 7
+        : key === 'libraryGrouping' ? ['day', 'week', 'month', 'all'].includes(value)
+        : Array.isArray(value) && value.every(item => typeof item === 'string');
+      if (!valid) throw new Error('Invalid preference in backup: ' + key);
+    }
     for (const highlight of highlights) {
-      if (!highlight || !highlight.id || typeof highlight.text !== 'string' || typeof highlight.url !== 'string') {
+      if (!highlight || !highlight.id || typeof highlight.id !== 'string' || typeof highlight.text !== 'string' || typeof highlight.url !== 'string') {
         throw new Error('Invalid highlight in backup');
       }
     }
     for (const space of spaces) {
-      if (!space || !space.id || typeof space.name !== 'string') throw new Error('Invalid space in backup');
+      if (!space || typeof space.id !== 'string' || !space.id || typeof space.name !== 'string') throw new Error('Invalid space in backup');
     }
     const db = await this.initialize();
-    // Keep the newer copy when an ID exists on both sides, like sync does, so importing an
-    // older backup cannot overwrite newer local edits or revive items trashed since.
-    const localById = new Map((await this.getAllSnippetsIncludingDeleted()).map((item) => [item.id, item]));
-    const snippetsToWrite = snippets.filter((item) => {
-      const local = localById.get(item.id);
-      return !local || (item.updated_at ?? 0) >= (local.updated_at ?? 0);
-    });
+    let importedCount = 0;
     await new Promise((resolve, reject) => {
       const transaction = db.transaction(['snippets', 'highlights', 'spaces', 'settings'], 'readwrite');
       const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => undefined);
       try {
-        snippetsToWrite.forEach((item) => transaction.objectStore('snippets').put(item));
+        upsertSyncData(transaction, snippets, spaces, () => { importedCount++; });
         highlights.forEach((item) => transaction.objectStore('highlights').put(item));
-        spaces.forEach((item) => transaction.objectStore('spaces').put(item));
         settings.forEach(([key, value]) => transaction.objectStore('settings').put({ key, value }));
       } catch (error) {
         transaction.abort();
@@ -959,7 +900,7 @@ class iSnipsDatabase {
       }
     }
     await this.runShadowSnippetTask('importData', () => this.syncShadowSnippets());
-    return { success: true, importedCount: snippetsToWrite.length, highlightCount: highlights.length, spaceCount: spaces.length };
+    return { success: true, importedCount, highlightCount: highlights.length, spaceCount: spaces.length };
   }
 
   async clearAllData() {
@@ -974,11 +915,17 @@ class iSnipsDatabase {
         rejectOnce(error, 'Failed to clear data');
       }
     });
+    await this.shadowQueue;
     await chrome.storage.local.clear();
     return { success: true };
   }
 
   async setSetting(key, value) {
+    if (key === 'clipboardCaptureEnabled' && typeof value !== 'boolean') throw new Error('Invalid clipboard preference');
+    if (key === 'columnCount') {
+      value = normalizeColumnCountSetting(value);
+      if (value == null) throw new Error('Choose 3 to 7 columns');
+    }
     const db = await this.initialize();
 
     // Update IndexedDB
@@ -1013,13 +960,31 @@ class iSnipsDatabase {
     return { success: true };
   }
 
+  async setClipboardConsent(choice) {
+    if (!['accepted', 'declined'].includes(choice)) throw new Error('Invalid clipboard choice');
+    const db = await this.initialize();
+    const values = {
+      clipboardCaptureConsent: { version: CLIPBOARD_CONSENT_VERSION, choice, decidedAt: Date.now() },
+      clipboardCaptureEnabled: choice === 'accepted',
+    };
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction('settings', 'readwrite');
+      const { rejectOnce } = bindWriteTransaction(transaction, resolve, reject, () => undefined);
+      for (const [key, value] of Object.entries(values)) {
+        const request = transaction.objectStore('settings').put({ key, value });
+        request.onerror = () => rejectOnce(request.error, 'Could not save clipboard choice');
+      }
+    });
+    await chromeStorageLocalSet(values);
+    return clipboardConsentStatus(this);
+  }
+
   async runShadowSnippetTask(label, executor) {
-    try {
-      return await executor();
-    } catch (error) {
+    this.shadowQueue = this.shadowQueue.then(executor).catch(error => {
       console.warn(`Shadow snippet mirror failed during ${label}:`, error);
       return { success: false, error: normalizeTransactionError(error, 'Shadow snippet mirror failed') };
-    }
+    });
+    return this.shadowQueue;
   }
 
   async upsertShadowSnippets(snippets) {
@@ -1132,6 +1097,15 @@ class iSnipsDatabase {
 let dbPromise = null;
 let syncInFlight = null;
 let backupInFlight = null;
+let maintenanceInFlight = null;
+async function withDataMaintenance(task) {
+  if (maintenanceInFlight) throw new Error('Data operation in progress. Try again shortly.');
+  maintenanceInFlight = (async () => {
+    await Promise.allSettled([syncInFlight, backupInFlight].filter(Boolean));
+    return task();
+  })();
+  try { return await maintenanceInFlight; } finally { maintenanceInFlight = null; }
+}
 
 function isSupportedSyncType(type) {
   return type === 'webdav' || type === 'googledrive';
@@ -1150,13 +1124,14 @@ function getAutoBackupRetention(config = {}) {
 }
 
 function clearAlarm(name) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (!chrome.alarms) {
       resolve(false);
       return;
     }
 
     chrome.alarms.clear(name, (wasCleared) => {
+      if (chrome.runtime.lastError) { reject(new Error(chrome.runtime.lastError.message)); return; }
       resolve(Boolean(wasCleared));
     });
   });
@@ -1169,7 +1144,7 @@ async function ensureAlarm(name, delayInMinutes, periodInMinutes) {
   if (existing && existing.periodInMinutes === periodInMinutes) {
     return;
   }
-  chrome.alarms.create(name, { delayInMinutes, periodInMinutes });
+  await chrome.alarms.create(name, { delayInMinutes, periodInMinutes });
 }
 
 function ensureAutoCleanupAlarm() {
@@ -1250,11 +1225,8 @@ async function buildBackupBundle(db, source = 'manual') {
     db.getStoredSpaces()
   ]);
 
-  // Credentials and sync state must not leak into snapshots or exported files.
-  if (settings.syncConfig && typeof settings.syncConfig === 'object') {
-    const { username, password, last_remote_etag, ...safeSyncConfig } = settings.syncConfig;
-    settings.syncConfig = safeSyncConfig;
-  }
+  // Never export sync endpoints, credentials, tokens or internal mirror state.
+  const portableSettings = Object.fromEntries(Object.entries(settings).filter(([key]) => IMPORTABLE_SETTINGS.has(key)));
 
   return {
     version: '3.1.0',
@@ -1262,7 +1234,7 @@ async function buildBackupBundle(db, source = 'manual') {
     source,
     snippets,
     highlights,
-    settings,
+    settings: portableSettings,
     spaces
   };
 }
@@ -1351,7 +1323,8 @@ async function restoreBackupSnapshot(snapshotId) {
   };
 }
 
-async function performSync(requestedType = null, source = 'manual') {
+async function performSync(requestedType = null, source = 'manual', options = {}) {
+  if (maintenanceInFlight) return { success: false, error: 'Data operation in progress. Try again shortly.' };
   if (syncInFlight) {
     return syncInFlight;
   }
@@ -1375,7 +1348,7 @@ async function performSync(requestedType = null, source = 'manual') {
 
     const result = type === 'webdav'
       ? await syncService.syncWebDAV(syncConfig)
-      : await syncService.syncGoogleDrive({ interactive: source !== 'auto' });
+      : await syncService.syncGoogleDrive({ interactive: source !== 'auto', allowCreate: source !== 'auto' && options.allowCreate === true });
 
     if (!result.success) {
       return result;
@@ -1400,6 +1373,7 @@ async function performSync(requestedType = null, source = 'manual') {
 }
 
 async function performBackup(source = 'manual') {
+  if (maintenanceInFlight) return { success: false, error: 'Data operation in progress. Try again shortly.' };
   if (backupInFlight) {
     return backupInFlight;
   }
@@ -1411,6 +1385,8 @@ async function performBackup(source = 'manual') {
       autoSyncInterval: 'off',
       autoBackupInterval: 'off'
     });
+    // Ignore an already-dispatched alarm after the user has switched automatic backup off.
+    if (source === 'auto' && !getAutoBackupPeriod(syncConfig)) return { success: true, skipped: true };
     const bundle = await buildBackupBundle(db, source);
     const snapshot = await writeBackupSnapshot(bundle, syncConfig);
     const lastBackupTime = bundle.createdAt;
@@ -1443,34 +1419,62 @@ async function performBackup(source = 'manual') {
   return backupInFlight;
 }
 
+function isBlockedUrl(url, sites) {
+  const host = new URL(url).hostname.toLowerCase();
+  return Array.isArray(sites) && sites.some(site => typeof site === 'string' && (host === site.toLowerCase() || host.endsWith('.' + site.toLowerCase())));
+}
+async function authorizeMessage(message, sender, db) {
+  if (!message || typeof message.action !== 'string') throw new Error('Invalid message');
+  if (sender.id !== chrome.runtime.id) throw new Error('Untrusted sender');
+  if (sender.url?.startsWith(chrome.runtime.getURL(''))) return message;
+  const actions = new Set(['getSetting', 'saveSnippet', 'getHighlightsForUrl', 'storeHighlight', 'captureClipboard']);
+  if (!sender.tab || !actions.has(message.action)) throw new Error('Action unavailable from a web page');
+  if (message.action === 'getSetting') {
+    if (!['language', 'blockedSites', 'clipboardCaptureEnabled'].includes(message.key)) throw new Error('Setting unavailable from a web page');
+    return message;
+  }
+  const url = new URL(sender.url);
+  if (!['https:', 'http:', 'file:'].includes(url.protocol)) throw new Error('Unsupported page');
+  if (isBlockedUrl(url.href, await db.getSetting('blockedSites', []))) throw new Error('Clipping is disabled on this site');
+  if (message.action === 'getHighlightsForUrl') return { ...message, url: url.href };
+  if (message.action === 'saveSnippet') {
+    if (typeof message.data?.text !== 'string' || !message.data.text.trim()) throw new Error('No selected text');
+    return { action: 'saveSnippet', data: { type: 'web', text: message.data.text, url: url.href, domain: url.hostname, title: typeof message.data.title === 'string' ? message.data.title : '' } };
+  }
+  if (message.action === 'captureClipboard') {
+    if (sender.tab.incognito) return { action: 'captureClipboard', data: null };
+    return { action: 'captureClipboard', data: { text: message.data?.text, title: typeof message.data?.title === 'string' ? message.data.title : '', url: url.href } };
+  }
+  const h = message.highlight;
+  if (!h || typeof h.id !== 'string' || !/^[a-zA-Z0-9_-]{1,100}$/.test(h.id) || typeof h.text !== 'string') throw new Error('Invalid highlight');
+  return { action: 'storeHighlight', highlight: { ...h, url: url.href } };
+}
+
 // Message handlers
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // Handle message asynchronously
   (async () => {
     try {
-      if (!sender.url || !sender.url.startsWith(chrome.runtime.getURL(''))) {
-        const contentActions = new Set(['getSetting', 'saveSnippet', 'getHighlightsForUrl', 'storeHighlight']);
-        if (!contentActions.has(message.action) || (message.action === 'getSetting' && !['language', 'blockedSites'].includes(message.key))) {
-          sendResponse({ success: false, error: 'Action unavailable from a web page' });
-          return;
-        }
-      }
       const db = await getDatabase();
-      const result = await handleMessage(db, message);
-      sendResponse(result);
+      const authorized = await authorizeMessage(message, sender, db);
+      if (maintenanceInFlight && !['getSetting', 'getSnippets', 'getDeletedSnippets', 'getHighlightsForUrl', 'getClipboardHistory', 'getLibraryPage', 'getSnippet', 'getSpaces'].includes(authorized.action)) throw new Error('Data operation in progress. Try again shortly.');
+      sendResponse(await handleMessage(db, authorized));
     } catch (error) {
-      console.error('Message handling error:', error);
-      sendResponse({ success: false, error: error.message });
+      sendResponse({ success: false, error: normalizeTransactionError(error), ...(error?.code ? { code: error.code } : {}) });
     }
   })();
-
-  // Return true to keep message channel open
   return true;
 });
 
+async function notifyContentPreferences() {
+  const tabs = await chrome.tabs.query({});
+  await Promise.allSettled(tabs.filter(tab => tab.id != null).map(tab =>
+    chrome.tabs.sendMessage(tab.id, { action: 'capturePreferencesChanged' })
+  ));
+}
+
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === 'save-to-isnips' && tab.id) {
+  if (info.menuItemId === 'save-to-isnips' && tab?.id != null) {
     chrome.tabs.sendMessage(tab.id, { action: 'captureSnippet' }).catch(err => {
       console.error('Failed to send capture message to tab:', err);
     });
@@ -1491,9 +1495,102 @@ async function broadcastDataChange(action, data = null) {
   });
 }
 
-async function handleMessage(db, message) {
+let dataOperations = Promise.resolve();
+const MUTATING_ACTIONS = new Set([
+  'saveSnippet', 'saveIndexCard', 'updateSnippet', 'updateIndexCard',
+  'softDeleteSnippet', 'softDeleteIndexCard', 'restoreSnippet', 'restoreCard',
+  'purgeSnippet', 'emptyTrash', 'autoDeleteOldTrash', 'storeHighlight',
+  'importData', 'clearAllData', 'restoreBackupSnapshot', 'setSetting', 'disconnectGoogleDrive',
+  'captureClipboard', 'deleteClipboardEntry', 'clearClipboardHistory', 'promoteClipboardEntry',
+  'createSpace', 'updateSpace', 'deleteSpace', 'moveSnippet', 'setClipboardConsent'
+]);
+function handleMessage(db, message) {
+  if (!MUTATING_ACTIONS.has(message.action)) return dispatchMessage(db, message);
+  // Complete prior local writes (including recovery mirrors) before a clear or restore.
+  const operation = dataOperations.then(() => dispatchMessage(db, message));
+  dataOperations = operation.catch(() => {});
+  return operation;
+}
+
+async function dispatchMessage(db, message) {
   try {
     switch (message.action) {
+      case 'getLibraryPage':
+        return await LibraryData.query(db, message.query || {});
+      case 'getSnippet': {
+        const snippet = await db.getSnippetById(message.cardId);
+        if (!snippet || snippet.purged_at) throw new Error('Record no longer exists');
+        return { success: true, snippet };
+      }
+      case 'getSpaces':
+        return { success: true, spaces: (await db.getStoredSpaces()).filter(space => !space.deleted_at) };
+      case 'createSpace': {
+        const result = await db.createSpace({ name: message.name });
+        broadcastDataChange('spacesChanged');
+        return result;
+      }
+      case 'updateSpace': {
+        const result = await db.updateSpace(message.spaceId, { name: message.name });
+        broadcastDataChange('spacesChanged');
+        return result;
+      }
+      case 'deleteSpace': {
+        const result = await db.deleteSpace(message.spaceId);
+        broadcastDataChange('spacesChanged');
+        broadcastDataChange('cardSaved');
+        return result;
+      }
+      case 'moveSnippet': {
+        const result = await db.moveSnippet(message.cardId, message.spaceId);
+        broadcastDataChange('cardSaved');
+        return result;
+      }
+
+      case 'getClipboardHistory': {
+        const all = await clipboardHistory.getHistory();
+        const search = typeof message.search === 'string' ? message.search.slice(0, 200).toLowerCase() : '';
+        const items = search ? all.filter(item => [item.text, item.domain, item.title, item.url].some(value => String(value || '').toLowerCase().includes(search))) : all;
+        return { ...await clipboardConsentStatus(db), totalCount: all.length, items: message.preview ? items.map(item => ({ ...LibraryData.preview(item), copied_at: item.copied_at })) : items };
+      }
+      case 'getClipboardConsentStatus':
+        return clipboardConsentStatus(db);
+      case 'setClipboardConsent': {
+        const result = await db.setClipboardConsent(message.choice);
+        void notifyContentPreferences().catch(() => {});
+        broadcastDataChange('clipboardConsentChanged');
+        broadcastDataChange('clipboardChanged');
+        return result;
+      }
+      case 'getClipboardEntry': {
+        const entry = (await clipboardHistory.getHistory()).find(item => item.id === message.entryId);
+        if (!entry) throw new Error('Clipboard entry no longer exists');
+        return { success: true, snippet: entry };
+      }
+      case 'captureClipboard': {
+        if (!message.data || !(await clipboardConsentStatus(db)).enabled) return { success: true, changed: false };
+        // Recheck inside the write queue so disabling a site takes effect before queued captures.
+        if (isBlockedUrl(message.data.url, await db.getSetting('blockedSites', []))) return { success: true, changed: false };
+        const result = await clipboardHistory.capture(message.data);
+        if (result.changed) broadcastDataChange('clipboardChanged');
+        return result;
+      }
+      case 'deleteClipboardEntry': {
+        const result = await clipboardHistory.remove(message.entryId);
+        broadcastDataChange('clipboardChanged');
+        return result;
+      }
+      case 'clearClipboardHistory': {
+        const result = await clipboardHistory.clear();
+        broadcastDataChange('clipboardChanged');
+        return result;
+      }
+      case 'promoteClipboardEntry': {
+        const result = await clipboardHistory.promote(message.entryId, db);
+        broadcastDataChange('cardSaved', result.snippet);
+        broadcastDataChange('clipboardChanged');
+        return result;
+      }
+
       case 'saveSnippet':
       case 'saveIndexCard':
         const saveResult = await db.saveSnippet(message.data);
@@ -1519,14 +1616,17 @@ async function handleMessage(db, message) {
         await scheduleAutoSyncAlarm(config);
         await scheduleAutoBackupAlarm(config);
         broadcastDataChange('cardSaved');
+        void notifyContentPreferences().catch(() => {});
         return result;
       }
 
       case 'clearAllData': {
-        const result = await db.clearAllData();
+        const result = await withDataMaintenance(async () => { await googleDriveAuth.forgetWeb(); return db.clearAllData(); });
+        await chrome.storage.session?.clear();
         await scheduleAutoSyncAlarm({ type: 'none', autoSyncInterval: 'off' });
         await scheduleAutoBackupAlarm({ autoBackupInterval: 'off' });
         broadcastDataChange('cardSaved');
+        void notifyContentPreferences().catch(() => {});
         return result;
       }
 
@@ -1599,16 +1699,32 @@ async function handleMessage(db, message) {
         return { success: true };
 
       case 'getSetting':
+        if (message.key === 'clipboardCaptureEnabled') return { success: true, value: (await clipboardConsentStatus(db)).enabled };
         const settingValue = await db.getSetting(message.key, message.defaultValue);
         return { success: true, value: settingValue };
 
-      case 'setSetting':
+      case 'setSetting': {
+        if (message.key === 'clipboardCaptureConsent') throw new Error('Use the clipboard consent action');
+        if (message.key === 'clipboardCaptureEnabled' && message.value === true && (await clipboardConsentStatus(db)).consentRequired)
+          throw Object.assign(new Error('Confirm clipboard auto-save first'), { code: 'CLIPBOARD_CONSENT_REQUIRED' });
+        if (message.key === 'syncConfig' && (syncInFlight || backupInFlight)) throw new Error('Sync or backup is running. Try again shortly.');
+        const previousConfig = message.key === 'syncConfig' ? await db.getSetting('syncConfig', { type: 'none' }) : null;
         const setResult = await db.setSetting(message.key, message.value);
         if (setResult.success && message.key === 'syncConfig') {
+          if (previousConfig?.type !== message.value?.type &&
+              (previousConfig?.type === 'googledrive' || message.value?.type === 'googledrive' || message.value?.type === 'none')) {
+            const method = await googleDriveAuth.method();
+            await googleDriveAuth.forgetWeb();
+            if (method === 'native') await chrome.identity.clearAllCachedAuthTokens?.();
+          }
           await scheduleAutoSyncAlarm(message.value);
           await scheduleAutoBackupAlarm(message.value);
+          broadcastDataChange('googleAuthChanged');
         }
+        if (setResult.success && ['blockedSites', 'language', 'clipboardCaptureEnabled'].includes(message.key)) void notifyContentPreferences().catch(() => {});
+        if (setResult.success && message.key === 'clipboardCaptureEnabled') broadcastDataChange('clipboardChanged');
         return setResult;
+      }
 
       case 'languageChanged':
         // Broadcast language change to all extension pages
@@ -1646,11 +1762,57 @@ async function handleMessage(db, message) {
         });
         return { success: true };
 
+      case 'getGoogleAuthStatus': {
+        await googleDriveAuth.noteBrowser(message.browser);
+        const config = await db.getSetting('syncConfig', { type: 'none' });
+        const status = await googleDriveAuth.status();
+        return { success: true, ...status, connected: config.type === 'googledrive' && status.connected };
+      }
+      case 'connectGoogleDrive':
+      case 'connectGoogleDriveWeb': {
+        if (syncInFlight || maintenanceInFlight) throw new Error('Sync or data operation is running');
+        if ((await db.getSetting('syncConfig', { type: 'none' })).type !== 'googledrive') throw new Error('Google Drive not configured');
+        await googleDriveAuth.noteBrowser(message.browser);
+        if (message.action === 'connectGoogleDriveWeb') await googleDriveAuth.connectWeb();
+        else await googleDriveAuth.connect();
+        if ((await db.getSetting('syncConfig', { type: 'none' })).type !== 'googledrive') {
+          await googleDriveAuth.forgetWeb();
+          throw new GoogleAuthError('AUTH_CHANGED');
+        }
+        broadcastDataChange('googleAuthChanged');
+        return { success: true, ...await googleDriveAuth.status() };
+      }
+      case 'disconnectGoogleDrive': {
+        if (syncInFlight) throw new Error('Sync is running. Try again shortly.');
+        const config = await db.getSetting('syncConfig', {});
+        await db.setSetting('syncConfig', { ...config, type: 'none', last_remote_etag: null });
+        await scheduleAutoSyncAlarm({ type: 'none' });
+        const method = await googleDriveAuth.method();
+        let token = null;
+        if (method === 'native') {
+          try { token = await syncService._getGoogleToken(false); } catch { /* No cached login. */ }
+        }
+        await googleDriveAuth.forgetWeb();
+        broadcastDataChange('googleAuthChanged');
+        if (method === 'web') return { success: true };
+        await chrome.identity.clearAllCachedAuthTokens();
+        if (token) {
+          const response = await fetch('https://oauth2.googleapis.com/revoke', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ token }).toString(),
+            signal: AbortSignal.timeout(20000)
+          });
+          if (!response.ok && response.status !== 400) throw new Error('Sync stopped. Could not revoke Google access; remove it in your Google account.');
+        }
+        return { success: true };
+      }
+
       case 'syncWebDAV':
         return await performSync('webdav');
 
       case 'syncGoogleDrive':
-        return await performSync('googledrive');
+        return await performSync('googledrive', 'manual', { allowCreate: message.allowCreate === true });
 
       case 'createBackup':
         return await performBackup(message.source || 'manual');
@@ -1659,7 +1821,7 @@ async function handleMessage(db, message) {
         return await listBackupSnapshots(message.limit || 20);
 
       case 'restoreBackupSnapshot':
-        return await restoreBackupSnapshot(message.snapshotId);
+        return await withDataMaintenance(() => restoreBackupSnapshot(message.snapshotId));
 
       case 'requestPersistentStorage':
         return await requestPersistentStorage(message.source || 'message');
@@ -1669,7 +1831,7 @@ async function handleMessage(db, message) {
     }
   } catch (error) {
     console.error('Message handling error:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: normalizeTransactionError(error), ...(error?.code ? { code: error.code } : {}) };
   }
 }
 
@@ -1710,8 +1872,8 @@ async function scheduleAutoCleanup() {
 // Schedule daily cleanup - wait for alarms API to be available
 if (chrome.alarms) {
   ensureAutoCleanupAlarm();
-  void scheduleAutoSyncAlarm();
-  void scheduleAutoBackupAlarm();
+  void scheduleAutoSyncAlarm().catch(error => console.warn('Could not schedule sync:', error));
+  void scheduleAutoBackupAlarm().catch(error => console.warn('Could not schedule backup:', error));
   void requestPersistentStorage('service-worker-init');
 
   chrome.alarms.onAlarm.addListener((alarm) => {
@@ -1733,8 +1895,8 @@ if (chrome.alarms) {
 
 chrome.runtime.onStartup?.addListener(() => {
   ensureAutoCleanupAlarm();
-  void scheduleAutoSyncAlarm();
-  void scheduleAutoBackupAlarm();
+  void scheduleAutoSyncAlarm().catch(error => console.warn('Could not schedule sync:', error));
+  void scheduleAutoBackupAlarm().catch(error => console.warn('Could not schedule backup:', error));
   void requestPersistentStorage('runtime-startup');
 });
 
@@ -1744,7 +1906,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     ensureAutoCleanupAlarm();
     void requestPersistentStorage('runtime-installed');
 
-    // Add some sample data for testing
+    // Initialize preferences without inserting sample records
     const db = await getDatabase();
 
     // Set initial language based on browser environment
@@ -1769,23 +1931,14 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       });
     });
 
-    // Check if we already have data
-    const existingCards = await db.getAllSnippetsIncludingDeleted();
-    if (details.reason === 'install' && existingCards.length === 0) {
-
-      const currentLang = await db.getSetting('language', 'en');
-      const sampleCards = db.getSampleData(currentLang);
-
-      for (const card of sampleCards) {
-        await db.saveSnippet(card);
-      }
-
-    }
+    // New installations start with an empty library; upgrades keep every existing record.
 
     // Run initial cleanup
     await scheduleAutoCleanup();
     await scheduleAutoSyncAlarm();
     await scheduleAutoBackupAlarm();
+    if (['install', 'update'].includes(details.reason) && (await clipboardConsentStatus(db)).needsNotice)
+      await chrome.tabs.create({ url: chrome.runtime.getURL('library.html#clipboard-consent') });
   } catch (error) {
     console.error('Error during installation:', error);
   }

@@ -1,0 +1,581 @@
+{
+  "version": "3.0.0",
+  "exportDate": "2026-10-16T11:23:57.000Z",
+  "snippets": [
+    {
+      "id": "en-demo-001",
+      "type": "note",
+      "text": "Capture inspiration first, organize it later. The best note-taking tool is the one that gets out of your way and makes capturing frictionless.",
+      "clipText": "Capture inspiration first, organize it later. The best note-taking tool is the one that gets out of your way and makes capturing frictionless.",
+      "createdAt": 1792146237000,
+      "updatedAt": 1792146237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-002",
+      "type": "web",
+      "text": "Local-first software gives users ownership of their data by storing it on local devices first. Cloud services are used purely for synchronization and backup, not as the primary source of truth.",
+      "clipText": "Local-first software gives users ownership of their data by storing it on local devices first. Cloud services are used purely for synchronization and backup, not as the primary source of truth.",
+      "createdAt": 1792140837000,
+      "updatedAt": 1792140837000,
+      "spaceId": "research",
+      "url": "https://www.inkandswitch.com/local-first/",
+      "domain": "inkandswitch.com",
+      "title": "Local-First Software: You own your data, in spite of the cloud",
+      "pageTitle": "Local-First Software: You own your data, in spite of the cloud"
+    },
+    {
+      "id": "en-demo-003",
+      "type": "note",
+      "text": "Architecture note: IndexedDB transaction boundaries must be strictly scoped. Never hold transactions across asynchronous callbacks without active requests.",
+      "clipText": "Architecture note: IndexedDB transaction boundaries must be strictly scoped. Never hold transactions across asynchronous callbacks without active requests.",
+      "createdAt": 1792135437000,
+      "updatedAt": 1792135437000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "en-demo-004",
+      "type": "web",
+      "text": "Good design is innovative. Good design makes a product useful. Good design is aesthetic. Good design makes a product understandable. Good design is unobtrusive. Good design is honest.",
+      "clipText": "Good design is innovative. Good design makes a product useful. Good design is aesthetic. Good design makes a product understandable. Good design is unobtrusive. Good design is honest.",
+      "createdAt": 1792128237000,
+      "updatedAt": 1792128237000,
+      "spaceId": "reading",
+      "url": "https://vitsoe.com/us/about/good-design",
+      "domain": "vitsoe.com",
+      "title": "Ten Principles for Good Design - Dieter Rams",
+      "pageTitle": "Ten Principles for Good Design - Dieter Rams"
+    },
+    {
+      "id": "en-demo-005",
+      "type": "note",
+      "text": "Weekly Review: Keep small daily logs to notice patterns. A single sentence captured each evening is worth more than a monthly journal you never write.",
+      "clipText": "Weekly Review: Keep small daily logs to notice patterns. A single sentence captured each evening is worth more than a monthly journal you never write.",
+      "createdAt": 1792121037000,
+      "updatedAt": 1792121037000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-006",
+      "type": "web",
+      "text": "Manifest V3 represents one of the most significant shifts in the Chrome extensions platform since it launched. Service workers replace background pages, improving resource usage and privacy.",
+      "clipText": "Manifest V3 represents one of the most significant shifts in the Chrome extensions platform since it launched. Service workers replace background pages, improving resource usage and privacy.",
+      "createdAt": 1792056237000,
+      "updatedAt": 1792056237000,
+      "spaceId": "tech",
+      "url": "https://developer.chrome.com/docs/extensions/mv3/intro/",
+      "domain": "developer.chrome.com",
+      "title": "Web Extension Manifest V3 Overview - Chrome Developers",
+      "pageTitle": "Web Extension Manifest V3 Overview - Chrome Developers"
+    },
+    {
+      "id": "en-demo-007",
+      "type": "note",
+      "text": "Zettelkasten Method: The essence of a slip-box note is atomicity. One thought per note, expressed in your own words, connected to existing thoughts by explicit references.",
+      "clipText": "Zettelkasten Method: The essence of a slip-box note is atomicity. One thought per note, expressed in your own words, connected to existing thoughts by explicit references.",
+      "createdAt": 1792045437000,
+      "updatedAt": 1792045437000,
+      "spaceId": "research"
+    },
+    {
+      "id": "en-demo-008",
+      "type": "web",
+      "text": "Programs must be written for people to read, and only incidentally for machines to execute. - Hal Abelson and Gerald Jay Sussman",
+      "clipText": "Programs must be written for people to read, and only incidentally for machines to execute. - Hal Abelson and Gerald Jay Sussman",
+      "createdAt": 1792034637000,
+      "updatedAt": 1792034637000,
+      "spaceId": "reading",
+      "url": "https://mitpress.mit.edu/sicp",
+      "domain": "mitpress.mit.edu",
+      "title": "Structure and Interpretation of Computer Programs",
+      "pageTitle": "Structure and Interpretation of Computer Programs"
+    },
+    {
+      "id": "en-demo-009",
+      "type": "note",
+      "text": "CSS Tip: Use CSS Grid with clamp() for dynamic columns, but fall back to computed masonry geometry when card heights vary naturally based on content.",
+      "clipText": "CSS Tip: Use CSS Grid with clamp() for dynamic columns, but fall back to computed masonry geometry when card heights vary naturally based on content.",
+      "createdAt": 1792023837000,
+      "updatedAt": 1792023837000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "en-demo-010",
+      "type": "web",
+      "text": "Write programs that do one thing and do it well. Write programs to work together. Write programs to handle text streams, because that is a universal interface.",
+      "clipText": "Write programs that do one thing and do it well. Write programs to work together. Write programs to handle text streams, because that is a universal interface.",
+      "createdAt": 1791966237000,
+      "updatedAt": 1791966237000,
+      "spaceId": "ideas",
+      "url": "https://en.wikipedia.org/wiki/Unix_philosophy",
+      "domain": "wikipedia.org",
+      "title": "Keep It Simple, Stupid - Principles of Unix Philosophy",
+      "pageTitle": "Keep It Simple, Stupid - Principles of Unix Philosophy"
+    },
+    {
+      "id": "en-demo-011",
+      "type": "note",
+      "text": "Quote by Alan Kay: \"Simple things should be simple, complex things should be possible.\" This remains the gold standard for software ergonomics.",
+      "clipText": "Quote by Alan Kay: \"Simple things should be simple, complex things should be possible.\" This remains the gold standard for software ergonomics.",
+      "createdAt": 1791951837000,
+      "updatedAt": 1791951837000,
+      "spaceId": "reading"
+    },
+    {
+      "id": "en-demo-012",
+      "type": "web",
+      "text": "IndexedDB is a low-level API for client-side storage of significant amounts of structured data, including files/blobs. It uses indexes to enable high-performance searches on this data.",
+      "clipText": "IndexedDB is a low-level API for client-side storage of significant amounts of structured data, including files/blobs. It uses indexes to enable high-performance searches on this data.",
+      "createdAt": 1791941037000,
+      "updatedAt": 1791941037000,
+      "spaceId": "tech",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API",
+      "domain": "developer.mozilla.org",
+      "title": "MDN Web Docs: IndexedDB API",
+      "pageTitle": "MDN Web Docs: IndexedDB API"
+    },
+    {
+      "id": "en-demo-013",
+      "type": "note",
+      "text": "Research question: How do lightweight offline snapshots compare with continuous CRDT synchronization when handling multi-device edge cases for personal knowledge bases?",
+      "clipText": "Research question: How do lightweight offline snapshots compare with continuous CRDT synchronization when handling multi-device edge cases for personal knowledge bases?",
+      "createdAt": 1791883437000,
+      "updatedAt": 1791883437000,
+      "spaceId": "research"
+    },
+    {
+      "id": "en-demo-014",
+      "type": "web",
+      "text": "Inspectional reading is the art of skimming systematically. The goal is to discover whether the book requires a more careful reading, and to understand its underlying architecture.",
+      "clipText": "Inspectional reading is the art of skimming systematically. The goal is to discover whether the book requires a more careful reading, and to understand its underlying architecture.",
+      "createdAt": 1791869037000,
+      "updatedAt": 1791869037000,
+      "spaceId": "reading",
+      "url": "https://en.wikipedia.org/wiki/How_to_Read_a_Book",
+      "domain": "wikipedia.org",
+      "title": "How to Read a Book - Mortimer J. Adler",
+      "pageTitle": "How to Read a Book - Mortimer J. Adler"
+    },
+    {
+      "id": "en-demo-015",
+      "type": "note",
+      "text": "UI Polish: Subtlety over flashiness. 4px hover lifts with a soft 2% scale and gentle shadow transitions feel tactile without distracting the eye.",
+      "clipText": "UI Polish: Subtlety over flashiness. 4px hover lifts with a soft 2% scale and gentle shadow transitions feel tactile without distracting the eye.",
+      "createdAt": 1791858237000,
+      "updatedAt": 1791858237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-016",
+      "type": "web",
+      "text": "HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV) specify headers such as If-Match and If-None-Match to facilitate conditional updates and avoid lost update problems.",
+      "clipText": "HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV) specify headers such as If-Match and If-None-Match to facilitate conditional updates and avoid lost update problems.",
+      "createdAt": 1791789837000,
+      "updatedAt": 1791789837000,
+      "spaceId": "tech",
+      "url": "https://datatracker.ietf.org/doc/html/rfc4918",
+      "domain": "datatracker.ietf.org",
+      "title": "WebDAV Protocol Specification (RFC 4918)",
+      "pageTitle": "WebDAV Protocol Specification (RFC 4918)"
+    },
+    {
+      "id": "en-demo-017",
+      "type": "note",
+      "text": "Writing draft: Clear writing begins with clear thinking. If a paragraph feels muddy, do not edit words—re-examine the sequence of concepts.",
+      "clipText": "Writing draft: Clear writing begins with clear thinking. If a paragraph feels muddy, do not edit words—re-examine the sequence of concepts.",
+      "createdAt": 1791775437000,
+      "updatedAt": 1791775437000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-018",
+      "type": "web",
+      "text": "Two of the most important characteristics of good design are discoverability and understanding. Discoverability: Is it possible to even figure out what actions are possible and where and how to perform them?",
+      "clipText": "Two of the most important characteristics of good design are discoverability and understanding. Discoverability: Is it possible to even figure out what actions are possible and where and how to perform them?",
+      "createdAt": 1791707037000,
+      "updatedAt": 1791707037000,
+      "spaceId": "reading",
+      "url": "https://jnd.org/the-design-of-everyday-things-revised/",
+      "domain": "jnd.org",
+      "title": "The Design of Everyday Things - Don Norman",
+      "pageTitle": "The Design of Everyday Things - Don Norman"
+    },
+    {
+      "id": "en-demo-019",
+      "type": "note",
+      "text": "Data privacy principles: Always prefer on-device storage. When sync is needed, let users bring their own cloud endpoints rather than requiring central server lock-in.",
+      "clipText": "Data privacy principles: Always prefer on-device storage. When sync is needed, let users bring their own cloud endpoints rather than requiring central server lock-in.",
+      "createdAt": 1791692637000,
+      "updatedAt": 1791692637000,
+      "spaceId": "research"
+    },
+    {
+      "id": "en-demo-020",
+      "type": "web",
+      "text": "The Web Cryptography API describes a JavaScript API for performing basic cryptographic operations in web applications, including hashing, signature generation and verification, and encryption and decryption.",
+      "clipText": "The Web Cryptography API describes a JavaScript API for performing basic cryptographic operations in web applications, including hashing, signature generation and verification, and encryption and decryption.",
+      "createdAt": 1791613437000,
+      "updatedAt": 1791613437000,
+      "spaceId": "tech",
+      "url": "https://www.w3.org/TR/WebCryptoAPI/",
+      "domain": "w3.org",
+      "title": "W3C Web Cryptography API Specification",
+      "pageTitle": "W3C Web Cryptography API Specification"
+    },
+    {
+      "id": "en-demo-021",
+      "type": "note",
+      "text": "Project backlog: 1. Keyboard shortcuts refinement 2. Dark theme contrast tuning 3. Quick markdown export 4. Tag filtering performance check.",
+      "clipText": "Project backlog: 1. Keyboard shortcuts refinement 2. Dark theme contrast tuning 3. Quick markdown export 4. Tag filtering performance check.",
+      "createdAt": 1791537837000,
+      "updatedAt": 1791537837000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-022",
+      "type": "web",
+      "text": "The first step is to decide what to work on. The work you choose should have three qualities: it has to be something you have a natural aptitude for, that you have a deep interest in, and that offers scope to do great work.",
+      "clipText": "The first step is to decide what to work on. The work you choose should have three qualities: it has to be something you have a natural aptitude for, that you have a deep interest in, and that offers scope to do great work.",
+      "createdAt": 1791516237000,
+      "updatedAt": 1791516237000,
+      "spaceId": "reading",
+      "url": "https://paulgraham.com/greatwork.html",
+      "domain": "paulgraham.com",
+      "title": "Paul Graham: How to Do Great Work",
+      "pageTitle": "Paul Graham: How to Do Great Work"
+    },
+    {
+      "id": "en-demo-023",
+      "type": "note",
+      "text": "Performance checklist: Virtualized DOM or bounded rendering for lists exceeding 200 items prevents memory bloat and keeps 60fps scrolling butter-smooth.",
+      "clipText": "Performance checklist: Virtualized DOM or bounded rendering for lists exceeding 200 items prevents memory bloat and keeps 60fps scrolling butter-smooth.",
+      "createdAt": 1791444237000,
+      "updatedAt": 1791444237000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "en-demo-024",
+      "type": "web",
+      "text": "Consider a future device for individual use, which is a sort of mechanized private file and library. It needs a name, and to coin one at random, \"memex\" will do. A memex is a device in which an individual stores all his books, records, and communications.",
+      "clipText": "Consider a future device for individual use, which is a sort of mechanized private file and library. It needs a name, and to coin one at random, \"memex\" will do. A memex is a device in which an individual stores all his books, records, and communications.",
+      "createdAt": 1791350637000,
+      "updatedAt": 1791350637000,
+      "spaceId": "research",
+      "url": "https://www.theatlantic.com/magazine/archive/1945/07/as-we-may-think/303881/",
+      "domain": "theatlantic.com",
+      "title": "As We May Think - Vannevar Bush (The Atlantic, 1945)",
+      "pageTitle": "As We May Think - Vannevar Bush (The Atlantic, 1945)"
+    },
+    {
+      "id": "en-demo-025",
+      "type": "note",
+      "text": "Minimalism in software: Features are easy to add, impossible to remove. Default to restraint. Every button must earn its place on the screen.",
+      "clipText": "Minimalism in software: Features are easy to add, impossible to remove. Default to restraint. Every button must earn its place on the screen.",
+      "createdAt": 1791275037000,
+      "updatedAt": 1791275037000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-026",
+      "type": "note",
+      "text": "Capture inspiration first, organize it later. The best note-taking tool is the one that gets out of your way and makes capturing frictionless.",
+      "clipText": "Capture inspiration first, organize it later. The best note-taking tool is the one that gets out of your way and makes capturing frictionless.",
+      "createdAt": 1791714237000,
+      "updatedAt": 1791714237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-027",
+      "type": "web",
+      "text": "Local-first software gives users ownership of their data by storing it on local devices first. Cloud services are used purely for synchronization and backup, not as the primary source of truth.",
+      "clipText": "Local-first software gives users ownership of their data by storing it on local devices first. Cloud services are used purely for synchronization and backup, not as the primary source of truth.",
+      "createdAt": 1791708837000,
+      "updatedAt": 1791708837000,
+      "spaceId": "research",
+      "url": "https://www.inkandswitch.com/local-first/",
+      "domain": "inkandswitch.com",
+      "title": "Local-First Software: You own your data, in spite of the cloud",
+      "pageTitle": "Local-First Software: You own your data, in spite of the cloud"
+    },
+    {
+      "id": "en-demo-028",
+      "type": "note",
+      "text": "Architecture note: IndexedDB transaction boundaries must be strictly scoped. Never hold transactions across asynchronous callbacks without active requests.",
+      "clipText": "Architecture note: IndexedDB transaction boundaries must be strictly scoped. Never hold transactions across asynchronous callbacks without active requests.",
+      "createdAt": 1791703437000,
+      "updatedAt": 1791703437000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "en-demo-029",
+      "type": "web",
+      "text": "Good design is innovative. Good design makes a product useful. Good design is aesthetic. Good design makes a product understandable. Good design is unobtrusive. Good design is honest.",
+      "clipText": "Good design is innovative. Good design makes a product useful. Good design is aesthetic. Good design makes a product understandable. Good design is unobtrusive. Good design is honest.",
+      "createdAt": 1791696237000,
+      "updatedAt": 1791696237000,
+      "spaceId": "reading",
+      "url": "https://vitsoe.com/us/about/good-design",
+      "domain": "vitsoe.com",
+      "title": "Ten Principles for Good Design - Dieter Rams",
+      "pageTitle": "Ten Principles for Good Design - Dieter Rams"
+    },
+    {
+      "id": "en-demo-030",
+      "type": "note",
+      "text": "Weekly Review: Keep small daily logs to notice patterns. A single sentence captured each evening is worth more than a monthly journal you never write.",
+      "clipText": "Weekly Review: Keep small daily logs to notice patterns. A single sentence captured each evening is worth more than a monthly journal you never write.",
+      "createdAt": 1791689037000,
+      "updatedAt": 1791689037000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-031",
+      "type": "web",
+      "text": "Manifest V3 represents one of the most significant shifts in the Chrome extensions platform since it launched. Service workers replace background pages, improving resource usage and privacy.",
+      "clipText": "Manifest V3 represents one of the most significant shifts in the Chrome extensions platform since it launched. Service workers replace background pages, improving resource usage and privacy.",
+      "createdAt": 1791624237000,
+      "updatedAt": 1791624237000,
+      "spaceId": "tech",
+      "url": "https://developer.chrome.com/docs/extensions/mv3/intro/",
+      "domain": "developer.chrome.com",
+      "title": "Web Extension Manifest V3 Overview - Chrome Developers",
+      "pageTitle": "Web Extension Manifest V3 Overview - Chrome Developers"
+    },
+    {
+      "id": "en-demo-032",
+      "type": "note",
+      "text": "Zettelkasten Method: The essence of a slip-box note is atomicity. One thought per note, expressed in your own words, connected to existing thoughts by explicit references.",
+      "clipText": "Zettelkasten Method: The essence of a slip-box note is atomicity. One thought per note, expressed in your own words, connected to existing thoughts by explicit references.",
+      "createdAt": 1791613437000,
+      "updatedAt": 1791613437000,
+      "spaceId": "research"
+    },
+    {
+      "id": "en-demo-033",
+      "type": "web",
+      "text": "Programs must be written for people to read, and only incidentally for machines to execute. - Hal Abelson and Gerald Jay Sussman",
+      "clipText": "Programs must be written for people to read, and only incidentally for machines to execute. - Hal Abelson and Gerald Jay Sussman",
+      "createdAt": 1791602637000,
+      "updatedAt": 1791602637000,
+      "spaceId": "reading",
+      "url": "https://mitpress.mit.edu/sicp",
+      "domain": "mitpress.mit.edu",
+      "title": "Structure and Interpretation of Computer Programs",
+      "pageTitle": "Structure and Interpretation of Computer Programs"
+    },
+    {
+      "id": "en-demo-034",
+      "type": "note",
+      "text": "CSS Tip: Use CSS Grid with clamp() for dynamic columns, but fall back to computed masonry geometry when card heights vary naturally based on content.",
+      "clipText": "CSS Tip: Use CSS Grid with clamp() for dynamic columns, but fall back to computed masonry geometry when card heights vary naturally based on content.",
+      "createdAt": 1791591837000,
+      "updatedAt": 1791591837000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "en-demo-035",
+      "type": "web",
+      "text": "Write programs that do one thing and do it well. Write programs to work together. Write programs to handle text streams, because that is a universal interface.",
+      "clipText": "Write programs that do one thing and do it well. Write programs to work together. Write programs to handle text streams, because that is a universal interface.",
+      "createdAt": 1791534237000,
+      "updatedAt": 1791534237000,
+      "spaceId": "ideas",
+      "url": "https://en.wikipedia.org/wiki/Unix_philosophy",
+      "domain": "wikipedia.org",
+      "title": "Keep It Simple, Stupid - Principles of Unix Philosophy",
+      "pageTitle": "Keep It Simple, Stupid - Principles of Unix Philosophy"
+    },
+    {
+      "id": "en-demo-036",
+      "type": "note",
+      "text": "Quote by Alan Kay: \"Simple things should be simple, complex things should be possible.\" This remains the gold standard for software ergonomics.",
+      "clipText": "Quote by Alan Kay: \"Simple things should be simple, complex things should be possible.\" This remains the gold standard for software ergonomics.",
+      "createdAt": 1791519837000,
+      "updatedAt": 1791519837000,
+      "spaceId": "reading"
+    },
+    {
+      "id": "en-demo-037",
+      "type": "web",
+      "text": "IndexedDB is a low-level API for client-side storage of significant amounts of structured data, including files/blobs. It uses indexes to enable high-performance searches on this data.",
+      "clipText": "IndexedDB is a low-level API for client-side storage of significant amounts of structured data, including files/blobs. It uses indexes to enable high-performance searches on this data.",
+      "createdAt": 1791509037000,
+      "updatedAt": 1791509037000,
+      "spaceId": "tech",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API",
+      "domain": "developer.mozilla.org",
+      "title": "MDN Web Docs: IndexedDB API",
+      "pageTitle": "MDN Web Docs: IndexedDB API"
+    },
+    {
+      "id": "en-demo-038",
+      "type": "note",
+      "text": "Research question: How do lightweight offline snapshots compare with continuous CRDT synchronization when handling multi-device edge cases for personal knowledge bases?",
+      "clipText": "Research question: How do lightweight offline snapshots compare with continuous CRDT synchronization when handling multi-device edge cases for personal knowledge bases?",
+      "createdAt": 1791451437000,
+      "updatedAt": 1791451437000,
+      "spaceId": "research"
+    },
+    {
+      "id": "en-demo-039",
+      "type": "web",
+      "text": "Inspectional reading is the art of skimming systematically. The goal is to discover whether the book requires a more careful reading, and to understand its underlying architecture.",
+      "clipText": "Inspectional reading is the art of skimming systematically. The goal is to discover whether the book requires a more careful reading, and to understand its underlying architecture.",
+      "createdAt": 1791437037000,
+      "updatedAt": 1791437037000,
+      "spaceId": "reading",
+      "url": "https://en.wikipedia.org/wiki/How_to_Read_a_Book",
+      "domain": "wikipedia.org",
+      "title": "How to Read a Book - Mortimer J. Adler",
+      "pageTitle": "How to Read a Book - Mortimer J. Adler"
+    },
+    {
+      "id": "en-demo-040",
+      "type": "note",
+      "text": "UI Polish: Subtlety over flashiness. 4px hover lifts with a soft 2% scale and gentle shadow transitions feel tactile without distracting the eye.",
+      "clipText": "UI Polish: Subtlety over flashiness. 4px hover lifts with a soft 2% scale and gentle shadow transitions feel tactile without distracting the eye.",
+      "createdAt": 1791426237000,
+      "updatedAt": 1791426237000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-041",
+      "type": "web",
+      "text": "HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV) specify headers such as If-Match and If-None-Match to facilitate conditional updates and avoid lost update problems.",
+      "clipText": "HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV) specify headers such as If-Match and If-None-Match to facilitate conditional updates and avoid lost update problems.",
+      "createdAt": 1791357837000,
+      "updatedAt": 1791357837000,
+      "spaceId": "tech",
+      "url": "https://datatracker.ietf.org/doc/html/rfc4918",
+      "domain": "datatracker.ietf.org",
+      "title": "WebDAV Protocol Specification (RFC 4918)",
+      "pageTitle": "WebDAV Protocol Specification (RFC 4918)"
+    },
+    {
+      "id": "en-demo-042",
+      "type": "note",
+      "text": "Writing draft: Clear writing begins with clear thinking. If a paragraph feels muddy, do not edit words—re-examine the sequence of concepts.",
+      "clipText": "Writing draft: Clear writing begins with clear thinking. If a paragraph feels muddy, do not edit words—re-examine the sequence of concepts.",
+      "createdAt": 1791343437000,
+      "updatedAt": 1791343437000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-043",
+      "type": "web",
+      "text": "Two of the most important characteristics of good design are discoverability and understanding. Discoverability: Is it possible to even figure out what actions are possible and where and how to perform them?",
+      "clipText": "Two of the most important characteristics of good design are discoverability and understanding. Discoverability: Is it possible to even figure out what actions are possible and where and how to perform them?",
+      "createdAt": 1791275037000,
+      "updatedAt": 1791275037000,
+      "spaceId": "reading",
+      "url": "https://jnd.org/the-design-of-everyday-things-revised/",
+      "domain": "jnd.org",
+      "title": "The Design of Everyday Things - Don Norman",
+      "pageTitle": "The Design of Everyday Things - Don Norman"
+    },
+    {
+      "id": "en-demo-044",
+      "type": "note",
+      "text": "Data privacy principles: Always prefer on-device storage. When sync is needed, let users bring their own cloud endpoints rather than requiring central server lock-in.",
+      "clipText": "Data privacy principles: Always prefer on-device storage. When sync is needed, let users bring their own cloud endpoints rather than requiring central server lock-in.",
+      "createdAt": 1791260637000,
+      "updatedAt": 1791260637000,
+      "spaceId": "research"
+    },
+    {
+      "id": "en-demo-045",
+      "type": "web",
+      "text": "The Web Cryptography API describes a JavaScript API for performing basic cryptographic operations in web applications, including hashing, signature generation and verification, and encryption and decryption.",
+      "clipText": "The Web Cryptography API describes a JavaScript API for performing basic cryptographic operations in web applications, including hashing, signature generation and verification, and encryption and decryption.",
+      "createdAt": 1791181437000,
+      "updatedAt": 1791181437000,
+      "spaceId": "tech",
+      "url": "https://www.w3.org/TR/WebCryptoAPI/",
+      "domain": "w3.org",
+      "title": "W3C Web Cryptography API Specification",
+      "pageTitle": "W3C Web Cryptography API Specification"
+    },
+    {
+      "id": "en-demo-046",
+      "type": "note",
+      "text": "Project backlog: 1. Keyboard shortcuts refinement 2. Dark theme contrast tuning 3. Quick markdown export 4. Tag filtering performance check.",
+      "clipText": "Project backlog: 1. Keyboard shortcuts refinement 2. Dark theme contrast tuning 3. Quick markdown export 4. Tag filtering performance check.",
+      "createdAt": 1791105837000,
+      "updatedAt": 1791105837000,
+      "spaceId": "ideas"
+    },
+    {
+      "id": "en-demo-047",
+      "type": "web",
+      "text": "The first step is to decide what to work on. The work you choose should have three qualities: it has to be something you have a natural aptitude for, that you have a deep interest in, and that offers scope to do great work.",
+      "clipText": "The first step is to decide what to work on. The work you choose should have three qualities: it has to be something you have a natural aptitude for, that you have a deep interest in, and that offers scope to do great work.",
+      "createdAt": 1791084237000,
+      "updatedAt": 1791084237000,
+      "spaceId": "reading",
+      "url": "https://paulgraham.com/greatwork.html",
+      "domain": "paulgraham.com",
+      "title": "Paul Graham: How to Do Great Work",
+      "pageTitle": "Paul Graham: How to Do Great Work"
+    },
+    {
+      "id": "en-demo-048",
+      "type": "note",
+      "text": "Performance checklist: Virtualized DOM or bounded rendering for lists exceeding 200 items prevents memory bloat and keeps 60fps scrolling butter-smooth.",
+      "clipText": "Performance checklist: Virtualized DOM or bounded rendering for lists exceeding 200 items prevents memory bloat and keeps 60fps scrolling butter-smooth.",
+      "createdAt": 1791012237000,
+      "updatedAt": 1791012237000,
+      "spaceId": "tech"
+    },
+    {
+      "id": "en-demo-049",
+      "type": "web",
+      "text": "Consider a future device for individual use, which is a sort of mechanized private file and library. It needs a name, and to coin one at random, \"memex\" will do. A memex is a device in which an individual stores all his books, records, and communications.",
+      "clipText": "Consider a future device for individual use, which is a sort of mechanized private file and library. It needs a name, and to coin one at random, \"memex\" will do. A memex is a device in which an individual stores all his books, records, and communications.",
+      "createdAt": 1790918637000,
+      "updatedAt": 1790918637000,
+      "spaceId": "research",
+      "url": "https://www.theatlantic.com/magazine/archive/1945/07/as-we-may-think/303881/",
+      "domain": "theatlantic.com",
+      "title": "As We May Think - Vannevar Bush (The Atlantic, 1945)",
+      "pageTitle": "As We May Think - Vannevar Bush (The Atlantic, 1945)"
+    },
+    {
+      "id": "en-demo-050",
+      "type": "note",
+      "text": "Minimalism in software: Features are easy to add, impossible to remove. Default to restraint. Every button must earn its place on the screen.",
+      "clipText": "Minimalism in software: Features are easy to add, impossible to remove. Default to restraint. Every button must earn its place on the screen.",
+      "createdAt": 1790843037000,
+      "updatedAt": 1790843037000,
+      "spaceId": "ideas"
+    }
+  ],
+  "highlights": [],
+  "settings": {
+    "language": "en",
+    "blockedSites": [],
+    "columnCount": 5,
+    "libraryGrouping": "all"
+  },
+  "spaces": [
+    {
+      "id": "research",
+      "name": "Research",
+      "updated_at": 1792149837000
+    },
+    {
+      "id": "reading",
+      "name": "Reading & Articles",
+      "updated_at": 1792149837000
+    },
+    {
+      "id": "ideas",
+      "name": "Ideas & Notes",
+      "updated_at": 1792149837000
+    },
+    {
+      "id": "tech",
+      "name": "Engineering",
+      "updated_at": 1792149837000
+    }
+  ]
+}

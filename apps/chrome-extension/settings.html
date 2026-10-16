@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -9,157 +9,131 @@
   <body data-page="settings">
     <div class="settings-shell">
       <header class="settings-top">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true">i</span
-          ><span>iSnips</span>
-        </div>
-        <button
+        <a class="brand" href="library.html"
+          ><img src="icons/icon-48.png" alt="" width="28" height="28" /><span
+            >iSnips</span
+          ></a
+        >
+        <a
           id="backToLibrary"
-          class="button secondary"
-          type="button"
+          class="text-button"
+          href="library.html"
           data-i18n="back_to_library"
         >
-          ← Library
-        </button>
+          Library
+        </a>
       </header>
-      <div class="settings-layout">
-        <aside class="settings-nav">
-          <div class="nav-caption" data-i18n="preferences">PREFERENCES</div>
-          <a href="#general" data-i18n="general">General</a
-          ><a href="#sync" data-i18n="sync">Sync</a
-          ><a href="#data" data-i18n="data_backup">Data &amp; backup</a>
-        </aside>
-        <main class="settings-main">
-          <div class="eyebrow" data-i18n="make_it_yours">MAKE IT YOURS</div>
-          <h1 data-i18n="settings">Settings</h1>
-          <p class="settings-lead" data-i18n="settings_desc">
-            Keep iSnips comfortable, portable, and under your control.
-          </p>
-          <section id="general" class="settings-card">
-            <div class="card-title">
-              <span class="section-symbol">01</span>
-              <div>
-                <h2 data-i18n="general">General</h2>
-                <p data-i18n="general_desc">Display and capture preferences</p>
-              </div>
-            </div>
-            <label class="setting-row"
-              ><span
-                ><strong data-i18n="language">Language</strong
-                ><small data-i18n="language_desc"
-                  >Interface language</small
-                ></span
-              ><select id="language">
-                <option value="zh-CN">简体中文</option>
-                <option value="en">English</option>
-                <option value="ja">日本語</option>
-              </select></label
+      <main class="settings-main">
+        <h1 data-i18n="settings">Settings</h1>
+        <section
+          id="general"
+          class="settings-section"
+          aria-labelledby="generalTitle"
+        >
+          <h2 id="generalTitle" data-i18n="general">General</h2>
+          <label class="setting-row"
+            ><span data-i18n="language">Language</span
+            ><select id="language">
+              <option value="zh-CN">简体中文</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select></label
+          >
+          <label class="setting-row"
+            ><span data-i18n="appearance">Appearance</span
+            ><select id="appearance">
+              <option value="auto" data-i18n="system">System</option>
+              <option value="light" data-i18n="light">Light</option>
+              <option value="dark" data-i18n="dark">Dark</option>
+            </select></label
+          >
+          <label class="setting-row"
+            ><span
+              ><span data-i18n="columns">Library columns</span
+              ><small data-i18n="columns_desc"
+                >Adapts to window width</small
+              ></span
+            ><select id="columnCount">
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5" selected>5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select></label
+          >
+          <div class="setting-row">
+            <span
+              ><span data-i18n="shortcuts">Shortcuts</span
+              ><small id="shortcutSummary">Alt+C · Alt+S</small></span
+            ><button
+              id="manageShortcuts"
+              class="button secondary"
+              type="button"
+              data-i18n="manage"
             >
-            <label class="setting-row"
-              ><span
-                ><strong data-i18n="appearance">Appearance</strong
-                ><small data-i18n="appearance_desc"
-                  >Choose your preferred theme</small
-                ></span
-              ><select id="appearance">
-                <option value="auto" data-i18n="system">System</option>
-                <option value="light" data-i18n="light">Light</option>
-                <option value="dark" data-i18n="dark">Dark</option>
-              </select></label
-            >
-            <label class="setting-row"
-              ><span
-                ><strong data-i18n="columns">Library columns</strong
-                ><small data-i18n="columns_desc"
-                  >Used on wider screens</small
-                ></span
-              ><select id="columnCount">
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </select></label
-            >
-            <div class="setting-row">
-              <span
-                ><strong data-i18n="shortcuts">Keyboard shortcuts</strong
-                ><small id="shortcutSummary">Alt+C · Alt+S</small></span
-              ><button
-                id="manageShortcuts"
+              Manage
+            </button>
+          </div>
+          <details class="setting-details">
+            <summary data-i18n="blocked_sites">Blocked sites</summary>
+            <p class="context-hint" data-i18n="blocked_desc">
+              Disable clipping and highlights on these domains and subdomains.
+            </p>
+            <div class="inline-form">
+              <input
+                id="blockedDomain"
+                type="text"
+                data-i18n-label="blocked_sites"
+                aria-label="Blocked site"
+                data-i18n-placeholder="domain_placeholder"
+                placeholder="example.com"
+              /><button
+                id="addBlocked"
                 class="button secondary"
                 type="button"
-                data-i18n="manage"
+                data-i18n="add"
               >
-                Manage
+                Add
               </button>
             </div>
-            <div class="setting-row vertical">
-              <span
-                ><strong data-i18n="blocked_sites">Blocked sites</strong
-                ><small data-i18n="blocked_desc"
-                  >Clipping and highlights are disabled on these domains</small
-                ></span
-              >
-              <div class="inline-form">
-                <input
-                  id="blockedDomain"
-                  type="text"
-                  data-i18n-placeholder="domain_placeholder"
-                  placeholder="example.com"
-                /><button
-                  id="addBlocked"
-                  class="button secondary"
-                  type="button"
-                  data-i18n="add"
-                >
-                  Add
-                </button>
-              </div>
-              <div id="blockedList" class="chip-list"></div>
-            </div>
-          </section>
-          <section id="sync" class="settings-card">
-            <div class="card-title">
-              <span class="section-symbol">02</span>
-              <div>
-                <h2 data-i18n="sync">Sync</h2>
-                <p data-i18n="sync_desc">
-                  Connect a service only when you choose
-                </p>
-              </div>
-            </div>
-            <label class="setting-row"
-              ><span
-                ><strong data-i18n="sync_method">Sync method</strong
-                ><small data-i18n="sync_method_desc"
-                  >Your notes are local until sync is enabled</small
-                ></span
-              ><select id="syncMethod">
-                <option value="none" data-i18n="off">Off</option>
-                <option value="webdav">WebDAV</option>
-                <option value="googledrive">Google Drive</option>
-              </select></label
-            >
+            <div id="blockedList" class="chip-list"></div>
+          </details>
+        </section>
+        <section id="sync" class="settings-section" aria-labelledby="syncTitle">
+          <h2 id="syncTitle" data-i18n="sync">Sync</h2>
+          <label class="setting-row"
+            ><span data-i18n="sync_method">Service</span
+            ><select id="syncMethod">
+              <option value="none" data-i18n="off">Off</option>
+              <option value="webdav">WebDAV</option>
+              <option value="googledrive">Google Drive</option>
+            </select></label
+          >
+          <div id="syncOptions" class="hidden">
+            <p class="context-hint" data-i18n="sync_scope">
+              Records and folders sync. Highlights and preferences stay on this
+              device.
+            </p>
             <div id="webdavFields" class="sync-fields hidden">
               <label
                 ><span data-i18n="webdav_url">WebDAV URL (HTTPS)</span
                 ><input
                   id="webdavUrl"
                   type="url"
-                  placeholder="https://example.com/dav/" /></label
-              ><label
+                  placeholder="https://example.com/dav/"
+              /></label>
+              <label
                 ><span data-i18n="username">Username</span
-                ><input
-                  id="webdavUser"
-                  type="text"
-                  autocomplete="username" /></label
-              ><label
+                ><input id="webdavUser" type="text" autocomplete="username"
+              /></label>
+              <label
                 ><span data-i18n="password">Password</span
                 ><input
                   id="webdavPass"
                   type="password"
-                  autocomplete="current-password" /></label
-              ><button
+                  autocomplete="current-password"
+              /></label>
+              <button
                 id="saveWebdav"
                 class="button secondary"
                 type="button"
@@ -169,33 +143,42 @@
               </button>
             </div>
             <div id="driveFields" class="sync-fields hidden">
-              <span id="driveStatus" class="muted"></span
-              ><button
-                id="disconnectDrive"
-                class="button secondary"
-                type="button"
-                data-i18n="disconnect"
-              >
-                Disconnect
-              </button>
+              <span
+                id="driveStatus"
+                class="muted"
+                role="status"
+                aria-live="polite"
+              ></span>
+              <div class="button-pair">
+                <button
+                  id="connectDrive"
+                  class="button secondary"
+                  type="button"
+                  data-i18n="drive_connect"
+                >
+                  Connect
+                </button>
+                <button
+                  id="disconnectDrive"
+                  class="button secondary hidden"
+                  type="button"
+                  data-i18n="disconnect"
+                >
+                  Disconnect
+                </button>
+              </div>
             </div>
             <label class="setting-row"
-              ><span
-                ><strong data-i18n="auto_sync">Automatic sync</strong
-                ><small data-i18n="auto_sync_desc"
-                  >Runs while Chrome is open</small
-                ></span
+              ><span data-i18n="auto_sync">Automatic sync</span
               ><select id="autoSync">
                 <option value="off" data-i18n="off">Off</option>
                 <option value="30m" data-i18n="every_30m">Every 30 min</option>
-                <option value="1h" data-i18n="every_1h">Every hour</option>
+                <option value="1h" data-i18n="every_1h">Hourly</option>
                 <option value="1d" data-i18n="daily">Daily</option>
               </select></label
             >
             <div class="setting-row">
-              <span
-                ><strong data-i18n="sync_now">Sync now</strong
-                ><small id="lastSync"></small></span
+              <small id="lastSync"></small
               ><button
                 id="syncNow"
                 class="button primary"
@@ -205,34 +188,56 @@
                 Sync now
               </button>
             </div>
-          </section>
-          <section id="data" class="settings-card">
-            <div class="card-title">
-              <span class="section-symbol">03</span>
-              <div>
-                <h2 data-i18n="data_backup">Data &amp; backup</h2>
-                <p data-i18n="backup_desc">
-                  Export a copy and restore when needed
-                </p>
-              </div>
+          </div>
+        </section>
+        <section id="data" class="settings-section" aria-labelledby="dataTitle">
+          <h2 id="dataTitle" data-i18n="data_backup">Data</h2>
+          <div class="setting-row">
+            <span
+              ><span data-i18n="portable_backup">Backup file</span
+              ><small data-i18n="portable_desc"
+                >Records, highlights and preferences. No passwords.</small
+              ></span
+            >
+            <div class="button-pair">
+              <button
+                id="exportData"
+                class="button secondary"
+                type="button"
+                data-i18n="export"
+              >
+                Export</button
+              ><button
+                id="importData"
+                class="button secondary"
+                type="button"
+                data-i18n="import"
+              >
+                Import</button
+              ><input
+                id="importFile"
+                type="file"
+                accept=".json,application/json"
+                hidden
+              />
             </div>
+          </div>
+          <details class="setting-details">
+            <summary data-i18n="local_snapshots">Local snapshots</summary>
+            <p class="context-hint" data-i18n="backup_local_desc">
+              Stored in this browser. Export a file for an independent backup.
+            </p>
             <label class="setting-row"
-              ><span
-                ><strong data-i18n="auto_backup">Automatic local backups</strong
-                ><small data-i18n="backup_local_desc"
-                  >Snapshots are stored in this browser profile</small
-                ></span
+              ><span data-i18n="auto_backup">Automatic backup</span
               ><select id="autoBackup">
                 <option value="off" data-i18n="off">Off</option>
                 <option value="30m" data-i18n="every_30m">Every 30 min</option>
-                <option value="1h" data-i18n="every_1h">Every hour</option>
+                <option value="1h" data-i18n="every_1h">Hourly</option>
                 <option value="1d" data-i18n="daily">Daily</option>
               </select></label
             >
             <div class="setting-row">
-              <span
-                ><strong data-i18n="create_backup">Create snapshot</strong
-                ><small id="lastBackup"></small></span
+              <small id="lastBackup"></small
               ><button
                 id="backupNow"
                 class="button secondary"
@@ -244,13 +249,17 @@
             </div>
             <div class="setting-row">
               <span
-                ><strong data-i18n="restore_snapshot">Restore snapshot</strong
+                ><span data-i18n="restore_snapshot">Restore snapshot</span
                 ><small data-i18n="restore_desc"
-                  >Replaces the current local collection</small
+                  >Replaces local records. Cloud data is unchanged.</small
                 ></span
               >
               <div class="control-stack">
-                <select id="backupSelect"></select
+                <select
+                  id="backupSelect"
+                  data-i18n-label="restore_snapshot"
+                  aria-label="Snapshot"
+                ></select
                 ><button
                   id="restoreBackup"
                   class="button secondary"
@@ -261,42 +270,13 @@
                 </button>
               </div>
             </div>
+          </details>
+          <details class="setting-details danger-details">
+            <summary data-i18n="clear_local">Clear local data</summary>
             <div class="setting-row">
-              <span
-                ><strong data-i18n="portable_backup">Portable backup</strong
-                ><small data-i18n="portable_desc"
-                  >JSON file with items, highlights, spaces, and settings</small
-                ></span
-              >
-              <div class="button-pair">
-                <button
-                  id="exportData"
-                  class="button secondary"
-                  type="button"
-                  data-i18n="export"
-                >
-                  Export</button
-                ><button
-                  id="importData"
-                  class="button secondary"
-                  type="button"
-                  data-i18n="import"
-                >
-                  Import</button
-                ><input
-                  id="importFile"
-                  type="file"
-                  accept=".json,application/json"
-                  hidden
-                />
-              </div>
-            </div>
-            <div class="setting-row danger-row">
-              <span
-                ><strong data-i18n="clear_local">Clear local data</strong
-                ><small data-i18n="clear_desc"
-                  >Removes items and settings from this browser</small
-                ></span
+              <small data-i18n="clear_desc"
+                >Removes local records, preferences and snapshots. Cloud files
+                remain.</small
               ><button
                 id="clearData"
                 class="button danger"
@@ -306,23 +286,36 @@
                 Clear data
               </button>
             </div>
-          </section>
-          <p class="settings-foot" data-i18n="privacy_note">
-            WebDAV and Google Drive sync are optional. Portable exports may
-            contain connection credentials; keep the file private.
-          </p>
+          </details>
+        </section>
+        <footer class="settings-footer">
+          <span id="appVersion">iSnips 2.0.0</span
+          ><a
+            href="privacy.html"
+            target="_blank"
+            rel="noopener"
+            data-i18n="privacy_policy"
+            >Privacy</a
+          ><a
+            href="https://github.com/istxing/iSnips/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-i18n="feedback"
+            >Feedback</a
+          >
           <a
-            class="settings-sponsor sponsor-link"
+            class="coffee-link settings-coffee"
             href="https://buymeacoffee.com/istxingv"
             target="_blank"
             rel="noopener noreferrer"
-            data-i18n="sponsor"
-            >Support iSnips</a
+            ><span data-icon="coffee" aria-hidden="true"></span
+            ><span data-i18n="sponsor">Buy me a coffee</span></a
           >
-        </main>
-      </div>
+        </footer>
+      </main>
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="google-auth.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -10,134 +10,216 @@
     <div class="workspace">
       <aside class="workspace-sidebar">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">i</span
-          ><span>iSnips</span>
+          <img src="icons/icon-48.png" alt="" width="28" height="28" /><span
+            >iSnips</span
+          >
         </div>
-        <div class="nav-caption" data-i18n="workspace">WORKSPACE</div>
-        <nav id="filters" class="filter-nav" aria-label="Filters">
-          <button class="filter-button active" type="button" data-filter="all">
-            <span class="nav-icon">▦</span
+        <nav
+          id="filters"
+          class="filter-nav"
+          data-i18n-label="library"
+          aria-label="Library"
+        >
+          <button
+            class="filter-button active"
+            type="button"
+            data-filter="all"
+            aria-current="page"
+          >
+            <span data-icon="library"></span
             ><span data-i18n="all_items">All items</span
             ><span id="countAll" class="nav-count"></span>
           </button>
           <button class="filter-button" type="button" data-filter="web">
-            <span class="nav-icon">↗</span><span data-i18n="clips">Clips</span
+            <span data-icon="clip"></span><span data-i18n="clips">Clips</span
             ><span id="countWeb" class="nav-count"></span>
           </button>
           <button class="filter-button" type="button" data-filter="note">
-            <span class="nav-icon">✎</span><span data-i18n="notes">Notes</span
+            <span data-icon="note"></span><span data-i18n="notes">Notes</span
             ><span id="countNote" class="nav-count"></span>
           </button>
-          <button class="filter-button" type="button" data-filter="trash">
-            <span class="nav-icon">⌫</span><span data-i18n="trash">Trash</span
-            ><span id="countTrash" class="nav-count"></span>
+          <button class="filter-button" type="button" data-filter="clipboard">
+            <span data-icon="copy"></span
+            ><span data-i18n="clipboard">Clipboard</span>
+            <span id="countClipboard" class="nav-count"></span>
           </button>
         </nav>
+        <section class="folder-section" aria-labelledby="foldersTitle">
+          <div class="folder-heading">
+            <h2 id="foldersTitle" data-i18n="folders">Folders</h2>
+            <button
+              id="createFolder"
+              class="icon-button"
+              type="button"
+              data-icon="plus"
+              data-i18n-title="create_folder"
+              aria-label="New folder"
+            ></button>
+          </div>
+          <nav
+            id="folderList"
+            data-i18n-label="folders"
+            aria-label="Folders"
+          ></nav>
+        </section>
         <div class="sidebar-spacer"></div>
         <button
-          id="librarySettings"
-          class="filter-button settings-link"
+          id="libraryTrash"
+          class="filter-button trash-filter"
           type="button"
+          data-filter="trash"
         >
-          <span class="nav-icon">⚙</span
-          ><span data-i18n="settings">Settings</span>
+          <span data-icon="trash"></span><span data-i18n="trash">Trash</span
+          ><span id="countTrash" class="nav-count"></span>
         </button>
         <a
-          class="sidebar-sponsor sponsor-link"
+          id="librarySettings"
+          class="filter-button settings-link"
+          href="settings.html"
+        >
+          <span data-icon="settings"></span
+          ><span data-i18n="settings">Settings</span>
+        </a>
+        <a
+          class="coffee-link sidebar-coffee"
           href="https://buymeacoffee.com/istxingv"
           target="_blank"
           rel="noopener noreferrer"
-          data-i18n="sponsor"
-          >Support iSnips</a
+          ><span data-icon="coffee" aria-hidden="true"></span
+          ><span data-i18n="sponsor">Buy me a coffee</span></a
         >
-        <div class="sidebar-foot" data-i18n="local_first">
-          Your space, on your terms.
-        </div>
       </aside>
       <main class="library-main">
-        <header class="library-toolbar">
-          <div class="mobile-brand brand">
-            <span class="brand-mark" aria-hidden="true">i</span
-            ><span>iSnips</span>
-          </div>
-          <label class="search-wrap"
-            ><span aria-hidden="true">⌕</span
-            ><input
-              id="searchInput"
-              type="search"
-              data-i18n-placeholder="search_placeholder"
-              placeholder="Search your collection"
-          /></label>
-          <button
-            id="newNote"
-            class="button primary"
-            type="button"
-            data-i18n="new_note"
-          >
-            + New note
-          </button>
-        </header>
         <div class="library-content">
-          <div class="page-heading">
-            <div>
-              <div class="eyebrow" data-i18n="library_eyebrow">
-                YOUR KNOWLEDGE, ORGANIZED
+          <header class="page-heading">
+            <h1 id="pageTitle" data-i18n="all_items">All items</h1>
+            <div class="heading-actions">
+              <div id="clipboardControls" class="clipboard-controls hidden">
+                <label class="clipboard-toggle"
+                  ><input id="clipboardAuto" type="checkbox" />
+                  <span data-i18n="clipboard_auto"
+                    >Auto-save copies</span
+                  ></label
+                >
+                <button
+                  id="clearClipboard"
+                  class="button secondary"
+                  type="button"
+                  data-i18n="clipboard_clear"
+                >
+                  Clear history
+                </button>
               </div>
-              <h1 id="pageTitle" data-i18n="all_items">All items</h1>
-              <p id="pageSubtitle" data-i18n="library_desc">
-                Everything worth keeping, in one place.
-              </p>
+              <button
+                id="emptyTrash"
+                class="button danger hidden"
+                type="button"
+                data-i18n="empty_trash"
+              >
+                Empty trash
+              </button>
+              <button id="newNote" class="button primary" type="button">
+                <span data-icon="plus"></span
+                ><span data-i18n="new_note">Note</span>
+              </button>
             </div>
-            <button
-              id="emptyTrash"
-              class="button danger hidden"
-              type="button"
-              data-i18n="empty_trash"
-            >
-              Empty trash
-            </button>
-          </div>
-          <div class="list-toolbar">
-            <span id="resultCount"></span
-            ><select id="sortSelect" aria-label="Sort">
+          </header>
+          <div class="library-toolbar">
+            <label class="search-wrap"
+              ><span data-icon="search"></span
+              ><input
+                id="searchInput"
+                maxlength="200"
+                type="search"
+                data-i18n-label="search_placeholder"
+                aria-label="Search"
+                data-i18n-placeholder="search_placeholder"
+                placeholder="Search"
+            /></label>
+            <span id="resultCount" class="result-count" role="status"></span>
+            <div id="libraryView" class="view-switch" role="group" data-i18n-label="library_view" aria-label="View">
+              <button type="button" data-library-view="day" aria-pressed="false" data-i18n="view_day">Day</button>
+              <button type="button" data-library-view="week" aria-pressed="false" data-i18n="view_week">Week</button>
+              <button type="button" data-library-view="month" aria-pressed="false" data-i18n="view_month">Month</button>
+              <button type="button" data-library-view="all" aria-pressed="true" data-i18n="view_summary">All</button>
+            </div>
+            <select id="sortSelect" data-i18n-label="sort" aria-label="Sort">
               <option value="new" data-i18n="newest">Newest first</option>
               <option value="old" data-i18n="oldest">Oldest first</option>
             </select>
           </div>
-          <div id="libraryGrid" class="library-grid" aria-live="polite"></div>
+          <p
+            id="clipboardHint"
+            class="context-hint hidden"
+            data-i18n="clipboard_hint"
+          >
+            Last 99 copies, on this device. Save as a note to keep.
+          </p>
+          <p id="trashHint" class="context-hint hidden" data-i18n="trash_hint">
+            Items in trash are removed after 30 days.
+          </p>
+          <div id="libraryGrid" class="library-grid" aria-busy="true">
+            <p class="loading-state" data-i18n="loading">Loading…</p>
+          </div>
           <div id="emptyState" class="empty-state hidden">
-            <span class="empty-glyph">✦</span>
-            <h2 data-i18n="nothing_here">Nothing here yet</h2>
-            <p data-i18n="empty_desc">
-              Start with a note or save a selection from a page.
+            <h2 id="emptyTitle" data-i18n="nothing_here">No items yet</h2>
+            <p id="emptyDescription" data-i18n="empty_desc">
+              Create a note or clip text from a page.
             </p>
+          </div>
+          <div class="library-pagination">
+            <button
+              id="previousPage"
+              class="button secondary hidden"
+              type="button"
+              data-i18n="previous_page"
+            >
+              Previous
+            </button>
+            <span id="pageStatus" class="muted" role="status"></span>
+            <button
+              id="loadMore"
+              class="button secondary load-more hidden"
+              type="button"
+              data-i18n="next_page"
+            >
+              Next
+            </button>
           </div>
         </div>
       </main>
     </div>
-    <dialog id="editorDialog" class="editor-dialog">
+    <dialog
+      id="editorDialog"
+      class="editor-dialog"
+      aria-labelledby="editorTitle"
+    >
       <form method="dialog" id="editorForm">
         <div class="dialog-heading">
-          <div>
-            <div class="eyebrow" data-i18n="make_it_yours">MAKE IT YOURS</div>
-            <h2 id="editorTitle" data-i18n="edit_item">Edit item</h2>
-          </div>
+          <h2 id="editorTitle" data-i18n="edit_item">Edit</h2>
           <button
             id="closeEditor"
             class="icon-button"
             type="button"
+            data-icon="close"
             data-i18n-title="cancel"
             aria-label="Cancel"
-          >
-            ×
-          </button>
+          ></button>
         </div>
         <textarea
           id="editorText"
-          rows="10"
-          maxlength="20000"
+          rows="12"
+          aria-labelledby="editorTitle"
           required
         ></textarea>
+        <label class="folder-select-label"
+          ><span data-i18n="folder">Folder</span
+          ><select
+            id="editorFolder"
+            data-i18n-label="folder"
+            aria-label="Folder"
+          ></select
+        ></label>
         <div class="dialog-actions">
           <button
             id="cancelEditor"
@@ -150,9 +232,61 @@
             id="saveEditor"
             class="button primary"
             type="submit"
-            data-i18n="save_changes"
+            data-i18n="save"
           >
-            Save changes
+            Save
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog
+      id="folderEditorDialog"
+      class="editor-dialog"
+      aria-labelledby="folderEditorTitle"
+    >
+      <form id="folderEditorForm">
+        <div class="dialog-heading">
+          <h2 id="folderEditorTitle" data-i18n="create_folder">New folder</h2>
+          <button
+            id="closeFolderEditor"
+            class="icon-button"
+            type="button"
+            data-icon="close"
+            data-i18n-title="close"
+            aria-label="Close"
+          ></button>
+        </div>
+        <input
+          id="folderName"
+          type="text"
+          maxlength="40"
+          required
+          data-i18n-label="folder_name"
+          aria-label="Folder name"
+          autocomplete="off"
+        />
+        <div class="dialog-actions">
+          <button
+            id="deleteFolder"
+            class="button danger hidden"
+            type="button"
+            data-i18n="delete_folder"
+          >
+            Delete folder</button
+          ><button
+            id="cancelFolderEditor"
+            class="button secondary"
+            type="button"
+            data-i18n="cancel"
+          >
+            Cancel</button
+          ><button
+            id="saveFolder"
+            class="button primary"
+            type="submit"
+            data-i18n="save"
+          >
+            Save
           </button>
         </div>
       </form>

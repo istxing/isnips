@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -10,112 +10,171 @@
     <div class="panel-shell">
       <header class="panel-header">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">i</span
-          ><span>iSnips</span>
+          <img src="icons/icon-48.png" alt="" width="28" height="28" /><span
+            >iSnips</span
+          >
         </div>
         <div class="header-actions">
           <button
             id="openLibrary"
             class="icon-button"
             type="button"
+            data-icon="library"
             data-i18n-title="library"
             aria-label="Library"
-          >
-            ▦
-          </button>
+          ></button>
           <button
             id="openSettings"
             class="icon-button"
             type="button"
+            data-icon="settings"
             data-i18n-title="settings"
             aria-label="Settings"
-          >
-            ⚙
-          </button>
+          ></button>
+          <button
+            id="closePanel"
+            class="icon-button"
+            type="button"
+            data-icon="close"
+            data-i18n-title="close"
+            aria-label="Close"
+          ></button>
         </div>
       </header>
       <main class="panel-main">
-        <section class="composer card-surface" aria-labelledby="quickNoteTitle">
-          <div class="section-heading">
-            <h2 id="quickNoteTitle" data-i18n="quick_note">Quick note</h2>
-            <span class="muted" id="noteCount">0</span>
-          </div>
+        <section class="composer" aria-labelledby="quickNoteTitle">
+          <h2 id="quickNoteTitle" data-i18n="quick_note">Quick note</h2>
           <textarea
             id="noteInput"
             rows="2"
             maxlength="20000"
+            aria-labelledby="quickNoteTitle"
             data-i18n-placeholder="note_placeholder"
-            placeholder="What's on your mind?"
+            placeholder="Write a thought…"
           ></textarea>
           <div class="composer-footer">
             <label class="check-label"
               ><input id="attachPage" type="checkbox" checked /><span
                 data-i18n="attach_page"
-                >Attach current page</span
+                >Attach page</span
               ></label
             >
+            <span id="noteCount" class="character-count" aria-live="off"></span>
             <button
               id="saveNote"
               class="button primary"
               type="button"
-              data-i18n="save_note"
+              data-i18n="save"
+              disabled
             >
-              Save note
+              Save
             </button>
           </div>
         </section>
         <section class="recent-section" aria-labelledby="recentTitle">
           <div class="section-heading">
-            <h2 id="recentTitle" data-i18n="recent">Recent</h2>
+            <div
+              id="panelTabs"
+              class="panel-tabs"
+              role="tablist"
+              data-i18n-label="library"
+              aria-label="Library"
+            >
+              <button
+                id="recentTitle"
+                type="button"
+                role="tab"
+                data-panel-filter="recent"
+                aria-selected="true"
+                aria-controls="recentList"
+                data-i18n="recent"
+              >
+                Recent
+              </button>
+              <button
+                id="clipboardTab"
+                type="button"
+                role="tab"
+                data-panel-filter="clipboard"
+                aria-selected="false"
+                aria-controls="recentList"
+                tabindex="-1"
+                data-i18n="clipboard"
+              >
+                Clipboard
+              </button>
+            </div>
             <button
               id="viewAll"
               class="text-button"
               type="button"
               data-i18n="view_all"
             >
-              View all →
+              View all
             </button>
           </div>
-          <div id="recentList" class="snippet-list" aria-live="polite"></div>
+          <div
+            id="recentList"
+            class="recent-list-scroll"
+            role="tabpanel"
+            aria-labelledby="recentTitle"
+            aria-live="polite"
+            aria-busy="true"
+          >
+            <div id="recentItems" class="snippet-list">
+              <p class="loading-state" data-i18n="loading">Loading…</p>
+            </div>
+            <button
+              id="viewAllBottom"
+              class="text-button panel-view-all"
+              type="button"
+              data-i18n="view_all"
+            >
+              View all
+            </button>
+          </div>
         </section>
       </main>
       <footer class="panel-footer">
-        <span
-          ><span id="panelCount">0</span>
-          <span data-i18n="saved_items">saved items</span></span
-        >
-        <span class="footer-shortcut"
-          ><span id="shortcutHint">Alt+C</span>
-          <span data-i18n="to_clip">to clip selection</span></span
-        >
         <a
-          class="sponsor-link"
+          class="coffee-link panel-coffee"
           href="https://buymeacoffee.com/istxingv"
           target="_blank"
           rel="noopener noreferrer"
-          data-i18n="sponsor"
-          >Support iSnips</a
+          ><span data-icon="coffee" aria-hidden="true"></span
+          ><span data-i18n="sponsor">Buy me a coffee</span></a
+        >
+        <span
+          ><span id="panelCount">0</span>
+          <span data-i18n="saved_items">items</span></span
+        >
+        <span
+          ><kbd id="shortcutHint">Alt+C</kbd>
+          <span data-i18n="to_clip">to save</span></span
         >
       </footer>
     </div>
-    <dialog id="panelEditorDialog" class="editor-dialog panel-editor-dialog">
+    <dialog
+      id="panelEditorDialog"
+      class="editor-dialog"
+      aria-labelledby="panelEditorTitle"
+    >
       <form method="dialog" id="panelEditorForm">
         <div class="dialog-heading">
-          <h2 data-i18n="edit_item">Edit item</h2>
+          <h2 id="panelEditorTitle" data-i18n="edit_item">Edit</h2>
           <button
             id="panelCloseEditor"
             class="icon-button"
             type="button"
+            data-icon="close"
             data-i18n-title="cancel"
             aria-label="Cancel"
-          >
-            ×
-          </button>
+          ></button>
         </div>
         <textarea
           id="panelEditorText"
-          rows="9"
-          maxlength="20000"
+          rows="10"
+          aria-labelledby="panelEditorTitle"
           required
         ></textarea>
         <div class="dialog-actions">
@@ -131,9 +190,9 @@
             id="panelSaveEditor"
             class="button primary"
             type="submit"
-            data-i18n="save_changes"
+            data-i18n="save"
           >
-            Save changes
+            Save
           </button>
         </div>
       </form>

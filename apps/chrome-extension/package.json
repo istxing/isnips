@@ -7,10 +7,18 @@
     "build": "node build.js",
     "build:bun": "bun run build.js",
     "watch": "node build.js --watch",
-    "test": "node scripts/merge.test.js && node scripts/sync.test.js",
-    "oauth:derive": "node scripts/dev-oauth.js"
+    "test": "node scripts/merge.test.js && node scripts/sync.test.js && node scripts/google-auth.test.js && node scripts/folder-sync.test.js && node scripts/background.test.js && node scripts/backup.test.js && node scripts/content.test.js && node scripts/clipboard.test.js && node scripts/library.test.js && node scripts/ui.test.js",
+    "oauth:derive": "node scripts/dev-oauth.js",
+    "check:release": "node scripts/check-release.js --official",
+    "release": "npm test && node scripts/release.js",
+    "assets:render": "node design/render-assets.cjs"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.268"
+    "@types/chrome": "^0.0.268",
+    "fake-indexeddb": "^6.2.5",
+    "happy-dom": "^21.0.1"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

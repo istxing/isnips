@@ -6,6 +6,7 @@
   "description": "__MSG_app_desc__",
   "icons": {
     "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
@@ -14,7 +15,6 @@
     "storage",
     "unlimitedStorage",
     "activeTab",
-    "tabs",
     "sidePanel",
     "alarms",
     "identity",
@@ -35,6 +35,7 @@
         "<all_urls>"
       ],
       "js": [
+        "clipboard-capture.js",
         "content.js"
       ],
       "run_at": "document_start"
@@ -47,7 +48,13 @@
     "default_path": "popup.html"
   },
   "action": {
-    "default_title": "__MSG_app_name__"
+    "default_title": "__MSG_app_name__",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   },
   "commands": {
     "capture-snippet": {
@@ -65,5 +72,9 @@
       "description": "__MSG_toggle_sidebar_command_desc__"
     }
   },
-  "options_page": "settings.html"
+  "options_page": "settings.html",
+  "minimum_chrome_version": "116",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'"
+  }
 }
